@@ -1,10 +1,12 @@
 services:
-  app:
+  backend:
     build:
       context: ./backend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.development
     ports:
       - "8080:8080"
+    volumes:
+      - ./backend:/app
     environment:
       - DB_HOST=${DB_HOST}
       - DB_PORT=${DB_PORT}
