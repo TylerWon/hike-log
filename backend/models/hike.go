@@ -36,6 +36,6 @@ type Hike struct {
 	Photos []Photo `json:"photos"`
 
 	// Photo to use as the thumbnail for the hike.
-	CoverPhotoID *uint  `json:"coverPhotoId"`
+	CoverPhotoID *uint  `json:"-"` // Omit when struct is serialized into JSON
 	CoverPhoto   *Photo `json:"coverPhoto"`
 }

@@ -1,0 +1,51 @@
+package handler
+
+import (
+	"errors"
+	"fmt"
+	"log"
+	"net/http"
+
+	"github.com/TylerWon/todo-app/backend/models"
+	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
+)
+
+type Handler struct {
+	db *gorm.DB
+}
+
+func New(db *gorm.DB) *Handler {
+	return &Handler{db}
+}
+
+func (h *Handler) ListHike(c *gin.Context) {
+	var hikes []models.Hike
+
+	result := h.db.Preload("CoverPhoto").Order("date desc, trail").Find(&hikes)
+	if result.Error != nil {
+		log.Println("Failed to list tasks: ", result.Error)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": http.StatusText(http.StatusInternalServerError)})
+		return
+	}
+
+	c.JSON(http.StatusOK, hikes)
+}
+
+func (h *Handler) RetrieveHike(c *gin.Context) {
+	hikeId := c.Param("id")
+	var hike models.Hike
+
+	result := h.db.Preload("Photos").First(&hike, hikeId)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"error": fmt.Sprintf("Hike %v not found", hikeId)})
+			return
+		}
+		log.Printf("Failed to retrieve hike %v: %v", hikeId, result.Error)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": http.StatusText(http.StatusInternalServerError)})
+		return
+	}
+
+	c.JSON(http.StatusOK, hike)
+}

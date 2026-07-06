@@ -2,23 +2,29 @@ package main
 
 import (
 	"log"
-	"net/http"
+	"os"
 
 	"github.com/TylerWon/todo-app/backend/database"
-	"github.com/gin-gonic/gin"
+	"github.com/TylerWon/todo-app/backend/handler"
+	"github.com/TylerWon/todo-app/backend/router"
 )
 
 func main() {
-	_, err := database.Connect()
-	if err != nil {
-		log.Fatal("Failed to connect to database: ", err)
+	dbConfig := database.DbConfig{
+		DbHost:     os.Getenv("DB_HOST"),
+		DbPort:     os.Getenv("DB_PORT"),
+		DbName:     os.Getenv("DB_NAME"),
+		DbUser:     os.Getenv("DB_USER"),
+		DbPassword: os.Getenv("DB_PASSWORD"),
 	}
 
-	router := gin.Default()
+	db, err := database.Setup(dbConfig)
+	if err != nil {
+		log.Fatal("Failed to setup database: ", err)
+	}
 
-	router.GET("/", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"status": "ok"})
-	})
+	handler := handler.New(db)
+	router := router.New(handler)
 
 	router.Run()
 }
