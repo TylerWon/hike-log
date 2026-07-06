@@ -8,6 +8,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// A DbConfig stores information for connecting to a database.
 type DbConfig struct {
 	DbHost     string
 	DbPort     string
@@ -16,6 +17,8 @@ type DbConfig struct {
 	DbPassword string
 }
 
+// Connects to the database specified in the given dbConfig then performs migrations for models.
+// Returns the database handler and nil if successful. Otherwise, returns nil and an error.
 func Setup(dbConfig DbConfig) (*gorm.DB, error) {
 	db, err := Connect(dbConfig)
 	if err != nil {
@@ -30,6 +33,7 @@ func Setup(dbConfig DbConfig) (*gorm.DB, error) {
 	return db, nil
 }
 
+// Connects to the database specified in the given dbConfig
 func Connect(dbConfig DbConfig) (*gorm.DB, error) {
 	dsn := fmt.Sprintf(
 		"host=%s port=%s dbname=%s user=%s password=%s",

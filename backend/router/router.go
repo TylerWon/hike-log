@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// Creates a Gin router and registers API routes.
 func New(handler *handler.Handler) *gin.Engine {
 	router := gin.Default()
 

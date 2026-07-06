@@ -11,14 +11,18 @@ import (
 	"gorm.io/gorm"
 )
 
+// A Handler handles the request-response lifecycle for API routes.
 type Handler struct {
 	db *gorm.DB
 }
 
+// Creates a new Handler with access to the given database.
 func New(db *gorm.DB) *Handler {
 	return &Handler{db}
 }
 
+// Returns all Hikes in reverse chronological order by Date.
+// For each Hike, its CoverPhoto is included in the response, but not its Photos.
 func (h *Handler) ListHike(c *gin.Context) {
 	var hikes []models.Hike
 
@@ -32,6 +36,8 @@ func (h *Handler) ListHike(c *gin.Context) {
 	c.JSON(http.StatusOK, hikes)
 }
 
+// Returns the Hike with an ID matching the id path parameter. If no such Hike exists, a 404 error is returned instead.
+// For each Hike, its Photos are included in the response, but not its CoverPhoto.
 func (h *Handler) RetrieveHike(c *gin.Context) {
 	hikeId := c.Param("id")
 	var hike models.Hike

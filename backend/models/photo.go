@@ -1,5 +1,6 @@
 package models
 
+// A Photo represents a photo taken on a Hike.
 type Photo struct {
 	// Primary key
 	ID uint `json:"id"`

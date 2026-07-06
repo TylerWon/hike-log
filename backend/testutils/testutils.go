@@ -12,6 +12,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// Configures a fresh database to use during testing.
 func SetupTestDB(t *testing.T) *gorm.DB {
 	// Connect to the default 'postgres' database
 	dbConfig := database.DbConfig{
@@ -54,6 +55,7 @@ func SetupTestDB(t *testing.T) *gorm.DB {
 	return db
 }
 
+// Cleans up the test database.
 func TeardownTestDB(t *testing.T, db *gorm.DB) {
 	sqlDb, err := db.DB()
 	if err != nil {
@@ -63,6 +65,7 @@ func TeardownTestDB(t *testing.T, db *gorm.DB) {
 	sqlDb.Close()
 }
 
+// Configures a router to use during testing.
 func SetupTestRouter(handler *handler.Handler) *gin.Engine {
 	gin.SetMode(gin.TestMode)
 	return router.New(handler)

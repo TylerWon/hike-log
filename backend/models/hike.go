@@ -4,6 +4,7 @@ import (
 	"gorm.io/datatypes"
 )
 
+// A Hike represents a hike that was completed.
 type Hike struct {
 	// Primary key
 	ID uint `json:"id"`
