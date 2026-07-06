@@ -1,4 +1,4 @@
-module github.com/TylerWon/todo-app/backend
+module github.com/TylerWon/hike-log/backend
 
 go 1.26.4
 

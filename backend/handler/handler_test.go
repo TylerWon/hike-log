@@ -7,9 +7,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/TylerWon/todo-app/backend/handler"
-	"github.com/TylerWon/todo-app/backend/models"
-	"github.com/TylerWon/todo-app/backend/testutils"
+	"github.com/TylerWon/hike-log/backend/handler"
+	"github.com/TylerWon/hike-log/backend/models"
+	"github.com/TylerWon/hike-log/backend/testutils"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/datatypes"
 )

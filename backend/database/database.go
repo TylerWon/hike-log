@@ -3,7 +3,7 @@ package database
 import (
 	"fmt"
 
-	"github.com/TylerWon/todo-app/backend/models"
+	"github.com/TylerWon/hike-log/backend/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )

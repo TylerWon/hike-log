@@ -5,9 +5,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/TylerWon/todo-app/backend/database"
-	"github.com/TylerWon/todo-app/backend/handler"
-	"github.com/TylerWon/todo-app/backend/router"
+	"github.com/TylerWon/hike-log/backend/database"
+	"github.com/TylerWon/hike-log/backend/handler"
+	"github.com/TylerWon/hike-log/backend/router"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )

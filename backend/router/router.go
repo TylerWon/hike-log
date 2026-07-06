@@ -1,7 +1,7 @@
 package router
 
 import (
-	"github.com/TylerWon/todo-app/backend/handler"
+	"github.com/TylerWon/hike-log/backend/handler"
 	"github.com/gin-gonic/gin"
 )
 
