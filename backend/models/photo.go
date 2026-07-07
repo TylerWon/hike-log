@@ -9,7 +9,7 @@ type Photo struct {
 	SrcUrl string `json:"srcUrl"`
 
 	// Caption for the photo.
-	Caption *string `json:"caption"`
+	Caption string `json:"caption"`
 
 	// The Hike the photo was taken on.
 	HikeID uint `json:"hikeId"`

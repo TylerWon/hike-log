@@ -43,29 +43,29 @@ func TestListHike_ReturnsHikes(t *testing.T) {
 	hike1 := models.Hike{
 		TrailName:     "Trail 1",
 		Date:          datatypes.Date(time.Date(2026, 2, 5, 0, 0, 0, 0, time.UTC)),
+		Notes:         "Easy hike",
 		Rating:        4.5,
 		Difficulty:    3,
 		Distance:      8.2,
 		ElevationGain: 1200,
+		AllTrailsUrl:  "https://www.alltrails.com/",
 		TotalTime:     60,
 	}
 	hikes = append(hikes, &hike1)
 
-	notes := "Difficult hike"
-	allTrailsUrl := "https://www.alltrails.com/"
 	photos := []models.Photo{
 		{SrcUrl: "https://example.com/photo-1.jpg"},
 	}
 	hike2 := models.Hike{
 		TrailName:     "Trail 2",
 		Date:          datatypes.Date(time.Date(2026, 1, 16, 0, 0, 0, 0, time.UTC)),
-		Notes:         &notes,
+		Notes:         "Difficult hike",
 		Rating:        3,
 		Difficulty:    9.5,
 		Distance:      21.2,
 		ElevationGain: 1587,
 		TotalTime:     127,
-		AllTrailsUrl:  &allTrailsUrl,
+		AllTrailsUrl:  "https://www.alltrails.com/",
 		Photos:        photos,
 		CoverPhoto:    &photos[0],
 	}
@@ -99,19 +99,20 @@ func TestRetrieveHike_Success(t *testing.T) {
 	defer testutils.TeardownTestDB(t, db)
 	router := testutils.SetupTestRouter(handler.New(db))
 
-	photoCaption := "The peak"
 	photos := []models.Photo{
 		{SrcUrl: "https://example.com/photo-1.jpg"},
-		{SrcUrl: "https://example.com/photo-2.jpg", Caption: &photoCaption},
+		{SrcUrl: "https://example.com/photo-2.jpg", Caption: "The peak"},
 	}
 	hike := models.Hike{
-		TrailName:     "Trail 1",
+		TrailName:     "Trail 2",
 		Date:          datatypes.Date(time.Date(2026, 1, 16, 0, 0, 0, 0, time.UTC)),
+		Notes:         "Difficult hike",
 		Rating:        3,
 		Difficulty:    9.5,
 		Distance:      21.2,
 		ElevationGain: 1587,
-		TotalTime:     60,
+		TotalTime:     127,
+		AllTrailsUrl:  "https://www.alltrails.com/",
 		Photos:        photos,
 		CoverPhoto:    &photos[0],
 	}

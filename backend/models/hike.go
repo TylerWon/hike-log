@@ -16,7 +16,7 @@ type Hike struct {
 	Date datatypes.Date `json:"date"`
 
 	// Notes on the hike.
-	Notes *string `json:"notes"`
+	Notes string `json:"notes"`
 
 	// How enjoyable the hike was out of 5. Half values allowed.
 	Rating float32 `json:"rating"`
@@ -34,7 +34,7 @@ type Hike struct {
 	TotalTime uint `json:"totalTime"`
 
 	// Link to the AllTrails page for the trail.
-	AllTrailsUrl *string `json:"allTrailsUrl"`
+	AllTrailsUrl string `json:"allTrailsUrl"`
 
 	// Photos taken on the hike.
 	Photos []Photo `json:"photos"`
