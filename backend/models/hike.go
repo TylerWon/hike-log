@@ -9,8 +9,8 @@ type Hike struct {
 	// Primary key
 	ID uint `json:"id"`
 
-	// The trail that was hiked.
-	Trail string `json:"trail"`
+	// The name of the trail that was hiked.
+	TrailName string `json:"trail"`
 
 	// The date of the hike.
 	Date datatypes.Date `json:"date"`
@@ -24,11 +24,14 @@ type Hike struct {
 	// How difficult the hike was out of 10. Half values allowed.
 	Difficulty float32 `json:"difficulty"`
 
-	// The distance (km) hiked.
+	// The distance hiked (km).
 	Distance float32 `json:"distance"`
 
-	// The elevation (m) gained on the hike.
+	// The elevation gained on the hike (m).
 	ElevationGain uint `json:"elevationGain"`
+
+	// Time it took to complete the hike (mins).
+	TotalTime uint `json:"totalTime"`
 
 	// Link to the AllTrails page for the trail.
 	AllTrailsUrl *string `json:"allTrailsUrl"`

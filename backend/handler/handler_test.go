@@ -41,12 +41,13 @@ func TestListHike_ReturnsHikes(t *testing.T) {
 
 	var hikes []*models.Hike
 	hike1 := models.Hike{
-		Trail:         "Trail 1",
+		TrailName:     "Trail 1",
 		Date:          datatypes.Date(time.Date(2026, 2, 5, 0, 0, 0, 0, time.UTC)),
 		Rating:        4.5,
 		Difficulty:    3,
 		Distance:      8.2,
 		ElevationGain: 1200,
+		TotalTime:     60,
 	}
 	hikes = append(hikes, &hike1)
 
@@ -56,13 +57,14 @@ func TestListHike_ReturnsHikes(t *testing.T) {
 		{SrcUrl: "https://example.com/photo-1.jpg"},
 	}
 	hike2 := models.Hike{
-		Trail:         "Trail 2",
+		TrailName:     "Trail 2",
 		Date:          datatypes.Date(time.Date(2026, 1, 16, 0, 0, 0, 0, time.UTC)),
 		Notes:         &notes,
 		Rating:        3,
 		Difficulty:    9.5,
 		Distance:      21.2,
 		ElevationGain: 1587,
+		TotalTime:     127,
 		AllTrailsUrl:  &allTrailsUrl,
 		Photos:        photos,
 		CoverPhoto:    &photos[0],
@@ -103,12 +105,13 @@ func TestRetrieveHike_Success(t *testing.T) {
 		{SrcUrl: "https://example.com/photo-2.jpg", Caption: &photoCaption},
 	}
 	hike := models.Hike{
-		Trail:         "Trail 1",
+		TrailName:     "Trail 1",
 		Date:          datatypes.Date(time.Date(2026, 1, 16, 0, 0, 0, 0, time.UTC)),
 		Rating:        3,
 		Difficulty:    9.5,
 		Distance:      21.2,
 		ElevationGain: 1587,
+		TotalTime:     60,
 		Photos:        photos,
 		CoverPhoto:    &photos[0],
 	}

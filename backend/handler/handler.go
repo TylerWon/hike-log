@@ -26,7 +26,7 @@ func New(db *gorm.DB) *Handler {
 func (h *Handler) ListHike(c *gin.Context) {
 	var hikes []models.Hike
 
-	result := h.db.Preload("CoverPhoto").Order("date desc, trail").Find(&hikes)
+	result := h.db.Preload("CoverPhoto").Order("date desc, trail_name").Find(&hikes)
 	if result.Error != nil {
 		log.Println("Failed to list tasks: ", result.Error)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": http.StatusText(http.StatusInternalServerError)})
