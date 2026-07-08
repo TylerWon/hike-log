@@ -13,8 +13,27 @@ services:
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_NAME=${DB_NAME}
+    healthcheck:
+      test: ["CMD-SHELL", "wget -O - http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     depends_on:
       db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.development
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - node_modules:/app/node_modules
+    depends_on:
+      backend:
         condition: service_healthy
     restart: unless-stopped
 
@@ -37,3 +56,4 @@ services:
 
 volumes:
   pg_data:
+  node_modules:

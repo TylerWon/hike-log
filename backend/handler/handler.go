@@ -21,6 +21,11 @@ func New(db *gorm.DB) *Handler {
 	return &Handler{db}
 }
 
+// Returns a 200 OK. Used for application health checks.
+func (h *Handler) HealthCheck(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{"health": "ok"})
+}
+
 // Returns all Hikes in reverse chronological order by Date.
 // For each Hike, its CoverPhoto is included in the response, but not its Photos.
 func (h *Handler) ListHike(c *gin.Context) {

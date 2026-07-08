@@ -19,5 +19,7 @@ func New(handler *handler.Handler) *gin.Engine {
 		}
 	}
 
+	router.GET("/health", handler.HealthCheck)
+
 	return router
 }
