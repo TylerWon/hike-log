@@ -1,0 +1,85 @@
+@import 'tailwindcss';
+
+@font-face {
+  font-family: 'Playfair Display';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('https://static.figma.com/font/PlayfairDisplay_wght__1') format('woff2');
+}
+
+@font-face {
+  font-family: 'Playfair Display';
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('https://static.figma.com/font/PlayfairDisplay-Italic_wght__1') format('woff2');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('https://static.figma.com/font/Inter_1') format('woff2');
+}
+
+@font-face {
+  font-family: 'DM Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('https://static.figma.com/font/DMMono-Regular_1') format('woff2');
+}
+
+@font-face {
+  font-family: 'DM Mono';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('https://static.figma.com/font/DMMono-Medium_1') format('woff2');
+}
+
+@theme inline {
+  --color-background: #0f1410;
+  --color-foreground: #e8dfc8;
+  --color-card: #1a2018;
+  --color-card-hover: #1f2820;
+  --color-accent: #7fa86a;
+  --color-accent-muted: #4a7a38;
+  --color-muted: #4a5c44;
+  --color-muted-foreground: #8a9e82;
+  --color-border: #2e3d2a;
+  --color-danger: #c0604a;
+  --color-warning: #c09a4a;
+
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-serif: 'Playfair Display', ui-serif, Georgia, serif;
+  --font-mono: 'DM Mono', ui-monospace, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background-color: #0f1410;
+  color: #e8dfc8;
+  font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Hide scrollbars until scrolling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #2e3d2a;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #4a5c44;
+}
