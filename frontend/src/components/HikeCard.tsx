@@ -36,8 +36,8 @@ export default function HikeCard({ hike, index, isExpanded, onToggle }: HikeCard
     <article
       className="rounded-lg overflow-hidden border transition-all duration-200"
       style={{
-        borderColor: isExpanded ? "#4a5c44" : "#2e3d2a",
-        backgroundColor: isExpanded ? "#1f2820" : "#1a2018",
+        borderColor: isExpanded ? "var(--color-forest-700)" : "var(--color-forest-800)",
+        backgroundColor: isExpanded ? "var(--color-forest-850)" : "var(--color-forest-900)",
       }}
     >
       {/* Collapsed header — always visible */}
@@ -50,7 +50,7 @@ export default function HikeCard({ hike, index, isExpanded, onToggle }: HikeCard
           {/* Cover photo thumbnail */}
           {hike.coverPhoto ? (
             <div
-              className="flex-shrink-0 rounded overflow-hidden bg-[#2e3d2a]"
+              className="flex-shrink-0 rounded overflow-hidden bg-forest-800"
               style={{ width: 96, height: 72 }}
             >
               <img
@@ -70,7 +70,7 @@ export default function HikeCard({ hike, index, isExpanded, onToggle }: HikeCard
                 height="24"
                 viewBox="0 0 24 24"
                 fill="none"
-                stroke="#4a5c44"
+                stroke="var(--color-forest-700)"
                 strokeWidth="1.5"
               >
                 <path d="M3 17L9 9l4 5 3-3 5 6H3z" />
@@ -84,21 +84,18 @@ export default function HikeCard({ hike, index, isExpanded, onToggle }: HikeCard
               <div className="min-w-0">
                 <div className="flex items-baseline gap-2">
                   <span
-                    className="text-[10px] text-[#4a5c44] tabular-nums flex-shrink-0"
-                    style={{ fontFamily: "'DM Mono', monospace" }}
+                    className="text-[10px] font-mono text-forest-700 tabular-nums flex-shrink-0"
                   >
                     #{String(index).padStart(2, "0")}
                   </span>
                   <h2
-                    className="text-base font-semibold leading-snug text-[#e8dfc8] truncate"
-                    style={{ fontFamily: "'Playfair Display', serif" }}
+                    className="text-base font-semibold font-serif leading-snug text-cream-100 truncate"
                   >
                     {hike.trail}
                   </h2>
                 </div>
                 <p
-                  className="text-xs text-[#8a9e82] mt-0.5"
-                  style={{ fontFamily: "'DM Mono', monospace" }}
+                  className="text-xs font-mono text-forest-600 mt-0.5"
                 >
                   {formatDate(hike.date)}
                 </p>
@@ -109,7 +106,7 @@ export default function HikeCard({ hike, index, isExpanded, onToggle }: HikeCard
                 height="16"
                 viewBox="0 0 16 16"
                 fill="none"
-                stroke="#4a5c44"
+                stroke="var(--color-forest-700)"
                 strokeWidth="1.5"
                 strokeLinecap="round"
                 className="flex-shrink-0 mt-1 transition-transform duration-200"
@@ -124,16 +121,14 @@ export default function HikeCard({ hike, index, isExpanded, onToggle }: HikeCard
               <span className="inline-flex items-center gap-1.5">
                 <StarRating rating={hike.rating} />
                 <span
-                  className="text-[11px] text-[#8a9e82]"
-                  style={{ fontFamily: "'DM Mono', monospace" }}
+                  className="text-[11px] font-mono text-forest-600"
                 >
                   {hike.rating}/5
                 </span>
               </span>
 
               <span
-                className="text-[11px] text-[#8a9e82] inline-flex items-center gap-1"
-                style={{ fontFamily: "'DM Mono', monospace" }}
+                className="text-[11px] font-mono text-forest-600 inline-flex items-center gap-1"
               >
                 <svg
                   width="10"
@@ -151,8 +146,7 @@ export default function HikeCard({ hike, index, isExpanded, onToggle }: HikeCard
               </span>
 
               <span
-                className="text-[11px] text-[#8a9e82] inline-flex items-center gap-1"
-                style={{ fontFamily: "'DM Mono', monospace" }}
+                className="text-[11px] font-mono text-forest-600 inline-flex items-center gap-1"
               >
                 <svg
                   width="10"
@@ -171,8 +165,7 @@ export default function HikeCard({ hike, index, isExpanded, onToggle }: HikeCard
 
               {hike.durationMinutes !== undefined && (
                 <span
-                  className="text-[11px] text-[#8a9e82] inline-flex items-center gap-1"
-                  style={{ fontFamily: "'DM Mono', monospace" }}
+                  className="text-[11px] font-mono text-forest-600 inline-flex items-center gap-1"
                 >
                   <svg
                     width="10"

@@ -24,7 +24,7 @@ export default function PhotoGallery({ photos }: PhotoGalleryProps) {
           <button
             key={i}
             onClick={() => setLightboxIndex(i)}
-            className="flex-shrink-0 rounded overflow-hidden bg-[#2e3d2a] cursor-pointer group focus:outline-none focus:ring-2 focus:ring-[#7fa86a]"
+            className="flex-shrink-0 rounded overflow-hidden bg-forest-800 cursor-pointer group focus:outline-none focus:ring-2 focus:ring-sage-500"
             style={{ width: 120, height: 80 }}
             aria-label={photo.caption ?? `Photo ${i + 1}`}
           >
@@ -47,7 +47,7 @@ export default function PhotoGallery({ photos }: PhotoGalleryProps) {
         >
           {/* Close */}
           <button
-            className="absolute top-4 right-4 text-[#8a9e82] hover:text-[#e8dfc8] transition-colors p-2 focus:outline-none"
+            className="absolute top-4 right-4 text-forest-600 hover:text-cream-100 transition-colors p-2 focus:outline-none"
             onClick={closeLightbox}
             aria-label="Close"
           >
@@ -69,16 +69,14 @@ export default function PhotoGallery({ photos }: PhotoGalleryProps) {
             />
             {photos[lightboxIndex].caption && (
               <p
-                className="mt-3 text-center text-sm text-[#8a9e82] max-w-md"
-                style={{ fontFamily: "'DM Mono', monospace" }}
+                className="mt-3 text-center text-sm font-mono text-forest-600 max-w-md"
               >
                 {photos[lightboxIndex].caption}
               </p>
             )}
             {/* Counter */}
             <p
-              className="mt-1 text-xs text-[#4a5c44]"
-              style={{ fontFamily: "'DM Mono', monospace" }}
+              className="mt-1 text-xs font-mono text-forest-700"
             >
               {lightboxIndex + 1} / {photos.length}
             </p>
@@ -88,7 +86,7 @@ export default function PhotoGallery({ photos }: PhotoGalleryProps) {
           {photos.length > 1 && (
             <>
               <button
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-[#8a9e82] hover:text-[#e8dfc8] transition-colors p-3 focus:outline-none"
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-forest-600 hover:text-cream-100 transition-colors p-3 focus:outline-none"
                 onClick={(e) => { e.stopPropagation(); prev(); }}
                 aria-label="Previous photo"
               >
@@ -97,7 +95,7 @@ export default function PhotoGallery({ photos }: PhotoGalleryProps) {
                 </svg>
               </button>
               <button
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-[#8a9e82] hover:text-[#e8dfc8] transition-colors p-3 focus:outline-none"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-forest-600 hover:text-cream-100 transition-colors p-3 focus:outline-none"
                 onClick={(e) => { e.stopPropagation(); next(); }}
                 aria-label="Next photo"
               >

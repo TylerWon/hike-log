@@ -9,20 +9,18 @@ interface HikeDetailProps {
 
 export default function HikeDetail({ hike, photos }: HikeDetailProps) {
   return (
-    <div className="border-t border-[#2e3d2a] px-4 py-5 space-y-5">
+    <div className="border-t border-forest-800 px-4 py-5 space-y-5">
       {/* Difficulty + AllTrails row */}
       <div className="flex flex-wrap items-center gap-4">
         <div className="flex items-center gap-2">
           <span
-            className="text-[10px] uppercase tracking-widest text-[#4a5c44]"
-            style={{ fontFamily: "'DM Mono', monospace" }}
+            className="text-[10px] font-mono uppercase tracking-widest text-forest-700"
           >
             Difficulty
           </span>
           <DifficultyBar difficulty={hike.difficulty} />
           <span
-            className="text-[11px] text-[#8a9e82]"
-            style={{ fontFamily: "'DM Mono', monospace" }}
+            className="text-[11px] font-mono text-forest-600"
           >
             {hike.difficulty}/10
           </span>
@@ -33,8 +31,7 @@ export default function HikeDetail({ hike, photos }: HikeDetailProps) {
             href={hike.allTrailsUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 text-xs text-[#7fa86a] hover:text-[#9dc885] transition-colors border border-[#4a7a38] rounded px-2.5 py-1 hover:border-[#7fa86a]"
-            style={{ fontFamily: "'DM Mono', monospace" }}
+            className="inline-flex items-center gap-1.5 text-xs font-mono text-sage-500 hover:text-sage-400 transition-colors border border-sage-500 rounded px-2.5 py-1 hover:border-sage-400"
           >
             <svg
               width="11"
@@ -58,8 +55,7 @@ export default function HikeDetail({ hike, photos }: HikeDetailProps) {
       {hike.notes && (
         <div>
           <p
-            className="text-[10px] uppercase tracking-widest text-[#4a5c44] mb-2"
-            style={{ fontFamily: "'DM Mono', monospace" }}
+            className="text-[10px] font-mono uppercase tracking-widest text-forest-700 mb-2"
           >
             Notes
           </p>
@@ -73,8 +69,7 @@ export default function HikeDetail({ hike, photos }: HikeDetailProps) {
       {photos.length > 0 && (
         <div>
           <p
-            className="text-[10px] uppercase tracking-widest text-[#4a5c44] mb-2"
-            style={{ fontFamily: "'DM Mono', monospace" }}
+            className="text-[10px] font-mono uppercase tracking-widest text-forest-700 mb-2"
           >
             Photos ({photos.length})
           </p>

@@ -24,17 +24,15 @@ export default function HikeLog() {
     setExpandedId((prev) => (prev === id ? null : id));
 
   return (
-    <div className="min-h-screen bg-[#0f1410] text-[#e8dfc8]">
+    <div className="min-h-screen bg-forest-900 text-cream-100">
       <header className="max-w-3xl mx-auto px-6 pt-16 pb-10">
         <p
-          className="text-xs tracking-[0.2em] uppercase text-[#7fa86a] mb-3"
-          style={{ fontFamily: "'DM Mono', monospace" }}
+          className="text-xs font-mono tracking-[0.2em] uppercase text-sage-500 mb-3"
         >
           Field Notes
         </p>
         <h1
-          className="text-5xl font-bold leading-tight mb-6"
-          style={{ fontFamily: "'Playfair Display', serif" }}
+          className="text-5xl font-bold font-serif leading-tight mb-6"
         >
           Hiking Log
         </h1>
@@ -43,63 +41,55 @@ export default function HikeLog() {
         <div className="flex flex-wrap gap-6">
           <div>
             <p
-              className="text-[10px] uppercase tracking-widest text-[#4a5c44] mb-1"
-              style={{ fontFamily: "'DM Mono', monospace" }}
+              className="text-[10px] font-mono uppercase tracking-widest text-forest-700 mb-1"
             >
               Hikes
             </p>
             <p
-              className="text-2xl font-semibold text-[#e8dfc8]"
-              style={{ fontFamily: "'Playfair Display', serif" }}
+              className="text-2xl font-semibold font-serif text-cream-100"
             >
               {sorted.length}
             </p>
           </div>
-          <div className="w-px bg-[#2e3d2a] self-stretch" />
+          <div className="w-px bg-forest-800 self-stretch" />
           <div>
             <p
-              className="text-[10px] uppercase tracking-widest text-[#4a5c44] mb-1"
-              style={{ fontFamily: "'DM Mono', monospace" }}
+              className="text-[10px] font-mono uppercase tracking-widest text-forest-700 mb-1"
             >
               Distance
             </p>
             <p
-              className="text-2xl font-semibold text-[#e8dfc8]"
-              style={{ fontFamily: "'Playfair Display', serif" }}
+              className="text-2xl font-semibold font-serif text-cream-100"
             >
               {totalDistanceKm.toFixed(1)}{" "}
-              <span className="text-sm font-normal text-[#8a9e82]">km</span>
+              <span className="text-sm font-normal text-forest-600">km</span>
             </p>
           </div>
-          <div className="w-px bg-[#2e3d2a] self-stretch" />
+          <div className="w-px bg-forest-800 self-stretch" />
           <div>
             <p
-              className="text-[10px] uppercase tracking-widest text-[#4a5c44] mb-1"
-              style={{ fontFamily: "'DM Mono', monospace" }}
+              className="text-[10px] font-mono uppercase tracking-widest text-forest-700 mb-1"
             >
               Elevation
             </p>
             <p
-              className="text-2xl font-semibold text-[#e8dfc8]"
-              style={{ fontFamily: "'Playfair Display', serif" }}
+              className="text-2xl font-semibold font-serif text-cream-100"
             >
               {totalElevationM.toLocaleString()}{" "}
-              <span className="text-sm font-normal text-[#8a9e82]">m</span>
+              <span className="text-sm font-normal text-forest-600">m</span>
             </p>
           </div>
           {totalMinutes > 0 && (
             <>
-              <div className="w-px bg-[#2e3d2a] self-stretch" />
+              <div className="w-px bg-forest-800 self-stretch" />
               <div>
                 <p
-                  className="text-[10px] uppercase tracking-widest text-[#4a5c44] mb-1"
-                  style={{ fontFamily: "'DM Mono', monospace" }}
+                  className="text-[10px] font-mono uppercase tracking-widest text-forest-700 mb-1"
                 >
                   Time
                 </p>
                 <p
-                  className="text-2xl font-semibold text-[#e8dfc8]"
-                  style={{ fontFamily: "'Playfair Display', serif" }}
+                  className="text-2xl font-semibold font-serif text-cream-100"
                 >
                   {formatTotalDuration(totalMinutes)}
                 </p>
@@ -108,7 +98,7 @@ export default function HikeLog() {
           )}
         </div>
 
-        <div className="mt-8 h-px bg-[#2e3d2a]" />
+        <div className="mt-8 h-px bg-forest-800" />
       </header>
 
       <main className="max-w-3xl mx-auto px-6 pb-24">

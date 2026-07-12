@@ -26,13 +26,13 @@ export default function StarRating({ rating, max = 5 }: StarRatingProps) {
             {/* Empty star */}
             <polygon
               points="6,1 7.5,4.5 11.5,5 8.5,7.8 9.3,11.5 6,9.5 2.7,11.5 3.5,7.8 0.5,5 4.5,4.5"
-              fill="#2e3d2a"
+              fill="var(--color-forest-800)"
             />
             {/* Filled star (clipped) */}
             {fill > 0 && (
               <polygon
                 points="6,1 7.5,4.5 11.5,5 8.5,7.8 9.3,11.5 6,9.5 2.7,11.5 3.5,7.8 0.5,5 4.5,4.5"
-                fill="#7fa86a"
+                fill="var(--color-sage-500)"
                 clipPath={`url(#${id})`}
               />
             )}
