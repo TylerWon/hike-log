@@ -31,7 +31,7 @@ type Hike struct {
 	ElevationGain uint `json:"elevationGain"`
 
 	// Time it took to complete the hike (mins).
-	TotalTime uint `json:"totalTime"`
+	Duration uint `json:"duration"`
 
 	// Link to the AllTrails page for the trail.
 	AllTrailsUrl string `json:"allTrailsUrl"`

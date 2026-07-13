@@ -58,7 +58,7 @@ func (suite *HandlerTestSuite) TestListHike_ReturnsHikes() {
 		Distance:      8.2,
 		ElevationGain: 1200,
 		AllTrailsUrl:  "https://www.alltrails.com/",
-		TotalTime:     60,
+		Duration:      60,
 	}
 	hikes = append(hikes, &hike1)
 
@@ -73,7 +73,7 @@ func (suite *HandlerTestSuite) TestListHike_ReturnsHikes() {
 		Difficulty:    9.5,
 		Distance:      21.2,
 		ElevationGain: 1587,
-		TotalTime:     127,
+		Duration:      127,
 		AllTrailsUrl:  "https://www.alltrails.com/",
 		Photos:        photos,
 		CoverPhoto:    &photos[0],
@@ -116,7 +116,7 @@ func (suite *HandlerTestSuite) TestRetrieveHike_Success() {
 		Difficulty:    9.5,
 		Distance:      21.2,
 		ElevationGain: 1587,
-		TotalTime:     127,
+		Duration:      127,
 		AllTrailsUrl:  "https://www.alltrails.com/",
 		Photos:        photos,
 		CoverPhoto:    &photos[0],
