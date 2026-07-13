@@ -13,17 +13,9 @@ export default function HikeDetail({ hike, photos }: HikeDetailProps) {
       {/* Difficulty + AllTrails row */}
       <div className="flex flex-wrap items-center gap-4">
         <div className="flex items-center gap-2">
-          <span
-            className="text-[10px] font-mono uppercase tracking-widest text-forest-700"
-          >
-            Difficulty
-          </span>
+          <span className="field-label">Difficulty</span>
           <DifficultyBar difficulty={hike.difficulty} />
-          <span
-            className="text-[11px] font-mono text-forest-600"
-          >
-            {hike.difficulty}/10
-          </span>
+          <span className="text-[11px] font-mono text-forest-600">{hike.difficulty}/10</span>
         </div>
 
         {hike.allTrailsUrl && (
@@ -54,25 +46,15 @@ export default function HikeDetail({ hike, photos }: HikeDetailProps) {
       {/* Notes */}
       {hike.notes && (
         <div>
-          <p
-            className="text-[10px] font-mono uppercase tracking-widest text-forest-700 mb-2"
-          >
-            Notes
-          </p>
-          <p className="text-sm leading-relaxed text-[#c8c0a8]">
-            {hike.notes}
-          </p>
+          <p className="field-label mb-2">Notes</p>
+          <p className="text-sm leading-relaxed text-[#c8c0a8]">{hike.notes}</p>
         </div>
       )}
 
       {/* Photos */}
       {photos.length > 0 && (
         <div>
-          <p
-            className="text-[10px] font-mono uppercase tracking-widest text-forest-700 mb-2"
-          >
-            Photos ({photos.length})
-          </p>
+          <p className="field-label mb-2">Photos ({photos.length})</p>
           <PhotoGallery photos={photos} />
         </div>
       )}

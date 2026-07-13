@@ -6,7 +6,7 @@ interface HikeCardProps {
   hike: Hike;
   index: number;
   isExpanded: boolean;
-  onToggle: () => void;
+  onClick: () => void;
 }
 
 function formatDate(iso: string): string {
@@ -26,11 +26,8 @@ function formatDuration(minutes: number): string {
   return `${h}h ${m}m`;
 }
 
-export default function HikeCard({ hike, index, isExpanded, onToggle }: HikeCardProps) {
-  const allPhotos = [
-    ...(hike.coverPhoto ? [hike.coverPhoto] : []),
-    ...(hike.photos ?? []),
-  ];
+export default function HikeCard({ hike, index, isExpanded, onClick: onToggle }: HikeCardProps) {
+  const allPhotos = [...(hike.coverPhoto ? [hike.coverPhoto] : []), ...(hike.photos ?? [])];
 
   return (
     <article
@@ -41,18 +38,11 @@ export default function HikeCard({ hike, index, isExpanded, onToggle }: HikeCard
       }}
     >
       {/* Collapsed header — always visible */}
-      <button
-        onClick={onToggle}
-        className="w-full text-left cursor-pointer group"
-        aria-expanded={isExpanded}
-      >
+      <button onClick={onToggle} className="w-full text-left cursor-pointer group" aria-expanded={isExpanded}>
         <div className="flex gap-4 p-4">
           {/* Cover photo thumbnail */}
           {hike.coverPhoto ? (
-            <div
-              className="flex-shrink-0 rounded overflow-hidden bg-forest-800"
-              style={{ width: 96, height: 72 }}
-            >
+            <div className="flex-shrink-0 rounded overflow-hidden bg-forest-800" style={{ width: 96, height: 72 }}>
               <img
                 src={hike.coverPhoto.url}
                 alt={hike.coverPhoto.caption ?? hike.trail}
@@ -83,22 +73,14 @@ export default function HikeCard({ hike, index, isExpanded, onToggle }: HikeCard
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">
                 <div className="flex items-baseline gap-2">
-                  <span
-                    className="text-[10px] font-mono text-forest-700 tabular-nums flex-shrink-0"
-                  >
+                  <span className="text-[10px] font-mono text-forest-700 tabular-nums flex-shrink-0">
                     #{String(index).padStart(2, "0")}
                   </span>
-                  <h2
-                    className="text-base font-semibold font-serif leading-snug text-cream-100 truncate"
-                  >
+                  <h2 className="text-base font-semibold font-serif leading-snug text-cream-100 truncate">
                     {hike.trail}
                   </h2>
                 </div>
-                <p
-                  className="text-xs font-mono text-forest-600 mt-0.5"
-                >
-                  {formatDate(hike.date)}
-                </p>
+                <p className="text-xs font-mono text-forest-600 mt-0.5">{formatDate(hike.date)}</p>
               </div>
               {/* Expand chevron */}
               <svg
@@ -120,16 +102,10 @@ export default function HikeCard({ hike, index, isExpanded, onToggle }: HikeCard
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 mt-2.5">
               <span className="inline-flex items-center gap-1.5">
                 <StarRating rating={hike.rating} />
-                <span
-                  className="text-[11px] font-mono text-forest-600"
-                >
-                  {hike.rating}/5
-                </span>
+                <span className="text-[11px] font-mono text-forest-600">{hike.rating}/5</span>
               </span>
 
-              <span
-                className="text-[11px] font-mono text-forest-600 inline-flex items-center gap-1"
-              >
+              <span className="text-[11px] font-mono text-forest-600 inline-flex items-center gap-1">
                 <svg
                   width="10"
                   height="10"
@@ -145,9 +121,7 @@ export default function HikeCard({ hike, index, isExpanded, onToggle }: HikeCard
                 {hike.distanceKm} km
               </span>
 
-              <span
-                className="text-[11px] font-mono text-forest-600 inline-flex items-center gap-1"
-              >
+              <span className="text-[11px] font-mono text-forest-600 inline-flex items-center gap-1">
                 <svg
                   width="10"
                   height="10"
@@ -164,9 +138,7 @@ export default function HikeCard({ hike, index, isExpanded, onToggle }: HikeCard
               </span>
 
               {hike.durationMinutes !== undefined && (
-                <span
-                  className="text-[11px] font-mono text-forest-600 inline-flex items-center gap-1"
-                >
+                <span className="text-[11px] font-mono text-forest-600 inline-flex items-center gap-1">
                   <svg
                     width="10"
                     height="10"

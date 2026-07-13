@@ -11,14 +11,14 @@ export interface Hike {
   difficulty: number; // 0–10, 0.5 steps
   distanceKm: number;
   elevationGainM: number;
-  durationMinutes?: number;
+  durationMinutes: number;
   coverPhoto?: Photo;
   notes?: string;
   allTrailsUrl?: string;
   photos?: Photo[]; // coverPhoto prepended automatically
 }
 
-export const hikes: Hike[] = [
+export const mockHikeData: Hike[] = [
   {
     id: "panorama-ridge-2026",
     trail: "Panorama Ridge",

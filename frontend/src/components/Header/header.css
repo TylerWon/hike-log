@@ -1,0 +1,9 @@
+@reference "../../index.css";
+
+.overall-stat-value {
+  @apply text-2xl font-semibold font-serif text-cream-100;
+}
+
+.overall-stat-divider {
+  @apply w-px bg-forest-800 self-stretch;
+}
