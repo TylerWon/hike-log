@@ -1,0 +1,5 @@
+@reference "../../index.css";
+
+.card-stat {
+    @apply text-[11px] font-mono text-forest-600 inline-flex items-center;
+}

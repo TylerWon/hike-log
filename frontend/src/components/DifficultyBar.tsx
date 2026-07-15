@@ -4,7 +4,7 @@ interface DifficultyBarProps {
 
 function segmentColor(index: number): { filled: string; empty: string } {
   // index 0–2: easy (green), 3–5: moderate (amber), 6–9: hard (red)
-  if (index < 3) return { filled: "var(--color-sage-500)", empty: "#1f2d1a" };
+  if (index < 3) return { filled: "var(--color-sage-500)", empty: "var(--color-olive-850)" };
   if (index < 6) return { filled: "var(--color-amber-500)", empty: "#2d2510" };
   return { filled: "var(--color-coral-500)", empty: "#2d1510" };
 }
