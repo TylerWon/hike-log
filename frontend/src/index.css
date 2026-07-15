@@ -1,83 +1,85 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
 @font-face {
-  font-family: 'Playfair Display';
+  font-family: "Playfair Display";
   font-style: normal;
   font-weight: 100 900;
   font-display: swap;
   src:
       /* Try user's device first, then app files, then external site */
-      local('Playfair Display'),
-      url('./assets/fonts/playfair-display.woff2') format('woff2'),
-      url('https://static.figma.com/font/PlayfairDisplay_wght__1') format('woff2');
+    local("Playfair Display"),
+    url("./assets/fonts/playfair-display.woff2") format("woff2"),
+    url("https://static.figma.com/font/PlayfairDisplay_wght__1") format("woff2");
 }
 
 @font-face {
-  font-family: 'Playfair Display';
+  font-family: "Playfair Display";
   font-style: italic;
   font-weight: 100 900;
   font-display: swap;
   src:
-      local('Playfair Display'),
-      url('./assets/fonts/playfair-display-italic.woff2') format('woff2'),
-      url('https://static.figma.com/font/PlayfairDisplay-Italic_wght__1') format('woff2');
+    local("Playfair Display"),
+    url("./assets/fonts/playfair-display-italic.woff2") format("woff2"),
+    url("https://static.figma.com/font/PlayfairDisplay-Italic_wght__1") format("woff2");
 }
 
 @font-face {
-  font-family: 'Inter';
+  font-family: "Inter";
   font-style: normal;
   font-weight: 100 900;
   font-display: swap;
   src:
-      local('Inter'),
-      url('./assets/fonts/inter.woff2') format('woff2'),
-      url('https://static.figma.com/font/Inter_1') format('woff2');
+    local("Inter"),
+    url("./assets/fonts/inter.woff2") format("woff2"),
+    url("https://static.figma.com/font/Inter_1") format("woff2");
 }
 
 @font-face {
-  font-family: 'DM Mono';
+  font-family: "DM Mono";
   font-style: normal;
   font-weight: 400;
   font-display: swap;
   src:
-      local('DM Mono'),
-      url('./assets/fonts/dm-mono-regular.woff2') format('woff2'),
-      url('https://static.figma.com/font/DMMono-Regular_1') format('woff2');
+    local("DM Mono"),
+    url("./assets/fonts/dm-mono-regular.woff2") format("woff2"),
+    url("https://static.figma.com/font/DMMono-Regular_1") format("woff2");
 }
 
 @font-face {
-  font-family: 'DM Mono';
+  font-family: "DM Mono";
   font-style: normal;
   font-weight: 500;
   font-display: swap;
   src:
-      local('DM Mono'),
-      url('./assets/fonts/dm-mono-medium.woff2') format('woff2'),
-      url('https://static.figma.com/font/DMMono-Medium_1') format('woff2');
+    local("DM Mono"),
+    url("./assets/fonts/dm-mono-medium.woff2") format("woff2"),
+    url("https://static.figma.com/font/DMMono-Medium_1") format("woff2");
 }
 
-@theme inline { 
+@theme inline {
   /* Color palette */
-  --color-forest-950: #0f1410;    
-  --color-forest-900: #1a2018;      
-  --color-forest-850: #1f2820;     
-  --color-forest-800: #2e3d2a;         
-  --color-forest-700: #4a5c44;          
-  --color-forest-600: #8a9e82;          
-  
-  --color-cream-100: #e8dfc8;        
-         
-  --color-sage-400: #9dc885;            
-  --color-sage-500: #7fa86a;            
+  --color-forest-950: #0f1410;
+  --color-forest-900: #1a2018;
+  --color-forest-850: #1f2820;
+  --color-forest-800: #2e3d2a;
+  --color-forest-700: #4a5c44;
+  --color-forest-600: #8a9e82;
 
-  --color-coral-500: #c0604a; 
+  --color-olive-850: #1f2d1a;
 
-  --color-amber-500: #c09a4a;          
+  --color-cream-100: #e8dfc8;
+
+  --color-sage-400: #9dc885;
+  --color-sage-500: #7fa86a;
+
+  --color-coral-500: #c0604a;
+
+  --color-amber-500: #c09a4a;
 
   /* Typography */
-  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
-  --font-serif: 'Playfair Display', ui-serif, Georgia, serif;
-  --font-mono: 'DM Mono', ui-monospace, monospace;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Playfair Display", ui-serif, Georgia, serif;
+  --font-mono: "DM Mono", ui-monospace, monospace;
 }
 
 * {
@@ -87,5 +89,5 @@
 html {
   background-color: var(--color-forest-950);
   color: var(--color-cream-100);
-  font-family: var(--font-sans)
+  font-family: var(--font-sans);
 }
