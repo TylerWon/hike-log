@@ -15,7 +15,7 @@ type Hike struct {
 	// The date of the hike.
 	Date datatypes.Date `json:"date"`
 
-	// Notes on the hike.
+	// Notes on the hike. Can be left blank.
 	Notes string `json:"notes"`
 
 	// How enjoyable the hike was out of 5. Half values allowed.
@@ -36,10 +36,11 @@ type Hike struct {
 	// Link to the AllTrails page for the trail.
 	AllTrailsUrl string `json:"allTrailsUrl"`
 
-	// Photos taken on the hike.
+	// Photos taken on the hike. The Hike may not have any photos. The first photo in the list will be the same as the
+	// CoverPhoto.
 	Photos []Photo `json:"photos"`
 
-	// Photo to use as the thumbnail for the hike.
+	// Photo to use as the thumbnail for the hike. The Hike may not have a cover.
 	CoverPhotoID *uint  `json:"-"` // Omit when struct is serialized into JSON
 	CoverPhoto   *Photo `json:"coverPhoto"`
 }
