@@ -58,16 +58,17 @@
 
 @theme inline {
   /* Color palette */
-  --color-forest-950: #0f1410;
-  --color-forest-900: #1a2018;
-  --color-forest-850: #1f2820;
-  --color-forest-800: #2e3d2a;
-  --color-forest-700: #4a5c44;
   --color-forest-600: #8a9e82;
+  --color-forest-700: #4a5c44;
+  --color-forest-800: #2e3d2a;
+  --color-forest-850: #1f2820;
+  --color-forest-900: #1a2018;
+  --color-forest-950: #0f1410;
 
   --color-olive-850: #1f2d1a;
 
   --color-cream-100: #e8dfc8;
+  --color-cream-200: #c8c0a8;
 
   --color-sage-400: #9dc885;
   --color-sage-500: #7fa86a;

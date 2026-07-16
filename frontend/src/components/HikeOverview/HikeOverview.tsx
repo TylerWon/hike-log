@@ -3,6 +3,7 @@ import StarRating from "../StarRating";
 import Thumbnail from "../Thumbnail";
 import { classnames } from "../../utils/classnames";
 import "./hike-overview.css";
+import "../../assets/styles/text.css";
 
 interface HikeOverviewProps {
   hike: Hike;
@@ -64,12 +65,11 @@ export default function HikeOverview({ hike, index, isExpanded }: HikeOverviewPr
 
         {/* Stats */}
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 mt-2.5">
-          <span className="card-stat gap-1.5">
+          <span className="stat-value stat-container gap-1.5">
             <StarRating rating={hike.rating} />
             {hike.rating}/5
           </span>
-
-          <span className="card-stat gap-1">
+          <span className="stat-value stat-container gap-1">
             <svg
               width="10"
               height="10"
@@ -84,8 +84,7 @@ export default function HikeOverview({ hike, index, isExpanded }: HikeOverviewPr
             </svg>
             {hike.distanceKm} km
           </span>
-
-          <span className="card-stat gap-1">
+          <span className="stat-value stat-container gap-1">
             <svg
               width="10"
               height="10"
@@ -100,8 +99,7 @@ export default function HikeOverview({ hike, index, isExpanded }: HikeOverviewPr
             </svg>
             {hike.elevationGainM} m
           </span>
-
-          <span className="card-stat gap-1">
+          <span className="stat-value stat-container gap-1">
             <svg
               width="10"
               height="10"
