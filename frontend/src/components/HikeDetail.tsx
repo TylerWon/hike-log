@@ -1,7 +1,7 @@
-import { type Hike, type Photo } from "../data/hikes";
-import PhotoGallery from "./PhotoGallery";
-import DifficultyBar from "./DifficultyBar";
 import "../assets/styles/text.css";
+import { type Hike, type Photo } from "../data/hikes";
+import DifficultyBar from "./DifficultyBar";
+import PhotoGallery from "./PhotoGallery";
 
 interface HikeDetailProps {
   hike: Hike;

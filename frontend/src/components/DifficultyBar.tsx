@@ -11,10 +11,7 @@ function segmentColor(index: number): { filled: string; empty: string } {
 
 export default function DifficultyBar({ difficulty }: DifficultyBarProps) {
   return (
-    <span
-      className="inline-flex items-center gap-0.5"
-      aria-label={`Difficulty ${difficulty} out of 10`}
-    >
+    <span className="inline-flex items-center gap-0.5" aria-label={`Difficulty ${difficulty} out of 10`}>
       {Array.from({ length: 10 }).map((_, i) => {
         const fill = Math.min(Math.max(difficulty - i, 0), 1);
         const { filled, empty } = segmentColor(i);

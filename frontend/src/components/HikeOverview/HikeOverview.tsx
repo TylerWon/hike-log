@@ -1,9 +1,9 @@
+import "../../assets/styles/text.css";
 import { type Hike } from "../../data/hikes";
+import { classnames } from "../../utils/classnames";
 import StarRating from "../StarRating";
 import Thumbnail from "../Thumbnail";
-import { classnames } from "../../utils/classnames";
 import "./hike-overview.css";
-import "../../assets/styles/text.css";
 
 interface HikeOverviewProps {
   hike: Hike;

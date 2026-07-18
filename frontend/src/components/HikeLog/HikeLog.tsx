@@ -1,8 +1,9 @@
 import { useState } from "react";
+
+import "../../assets/styles/text.css";
 import { mockHikeData } from "../../data/hikes";
 import HikeCard from "../HikeCard";
 import "./hike-log.css";
-import "../../assets/styles/text.css";
 
 function formatTotalDuration(minutes: number): string {
   const h = Math.floor(minutes / 60);
@@ -16,9 +17,9 @@ export default function HikeLog() {
 
   const hikes = [...mockHikeData].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
-    const totalDistanceKm = hikes.reduce((sum, h) => sum + h.distanceKm, 0);
-    const totalElevationM = hikes.reduce((sum, h) => sum + h.elevationGainM, 0);
-    const totalMinutes = hikes.reduce((sum, h) => sum + h.durationMinutes, 0);
+  const totalDistanceKm = hikes.reduce((sum, h) => sum + h.distanceKm, 0);
+  const totalElevationM = hikes.reduce((sum, h) => sum + h.elevationGainM, 0);
+  const totalMinutes = hikes.reduce((sum, h) => sum + h.durationMinutes, 0);
 
   const handleCardClick = (id: string) => {
     setExpandedCardId((prev) => (prev === id ? null : id));

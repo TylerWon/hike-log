@@ -10,14 +10,7 @@ export default function StarRating({ rating, max = 5 }: StarRatingProps) {
         const fill = Math.min(Math.max(rating - i, 0), 1); // 0, 0.5, or 1
         const id = `star-clip-${i}-${rating}`;
         return (
-          <svg
-            key={i}
-            width="12"
-            height="12"
-            viewBox="0 0 12 12"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
+          <svg key={i} width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <clipPath id={id}>
                 <rect x="0" y="0" width={12 * fill} height="12" />

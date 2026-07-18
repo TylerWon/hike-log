@@ -11,10 +11,8 @@ export default function PhotoGallery({ photos }: PhotoGalleryProps) {
   if (photos.length === 0) return null;
 
   const closeLightbox = () => setLightboxIndex(null);
-  const prev = () =>
-    setLightboxIndex((i) => (i !== null ? (i - 1 + photos.length) % photos.length : 0));
-  const next = () =>
-    setLightboxIndex((i) => (i !== null ? (i + 1) % photos.length : 0));
+  const prev = () => setLightboxIndex((i) => (i !== null ? (i - 1 + photos.length) % photos.length : 0));
+  const next = () => setLightboxIndex((i) => (i !== null ? (i + 1) % photos.length : 0));
 
   return (
     <>
@@ -51,7 +49,15 @@ export default function PhotoGallery({ photos }: PhotoGalleryProps) {
             onClick={closeLightbox}
             aria-label="Close"
           >
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+            >
               <path d="M4 4l12 12M16 4L4 16" />
             </svg>
           </button>
@@ -68,16 +74,12 @@ export default function PhotoGallery({ photos }: PhotoGalleryProps) {
               style={{ maxWidth: "100%" }}
             />
             {photos[lightboxIndex].caption && (
-              <p
-                className="mt-3 text-center text-sm font-mono text-forest-600 max-w-md"
-              >
+              <p className="mt-3 text-center text-sm font-mono text-forest-600 max-w-md">
                 {photos[lightboxIndex].caption}
               </p>
             )}
             {/* Counter */}
-            <p
-              className="mt-1 text-xs font-mono text-forest-700"
-            >
+            <p className="mt-1 text-xs font-mono text-forest-700">
               {lightboxIndex + 1} / {photos.length}
             </p>
           </div>
@@ -87,19 +89,43 @@ export default function PhotoGallery({ photos }: PhotoGalleryProps) {
             <>
               <button
                 className="absolute left-4 top-1/2 -translate-y-1/2 text-forest-600 hover:text-cream-100 transition-colors p-3 focus:outline-none"
-                onClick={(e) => { e.stopPropagation(); prev(); }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  prev();
+                }}
                 aria-label="Previous photo"
               >
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <path d="M13 4l-6 6 6 6" />
                 </svg>
               </button>
               <button
                 className="absolute right-4 top-1/2 -translate-y-1/2 text-forest-600 hover:text-cream-100 transition-colors p-3 focus:outline-none"
-                onClick={(e) => { e.stopPropagation(); next(); }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  next();
+                }}
                 aria-label="Next photo"
               >
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <path d="M7 4l6 6-6 6" />
                 </svg>
               </button>
