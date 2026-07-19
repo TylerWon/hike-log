@@ -33,7 +33,7 @@ func (h *Handler) ListHike(c *gin.Context) {
 
 	result := h.db.Preload("CoverPhoto").Order("date desc, trail_name").Find(&hikes)
 	if result.Error != nil {
-		log.Println("Failed to list tasks: ", result.Error)
+		log.Println("Failed to list hikes: ", result.Error)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": http.StatusText(http.StatusInternalServerError)})
 		return
 	}
