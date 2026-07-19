@@ -64,18 +64,19 @@
   --color-forest-850: #1f2820;
   --color-forest-900: #1a2018;
   --color-forest-950: #0f1410;
-
-  --color-olive-850: #1f2d1a;
-
+  
   --color-cream-100: #e8dfc8;
   --color-cream-200: #c8c0a8;
-
+  
   --color-sage-400: #9dc885;
   --color-sage-500: #7fa86a;
+  --color-sage-950: #1f2d1a;
 
   --color-coral-500: #c0604a;
-
+  --color-coral-950: #2d1510;
+  
   --color-amber-500: #c09a4a;
+  --color-amber-950: #2d2510;
 
   /* Typography */
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
