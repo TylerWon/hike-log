@@ -1,12 +1,11 @@
 interface StarRatingProps {
   rating: number; // 0–5, 0.5 steps
-  max?: number;
 }
 
-export default function StarRating({ rating, max = 5 }: StarRatingProps) {
+export default function StarRating({ rating }: StarRatingProps) {
   return (
-    <span className="inline-flex items-center gap-0.5" aria-label={`${rating} out of ${max} stars`}>
-      {Array.from({ length: max }).map((_, i) => {
+    <span className="inline-flex items-center gap-0.5" role="img" aria-label={`${rating} out of 5 stars`}>
+      {Array.from({ length: 5 }).map((_, i) => {
         const fill = Math.min(Math.max(rating - i, 0), 1); // 0, 0.5, or 1
         const id = `star-clip-${i}-${rating}`;
 
