@@ -36,11 +36,11 @@ type Hike struct {
 	// Link to the AllTrails page for the trail.
 	AllTrailsUrl string `json:"allTrailsUrl"`
 
-	// Photos taken on the hike. The Hike may not have any photos. The first photo in the list will be the same as the
-	// CoverPhoto.
+	// Photos taken on the hike. The Hike may not have any photos. If there are photos, the first one will be the same 
+	// as the CoverPhoto.
 	Photos []Photo `json:"photos"`
 
-	// Photo to use as the thumbnail for the hike. The Hike may not have a cover.
+	// Photo to use as a thumbnail for the Hike. The Hike may not have a cover photo.
 	CoverPhotoID *uint  `json:"-"` // Omit when struct is serialized into JSON
 	CoverPhoto   *Photo `json:"coverPhoto"`
 }

@@ -25,6 +25,7 @@ export default function HikeCard({ hike, index, isExpanded, onClick }: HikeCardP
 
       {/* Hike details (shown when overview is clicked) */}
       <div
+        // Easier to use inline CSS here than Tailwind
         style={{
           display: "grid",
           gridTemplateRows: isExpanded ? "1fr" : "0fr",
