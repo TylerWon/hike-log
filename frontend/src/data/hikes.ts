@@ -12,10 +12,10 @@ export interface Hike {
   distanceKm: number;
   elevationGainM: number;
   durationMinutes: number;
-  coverPhoto?: Photo;
-  notes?: string;
-  allTrailsUrl?: string;
-  photos: Photo[]; // coverPhoto prepended automatically
+  notes: string;
+  allTrailsUrl: string;
+  coverPhoto: Photo | null;
+  photos: Photo[];
 }
 
 export const mockHikeData: Hike[] = [
@@ -31,6 +31,7 @@ export const mockHikeData: Hike[] = [
     notes:
       "One of the best days I've had on a trail. Started at 5am to beat the crowds and caught alpenglow on the Black Tusk. The ridge itself is a narrow knife-edge with jaw-dropping views in every direction. Snow on the descent made trekking poles essential. Would not skip this one.",
     allTrailsUrl: "https://www.alltrails.com/trail/canada/british-columbia/panorama-ridge",
+    coverPhoto: null,
     photos: [],
   },
   {
@@ -69,7 +70,7 @@ export const mockHikeData: Hike[] = [
     trail: "Garibaldi Lake via Rubble Creek",
     date: "2025-09-06",
     rating: 5,
-    difficulty: 6,
+    difficulty: 6.5,
     distanceKm: 18.0,
     elevationGainM: 820,
     durationMinutes: 390,
@@ -150,7 +151,7 @@ export const mockHikeData: Hike[] = [
     trail: "Shannon Falls & Sea to Summit Connector",
     date: "2025-05-24",
     rating: 3.5,
-    difficulty: 4,
+    difficulty: 2.5,
     distanceKm: 7.4,
     elevationGainM: 260,
     durationMinutes: 165,
