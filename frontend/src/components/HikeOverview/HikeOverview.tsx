@@ -48,10 +48,10 @@ export default function HikeOverview({ hike, index, isExpanded }: HikeOverviewPr
             <p className="text-xs font-mono text-forest-600 mt-0.5">{formatDate(hike.date)}</p>
           </div>
           <svg
-            className={classnames("shrink-0 mt-1 transition-transform duration-200 stroke-forest-700", {
-              "rotate-180": isExpanded,
-              "rotate-0": !isExpanded,
-            })}
+            className={classnames(
+              "shrink-0 mt-1 transition-transform duration-200 stroke-forest-700",
+              isExpanded ? "rotate-180" : "rotate-0",
+            )}
             width="16"
             height="16"
             strokeWidth="1.5"

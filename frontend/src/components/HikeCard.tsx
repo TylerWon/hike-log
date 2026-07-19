@@ -13,10 +13,10 @@ interface HikeCardProps {
 export default function HikeCard({ hike, index, isExpanded, onClick }: HikeCardProps) {
   return (
     <article
-      className={classnames("border rounded-lg overflow-hidden transition-all duration-200", {
-        "bg-forest-850 border-forest-700": isExpanded,
-        "bg-forest-900 border-forest-800": !isExpanded,
-      })}
+      className={classnames(
+        "border rounded-lg overflow-hidden transition-all duration-200",
+        isExpanded ? "bg-forest-850 border-forest-700" : "bg-forest-900 border-forest-800",
+      )}
     >
       {/* Hike overview (always shown) */}
       <button onClick={onClick} className="w-full text-left cursor-pointer group/hike-card" aria-expanded={isExpanded}>
