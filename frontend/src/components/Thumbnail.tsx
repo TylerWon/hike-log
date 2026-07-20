@@ -1,7 +1,7 @@
 import { type Photo } from "../data/hikes";
 
 interface ThumbnailProps {
-  photo?: Photo;
+  photo: Photo | null;
   trail: string;
 }
 
