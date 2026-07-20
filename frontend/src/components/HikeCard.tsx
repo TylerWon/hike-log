@@ -19,7 +19,7 @@ export default function HikeCard({ hike, index, isExpanded, onClick }: HikeCardP
       )}
     >
       {/* Hike overview (always shown) */}
-      <button onClick={onClick} className="w-full text-left cursor-pointer group/hike-card" aria-expanded={isExpanded}>
+      <button aria-expanded={isExpanded} className="w-full text-left cursor-pointer group/hike-card" onClick={onClick}>
         <HikeOverview hike={hike} index={index} isExpanded={isExpanded} />
       </button>
 

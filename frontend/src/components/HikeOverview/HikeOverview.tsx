@@ -11,23 +11,6 @@ interface HikeOverviewProps {
   isExpanded: boolean;
 }
 
-function formatDate(iso: string): string {
-  const d = new Date(iso + "T12:00:00");
-  return d.toLocaleDateString("en-CA", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
-}
-
-function formatDuration(minutes: number): string {
-  const h = Math.floor(minutes / 60);
-  const m = minutes % 60;
-  if (h === 0) return `${m}m`;
-  if (m === 0) return `${h}h`;
-  return `${h}h ${m}m`;
-}
-
 export default function HikeOverview({ hike, index, isExpanded }: HikeOverviewProps) {
   return (
     <div className="flex gap-4 p-4">
@@ -52,12 +35,12 @@ export default function HikeOverview({ hike, index, isExpanded }: HikeOverviewPr
               "shrink-0 mt-1 transition-transform duration-200 stroke-forest-700",
               isExpanded ? "rotate-180" : "rotate-0",
             )}
-            width="16"
-            height="16"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            viewBox="0 0 16 16"
             fill="none"
+            height="16"
+            strokeLinecap="round"
+            strokeWidth="1.5"
+            viewBox="0 0 16 16"
+            width="16"
           >
             <path d="M4 6l4 4 4-4" />
           </svg>
@@ -71,13 +54,13 @@ export default function HikeOverview({ hike, index, isExpanded }: HikeOverviewPr
           </span>
           <span className="stat-value stat-container gap-1">
             <svg
-              width="10"
-              height="10"
-              viewBox="0 0 10 10"
               fill="none"
+              height="10"
               stroke="currentColor"
-              strokeWidth="1.5"
               strokeLinecap="round"
+              strokeWidth="1.5"
+              viewBox="0 0 10 10"
+              width="10"
             >
               <circle cx="5" cy="5" r="3.5" />
               <path d="M5 1.5v1M5 7.5v1M1.5 5h1M7.5 5h1" />
@@ -86,14 +69,14 @@ export default function HikeOverview({ hike, index, isExpanded }: HikeOverviewPr
           </span>
           <span className="stat-value stat-container gap-1">
             <svg
-              width="10"
-              height="10"
-              viewBox="0 0 10 10"
               fill="none"
+              height="10"
               stroke="currentColor"
-              strokeWidth="1.5"
               strokeLinecap="round"
               strokeLinejoin="round"
+              strokeWidth="1.5"
+              viewBox="0 0 10 10"
+              width="10"
             >
               <path d="M2 8L5 2l3 6" />
             </svg>
@@ -101,13 +84,13 @@ export default function HikeOverview({ hike, index, isExpanded }: HikeOverviewPr
           </span>
           <span className="stat-value stat-container gap-1">
             <svg
-              width="10"
-              height="10"
-              viewBox="0 0 10 10"
               fill="none"
+              height="10"
               stroke="currentColor"
-              strokeWidth="1.5"
               strokeLinecap="round"
+              strokeWidth="1.5"
+              viewBox="0 0 10 10"
+              width="10"
             >
               <circle cx="5" cy="5" r="3.5" />
               <path d="M5 3v2l1.5 1.5" />
@@ -118,4 +101,21 @@ export default function HikeOverview({ hike, index, isExpanded }: HikeOverviewPr
       </div>
     </div>
   );
+}
+
+function formatDate(iso: string): string {
+  const d = new Date(iso + "T12:00:00");
+  return d.toLocaleDateString("en-CA", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+function formatDuration(minutes: number): string {
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  if (h === 0) return `${m}m`;
+  if (m === 0) return `${h}h`;
+  return `${h}h ${m}m`;
 }

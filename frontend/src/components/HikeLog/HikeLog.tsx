@@ -5,15 +5,8 @@ import { mockHikeData } from "../../data/hikes";
 import HikeCard from "../HikeCard";
 import "./hike-log.css";
 
-function formatTotalDuration(minutes: number): string {
-  const h = Math.floor(minutes / 60);
-  const m = minutes % 60;
-  if (m === 0) return `${h}h`;
-  return `${h}h ${m}m`;
-}
-
 export default function HikeLog() {
-  const [expandedCardId, setExpandedCardId] = useState<string | null>(null);
+  const [expandedCardId, setExpandedCardId] = useState<null | string>(null);
 
   const hikes = [...mockHikeData].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
@@ -72,4 +65,11 @@ export default function HikeLog() {
       </main>
     </div>
   );
+}
+
+function formatTotalDuration(minutes: number): string {
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  if (m === 0) return `${h}h`;
+  return `${h}h ${m}m`;
 }

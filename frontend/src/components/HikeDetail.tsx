@@ -20,20 +20,20 @@ export default function HikeDetail({ hike, photos }: HikeDetailProps) {
         </div>
 
         <a
-          href={hike.allTrailsUrl}
-          target="_blank"
-          rel="noopener noreferrer"
           className="inline-flex items-center gap-1.5 text-xs font-mono text-sage-500 hover:text-sage-400 transition-colors border border-sage-500 rounded px-2.5 py-1 hover:border-sage-400"
+          href={hike.allTrailsUrl}
+          rel="noopener noreferrer"
+          target="_blank"
         >
           <svg
-            width="11"
-            height="11"
-            viewBox="0 0 11 11"
             fill="none"
+            height="11"
             stroke="currentColor"
-            strokeWidth="1.5"
             strokeLinecap="round"
             strokeLinejoin="round"
+            strokeWidth="1.5"
+            viewBox="0 0 11 11"
+            width="11"
           >
             <path d="M4.5 2H2.5A1 1 0 001.5 3v5.5A1 1 0 002.5 9.5H8a1 1 0 001-1V6.5" />
             <path d="M6.5 1.5H9.5v3M9.5 1.5L5 7" />
