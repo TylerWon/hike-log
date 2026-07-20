@@ -15,7 +15,7 @@ type Hike struct {
 	// The date of the hike.
 	Date datatypes.Date `json:"date"`
 
-	// Notes on the hike. Can be left blank.
+	// Notes on the hike.
 	Notes string `json:"notes"`
 
 	// How enjoyable the hike was out of 5. Half values allowed.

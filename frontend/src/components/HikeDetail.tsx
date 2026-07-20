@@ -42,12 +42,10 @@ export default function HikeDetail({ hike, photos }: HikeDetailProps) {
         </a>
       </div>
 
-      {hike.notes && (
-        <div>
-          <p className="field-label mb-2">Notes</p>
-          <p className="text-sm leading-relaxed text-cream-200">{hike.notes}</p>
-        </div>
-      )}
+      <div>
+        <p className="field-label mb-2">Notes</p>
+        <p className="text-sm leading-relaxed text-cream-200">{hike.notes}</p>
+      </div>
 
       {photos.length > 0 && (
         <div>
