@@ -10,26 +10,33 @@ export default function PhotoGallery({ photos }: PhotoGalleryProps) {
 
   if (photos.length === 0) return null;
 
-  const closeLightbox = () => setLightboxIndex(null);
-  const prev = () => setLightboxIndex((i) => (i !== null ? (i - 1 + photos.length) % photos.length : 0));
-  const next = () => setLightboxIndex((i) => (i !== null ? (i + 1) % photos.length : 0));
+  const closeLightbox = () => {
+    setLightboxIndex(null);
+  };
+
+  const showPrevPhoto = () => {
+    setLightboxIndex((currIdx) => (currIdx !== null ? (currIdx - 1 + photos.length) % photos.length : 0));
+  };
+
+  const showNextPhoto = () => {
+    setLightboxIndex((currIdx) => (currIdx !== null ? (currIdx + 1) % photos.length : 0));
+  };
 
   return (
     <>
       {/* Thumbnail strip */}
-      <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: "thin" }}>
+      <div className="flex gap-2 overflow-x-auto scrollbar-thin">
         {photos.map((photo, i) => (
           <button
             key={i}
             onClick={() => setLightboxIndex(i)}
-            className="flex-shrink-0 rounded overflow-hidden bg-forest-800 cursor-pointer group focus:outline-none focus:ring-2 focus:ring-sage-500"
-            style={{ width: 120, height: 80 }}
+            className="w-[120px] h-[80px] shrink-0 rounded overflow-hidden bg-forest-800 cursor-pointer group/photo"
             aria-label={photo.caption ?? `Photo ${i + 1}`}
           >
             <img
               src={photo.url}
               alt={photo.caption ?? `Photo ${i + 1}`}
-              className="w-full h-full object-cover transition-all duration-200 group-hover:scale-105 group-hover:brightness-110"
+              className="w-full h-full object-cover transition-all duration-200 group-hover/photo:scale-105 group-hover/photo:brightness-110"
               loading="lazy"
             />
           </button>
@@ -38,11 +45,7 @@ export default function PhotoGallery({ photos }: PhotoGalleryProps) {
 
       {/* Lightbox */}
       {lightboxIndex !== null && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center"
-          style={{ backgroundColor: "rgba(5, 8, 5, 0.95)" }}
-          onClick={closeLightbox}
-        >
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#050805]/95" onClick={closeLightbox}>
           {/* Close */}
           <button
             className="absolute top-4 right-4 text-forest-600 hover:text-cream-100 transition-colors p-2 focus:outline-none"
@@ -65,20 +68,18 @@ export default function PhotoGallery({ photos }: PhotoGalleryProps) {
           {/* Image */}
           <div
             className="relative flex flex-col items-center max-w-4xl w-full px-16"
-            onClick={(e) => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()} // Prevents lightbox from closing when image is clicked
           >
             <img
-              src={photos[lightboxIndex].url.replace(/w=\d+/, "w=1200").replace(/h=\d+/, "h=800")}
+              src={photos[lightboxIndex].url.replace(/w=\d+/, "w=1200").replace(/h=\d+/, "h=800")} // Request desired image width and height to save bandwidth
               alt={photos[lightboxIndex].caption ?? `Photo ${lightboxIndex + 1}`}
-              className="max-h-[75vh] w-auto object-contain rounded"
-              style={{ maxWidth: "100%" }}
+              className="max-h-[75vh] max-w-full w-auto object-contain rounded"
             />
             {photos[lightboxIndex].caption && (
               <p className="mt-3 text-center text-sm font-mono text-forest-600 max-w-md">
                 {photos[lightboxIndex].caption}
               </p>
             )}
-            {/* Counter */}
             <p className="mt-1 text-xs font-mono text-forest-700">
               {lightboxIndex + 1} / {photos.length}
             </p>
@@ -91,7 +92,7 @@ export default function PhotoGallery({ photos }: PhotoGalleryProps) {
                 className="absolute left-4 top-1/2 -translate-y-1/2 text-forest-600 hover:text-cream-100 transition-colors p-3 focus:outline-none"
                 onClick={(e) => {
                   e.stopPropagation();
-                  prev();
+                  showPrevPhoto();
                 }}
                 aria-label="Previous photo"
               >
@@ -112,7 +113,7 @@ export default function PhotoGallery({ photos }: PhotoGalleryProps) {
                 className="absolute right-4 top-1/2 -translate-y-1/2 text-forest-600 hover:text-cream-100 transition-colors p-3 focus:outline-none"
                 onClick={(e) => {
                   e.stopPropagation();
-                  next();
+                  showNextPhoto();
                 }}
                 aria-label="Next photo"
               >
