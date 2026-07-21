@@ -102,52 +102,6 @@ func (suite *HandlerTestSuite) TestListHike_ReturnsHikes() {
 	suite.Equal(hike2, response[1])
 }
 
-func (suite *HandlerTestSuite) TestRetrieveHike_Success() {
-	photos := []models.Photo{
-		{SrcUrl: "https://example.com/photo-1.jpg"},
-		{SrcUrl: "https://example.com/photo-2.jpg", Caption: "The peak"},
-	}
-	hike := models.Hike{
-		TrailName:     "Trail 2",
-		Date:          datatypes.Date(time.Date(2026, 1, 16, 0, 0, 0, 0, time.UTC)),
-		Notes:         "Difficult hike",
-		Rating:        3,
-		Difficulty:    9.5,
-		Distance:      21.2,
-		ElevationGain: 1587,
-		Duration:      127,
-		AllTrailsUrl:  "https://www.alltrails.com/",
-		Photos:        photos,
-	}
-
-	result := suite.db.Create(&hike)
-	if result.Error != nil {
-		suite.T().Fatal("Failed to create hike: ", result.Error)
-	}
-
-	req := httptest.NewRequest(http.MethodGet, "/api/v1/hikes/1", nil)
-	rec := httptest.NewRecorder()
-	suite.router.ServeHTTP(rec, req)
-
-	suite.Equal(http.StatusOK, rec.Code)
-
-	var response models.Hike
-	err := json.Unmarshal(rec.Body.Bytes(), &response)
-	if err != nil {
-		suite.T().Fatal("Failed to decode response: ", err)
-	}
-
-	suite.Equal(hike, response)
-}
-
-func (suite *HandlerTestSuite) TestRetrieveHike_NotFound() {
-	req := httptest.NewRequest(http.MethodGet, "/api/v1/hikes/999", nil)
-	rec := httptest.NewRecorder()
-	suite.router.ServeHTTP(rec, req)
-
-	suite.Equal(http.StatusNotFound, rec.Code)
-}
-
 func TestHandlerTestSuite(t *testing.T) {
 	suite.Run(t, new(HandlerTestSuite))
 }

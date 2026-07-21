@@ -1,8 +1,6 @@
 package handler
 
 import (
-	"errors"
-	"fmt"
 	"log"
 	"net/http"
 
@@ -38,23 +36,4 @@ func (h *Handler) ListHike(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, hikes)
-}
-
-// Returns the Hike with an ID matching the id path parameter. If no such Hike exists, a 404 error is returned instead.
-func (h *Handler) RetrieveHike(c *gin.Context) {
-	hikeId := c.Param("id")
-	var hike models.Hike
-
-	result := h.db.Preload("Photos").First(&hike, hikeId)
-	if result.Error != nil {
-		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-			c.JSON(http.StatusNotFound, gin.H{"error": fmt.Sprintf("Hike %v not found", hikeId)})
-			return
-		}
-		log.Printf("Failed to retrieve hike %v: %v", hikeId, result.Error)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": http.StatusText(http.StatusInternalServerError)})
-		return
-	}
-
-	c.JSON(http.StatusOK, hike)
 }

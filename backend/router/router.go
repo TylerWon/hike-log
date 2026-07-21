@@ -15,7 +15,6 @@ func New(handler *handler.Handler) *gin.Engine {
 		{
 			hikes := v1.Group("/hikes")
 			hikes.GET("", handler.ListHike)
-			hikes.GET("/:id", handler.RetrieveHike)
 		}
 	}
 
