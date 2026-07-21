@@ -59,6 +59,7 @@ func (suite *HandlerTestSuite) TestListHike_ReturnsHikes() {
 		ElevationGain: 1200,
 		AllTrailsUrl:  "https://www.alltrails.com/",
 		Duration:      60,
+		Photos: 	   []models.Photo{},
 	}
 	hikes = append(hikes, &hike1)
 
@@ -76,7 +77,6 @@ func (suite *HandlerTestSuite) TestListHike_ReturnsHikes() {
 		Duration:      127,
 		AllTrailsUrl:  "https://www.alltrails.com/",
 		Photos:        photos,
-		CoverPhoto:    &photos[0],
 	}
 	hikes = append(hikes, &hike2)
 
@@ -99,7 +99,6 @@ func (suite *HandlerTestSuite) TestListHike_ReturnsHikes() {
 
 	suite.Len(response, 2)
 	suite.Equal(hike1, response[0])
-	hike2.Photos = nil // Set Photos field to nil since it's excluded from the response by the List endpoint
 	suite.Equal(hike2, response[1])
 }
 
@@ -119,7 +118,6 @@ func (suite *HandlerTestSuite) TestRetrieveHike_Success() {
 		Duration:      127,
 		AllTrailsUrl:  "https://www.alltrails.com/",
 		Photos:        photos,
-		CoverPhoto:    &photos[0],
 	}
 
 	result := suite.db.Create(&hike)
@@ -139,7 +137,6 @@ func (suite *HandlerTestSuite) TestRetrieveHike_Success() {
 		suite.T().Fatal("Failed to decode response: ", err)
 	}
 
-	hike.CoverPhoto = nil // Set CoverPhoto field to nil since it's excluded from the response by the Retrieve endpoint
 	suite.Equal(hike, response)
 }
 
