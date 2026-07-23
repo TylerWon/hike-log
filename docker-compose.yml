@@ -7,12 +7,8 @@ services:
       - "8080:8080"
     volumes:
       - ./backend:/app
-    environment:
-      - DB_HOST=${DB_HOST}
-      - DB_PORT=${DB_PORT}
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_NAME=${DB_NAME}
+    env_file:
+      ./backend/.env.local
     healthcheck:
       test: ["CMD-SHELL", "wget -O - http://localhost:8080/health"]
       interval: 10s
@@ -32,6 +28,8 @@ services:
     volumes:
       - ./frontend:/app
       - node_modules:/app/node_modules
+    env_file:
+      ./frontend/.env.local
     depends_on:
       backend:
         condition: service_healthy
@@ -42,13 +40,13 @@ services:
     ports:
       - "5432:5432"
     environment:
-      - POSTGRES_USER=${DB_USER}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
-      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=hike_log
     volumes:
       - pg_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d hike_log"]
       interval: 10s
       timeout: 5s
       retries: 5
