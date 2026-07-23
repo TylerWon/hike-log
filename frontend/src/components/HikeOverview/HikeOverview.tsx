@@ -1,5 +1,6 @@
 import "../../assets/styles/text.css";
-import { type Hike } from "../../data/hikes";
+import type { Hike } from "../../schemas/hike";
+
 import { classnames } from "../../utils/classnames";
 import StarRating from "../StarRating";
 import Thumbnail from "../Thumbnail";
@@ -14,7 +15,7 @@ interface HikeOverviewProps {
 export default function HikeOverview({ hike, index, isExpanded }: HikeOverviewProps) {
   return (
     <div className="flex gap-4 p-4">
-      <Thumbnail photo={hike.coverPhoto} trail={hike.trail} />
+      <Thumbnail photo={hike.photos.length > 0 ? hike.photos[0] : null} trailName={hike.trailName} />
 
       <div className="flex-1 min-w-0">
         {/* Trail name, date, chevron */}
@@ -25,7 +26,7 @@ export default function HikeOverview({ hike, index, isExpanded }: HikeOverviewPr
                 #{String(index).padStart(2, "0")}
               </span>
               <span className="block text-base font-semibold font-serif leading-snug text-cream-100 truncate">
-                {hike.trail}
+                {hike.trailName}
               </span>
             </div>
             <p className="text-xs font-mono text-forest-600 mt-0.5">{formatDate(hike.date)}</p>
@@ -65,7 +66,7 @@ export default function HikeOverview({ hike, index, isExpanded }: HikeOverviewPr
               <circle cx="5" cy="5" r="3.5" />
               <path d="M5 1.5v1M5 7.5v1M1.5 5h1M7.5 5h1" />
             </svg>
-            {hike.distanceKm} km
+            {hike.distance} km
           </span>
           <span className="stat-value stat-container gap-1">
             <svg
@@ -80,7 +81,7 @@ export default function HikeOverview({ hike, index, isExpanded }: HikeOverviewPr
             >
               <path d="M2 8L5 2l3 6" />
             </svg>
-            {hike.elevationGainM} m
+            {hike.elevationGain} m
           </span>
           <span className="stat-value stat-container gap-1">
             <svg
@@ -95,7 +96,7 @@ export default function HikeOverview({ hike, index, isExpanded }: HikeOverviewPr
               <circle cx="5" cy="5" r="3.5" />
               <path d="M5 3v2l1.5 1.5" />
             </svg>
-            {formatDuration(hike.durationMinutes)}
+            {formatDuration(Number(hike.duration))}
           </span>
         </div>
       </div>

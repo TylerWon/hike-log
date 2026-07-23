@@ -1,4 +1,5 @@
-import { type Hike } from "../data/hikes";
+import type { Hike } from "../schemas/hike";
+
 import { classnames } from "../utils/classnames";
 import HikeDetail from "./HikeDetail";
 import HikeOverview from "./HikeOverview/HikeOverview";

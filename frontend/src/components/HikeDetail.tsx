@@ -1,5 +1,7 @@
 import "../assets/styles/text.css";
-import { type Hike, type Photo } from "../data/hikes";
+import type { Hike } from "../schemas/hike";
+import type { Photo } from "../schemas/photo";
+
 import DifficultyBar from "./DifficultyBar";
 import PhotoGallery from "./PhotoGallery";
 

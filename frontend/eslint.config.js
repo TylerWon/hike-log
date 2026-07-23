@@ -1,4 +1,5 @@
 import js from "@eslint/js";
+import pluginQuery from "@tanstack/eslint-plugin-query";
 import eslintConfigPrettier from "eslint-config-prettier/flat";
 import perfectionist from "eslint-plugin-perfectionist";
 import reactHooks from "eslint-plugin-react-hooks";
@@ -22,5 +23,6 @@ export default defineConfig([
     },
   },
   perfectionist.configs["recommended-natural"],
+  ...pluginQuery.configs["flat/recommended"],
   eslintConfigPrettier, // Should be last config applied
 ]);

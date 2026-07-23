@@ -1,19 +1,19 @@
-import { type Photo } from "../data/hikes";
+import type { Photo } from "../schemas/photo";
 
 interface ThumbnailProps {
   photo: null | Photo;
-  trail: string;
+  trailName: string;
 }
 
-export default function Thumbnail({ photo, trail }: ThumbnailProps) {
+export default function Thumbnail({ photo, trailName }: ThumbnailProps) {
   if (photo) {
     return (
       <div className="shrink-0 rounded overflow-hidden bg-forest-800 w-[96px] h-[72px]">
         <img
-          alt={photo.caption ?? `${trail} cover photo`}
+          alt={photo.caption ?? `${trailName} cover photo`}
           className="w-full h-full object-cover transition-transform duration-300 group-hover/hike-card:scale-105 group-hover/hike-card:brightness-110"
           loading="lazy"
-          src={photo.url}
+          src={photo.srcUrl}
         />
       </div>
     );

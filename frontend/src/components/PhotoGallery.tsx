@@ -1,6 +1,7 @@
 import { useState } from "react";
 
-import { type Photo } from "../data/hikes";
+import type { Photo } from "../schemas/photo";
+
 
 interface PhotoGalleryProps {
   photos: Photo[];
@@ -38,7 +39,7 @@ export default function PhotoGallery({ photos }: PhotoGalleryProps) {
               alt={photo.caption ?? `Photo ${i + 1}`}
               className="w-full h-full object-cover transition-all duration-200 group-hover/photo:scale-105 group-hover/photo:brightness-110"
               loading="lazy"
-              src={photo.url}
+              src={photo.srcUrl}
             />
           </button>
         ))}
@@ -74,7 +75,7 @@ export default function PhotoGallery({ photos }: PhotoGalleryProps) {
             <img
               alt={photos[lightboxIndex].caption ?? `Photo ${lightboxIndex + 1}`}
               className="max-h-[75vh] max-w-full w-auto object-contain rounded"
-              src={photos[lightboxIndex].url.replace(/w=\d+/, "w=1200").replace(/h=\d+/, "h=800")} // Request desired image width and height to save bandwidth
+              src={photos[lightboxIndex].srcUrl.replace(/w=\d+/, "w=1200").replace(/h=\d+/, "h=800")} // Request desired image width and height to save bandwidth
             />
             {photos[lightboxIndex].caption && (
               <p className="mt-3 text-center text-sm font-mono text-forest-600 max-w-md">

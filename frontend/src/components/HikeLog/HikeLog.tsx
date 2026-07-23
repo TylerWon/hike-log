@@ -1,20 +1,33 @@
-import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 
 import "../../assets/styles/text.css";
-import { mockHikeData } from "../../data/hikes";
-import HikeCard from "../HikeCard";
+
+import { useState } from "react";
+
 import "./hike-log.css";
+import { fetchHikes } from "../../api/hikes";
+import HikeCard from "../HikeCard";
 
 export default function HikeLog() {
-  const [expandedCardId, setExpandedCardId] = useState<null | string>(null);
+  const [expandedCardId, setExpandedCardId] = useState<bigint | null>(null);
 
-  const hikes = [...mockHikeData].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  const hikes = useQuery({
+    queryFn: fetchHikes,
+    queryKey: ["hikes"],
+  });
 
-  const totalDistanceKm = hikes.reduce((sum, h) => sum + h.distanceKm, 0);
-  const totalElevationM = hikes.reduce((sum, h) => sum + h.elevationGainM, 0);
-  const totalMinutes = hikes.reduce((sum, h) => sum + h.durationMinutes, 0);
+  if (hikes.isPending) return "Loading...";
 
-  const handleCardClick = (id: string) => {
+  if (hikes.isError) {
+    console.error(`Error while loading hikes: ${hikes.error}`);
+    return "Something went wrong. Please try again later.";
+  }
+
+  const totalDistanceKm = hikes.data.reduce<number>((sum, h) => sum + h.distance, 0);
+  const totalElevationM = hikes.data.reduce<bigint>((sum, h) => sum + h.elevationGain, BigInt(0));
+  const totalMinutes = hikes.data.reduce<bigint>((sum, h) => sum + h.duration, BigInt(0));
+
+  const handleCardClick = (id: bigint) => {
     setExpandedCardId((prev) => (prev === id ? null : id));
   };
 
@@ -27,7 +40,7 @@ export default function HikeLog() {
         <div className="flex flex-wrap gap-6">
           <div>
             <p className="field-label mb-1">Hikes</p>
-            <p className="overall-stat-value">{hikes.length}</p>
+            <p className="overall-stat-value">{hikes.data.length}</p>
           </div>
           <div className="overall-stat-divider" />
           <div>
@@ -42,7 +55,7 @@ export default function HikeLog() {
           <div className="overall-stat-divider" />
           <div>
             <p className="field-label mb-1">Time</p>
-            <p className="overall-stat-value">{formatTotalDuration(totalMinutes)}</p>
+            <p className="overall-stat-value">{formatTotalDuration(Number(totalMinutes))}</p>
           </div>
         </div>
 
@@ -51,7 +64,7 @@ export default function HikeLog() {
 
       <main className="max-w-3xl mx-auto px-6 pb-24">
         <ol className="flex flex-col gap-3">
-          {hikes.map((hike, index) => (
+          {hikes.data.map((hike, index) => (
             <li key={hike.id}>
               <HikeCard
                 hike={hike}
