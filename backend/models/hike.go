@@ -10,9 +10,9 @@ type Hike struct {
 	ID uint `json:"id"`
 
 	// The name of the trail that was hiked.
-	TrailName string `json:"trail"`
+	TrailName string `json:"trailName"`
 
-	// The date of the hike.
+	// The date of the hike. YYYY-MM-DD format.
 	Date datatypes.Date `json:"date"`
 
 	// Notes on the hike.
