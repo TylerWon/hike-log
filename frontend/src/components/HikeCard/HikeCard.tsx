@@ -33,7 +33,7 @@ export default function HikeCard({ hike, index, isExpanded, onClick }: HikeCardP
           transition: "grid-template-rows 0.3s ease",
         }}
       >
-        <div className="overflow-hidden">
+        <div className="overflow-hidden" {...(!isExpanded && { inert: true })}>
           <HikeDetail hike={hike} photos={hike.photos} />
         </div>
       </div>
