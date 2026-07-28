@@ -1,0 +1,19 @@
+@reference "../../index.css";
+
+@keyframes shimmer {
+  0% { background-position: -600px 0; }
+  100% { background-position: 600px 0; }
+}
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--color-forest-900) 0%,
+    var(--color-forest-850) 40%,
+    var(--color-forest-800) 50%,
+    var(--color-forest-850) 60%,
+    var(--color-forest-900) 100%
+  );
+  background-size: 1200px 100%;
+  animation: shimmer 1.8s ease-in-out infinite;
+}

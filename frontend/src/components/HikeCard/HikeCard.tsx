@@ -1,8 +1,8 @@
-import type { Hike } from "../schemas/hike";
+import type { Hike } from "../../schemas/hike";
 
-import { classnames } from "../utils/classnames";
-import HikeDetail from "./HikeDetail";
-import HikeOverview from "./HikeOverview/HikeOverview";
+import { classnames } from "../../utils/classnames";
+import HikeDetail from "../HikeDetail";
+import HikeOverview from "../HikeOverview/HikeOverview";
 
 interface HikeCardProps {
   hike: Hike;
