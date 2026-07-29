@@ -5,16 +5,14 @@ import { Fragment } from "react/jsx-runtime";
 
 interface HikeLogContentProps {
   hikeCards: React.ReactElement[];
-  overallStatValues: React.ReactElement[];
+  overallStats: OverallStat[];
+}
+interface OverallStat {
+  label: string;
+  value: React.ReactElement;
 }
 
-const OVERALL_STAT_LABELS = ["Hikes", "Distance", "Elevation", "Time"];
-
-export default function HikeLogContent({ hikeCards, overallStatValues }: HikeLogContentProps) {
-  if (overallStatValues.length !== OVERALL_STAT_LABELS.length) {
-    throw new Error("Unexpected number of overall stat values provided");
-  }
-
+export default function HikeLogContent({ hikeCards, overallStats }: HikeLogContentProps) {
   return (
     <div className="min-h-screen bg-forest-900 text-cream-100">
       <header className="max-w-3xl mx-auto px-6 pt-16 pb-10">
@@ -22,13 +20,13 @@ export default function HikeLogContent({ hikeCards, overallStatValues }: HikeLog
         <h1 className="text-5xl font-bold font-serif leading-tight mb-6">Hiking Log</h1>
 
         <div className="flex flex-wrap gap-6">
-          {OVERALL_STAT_LABELS.map((label, i) => (
+          {overallStats.map((stat, i) => (
             <Fragment key={i}>
               <div>
-                <p className="field-label mb-1">{label}</p>
-                {overallStatValues[i]}
+                <p className="field-label mb-1">{stat.label}</p>
+                {stat.value}
               </div>
-              {i < OVERALL_STAT_LABELS.length - 1 && <div className="overall-stat-divider" />}
+              {i < overallStats.length - 1 && <div className="overall-stat-divider" />}
             </Fragment>
           ))}
         </div>

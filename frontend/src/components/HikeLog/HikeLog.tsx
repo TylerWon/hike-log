@@ -20,11 +20,11 @@ export default function HikeLog() {
         hikeCards={Array.from({ length: 5 }).map((_, i) => (
           <HikeCardSkeleton key={i} />
         ))}
-        overallStatValues={[
-          <div className="shimmer rounded h-7 w-8 mt-0.5" />,
-          <div className="shimmer rounded h-7 w-20 mt-0.5" />,
-          <div className="shimmer rounded h-7 w-24 mt-0.5" />,
-          <div className="shimmer rounded h-7 w-16 mt-0.5" />,
+        overallStats={[
+          { label: "Hikes", value: <div className="shimmer rounded h-7 w-8" /> },
+          { label: "Distance", value: <div className="shimmer rounded h-7 w-20" /> },
+          { label: "Elevation", value: <div className="shimmer rounded h-7 w-24" /> },
+          { label: "Time", value: <div className="shimmer rounded h-7 w-16" /> },
         ]}
       />
     );
@@ -61,11 +61,11 @@ export default function HikeLog() {
           onClick={() => handleCardClick(hike.id)}
         />
       ))}
-      overallStatValues={[
-        <p className="overall-stat-value">{hikes.data.length}</p>,
-        <p className="overall-stat-value">{totalDistanceKm.toFixed(1)} km</p>,
-        <p className="overall-stat-value">{totalElevationM.toLocaleString()} m</p>,
-        <p className="overall-stat-value">{formatTotalDuration(Number(totalMinutes))}</p>,
+      overallStats={[
+        { label: "Hikes", value: <p className="overall-stat-value">{hikes.data.length}</p> },
+        { label: "Distance", value: <p className="overall-stat-value">{totalDistanceKm.toFixed(1)} km</p> },
+        { label: "Elevation", value: <p className="overall-stat-value">{totalElevationM.toLocaleString()} m</p> },
+        { label: "Time", value: <p className="overall-stat-value">{formatTotalDuration(Number(totalMinutes))}</p> },
       ]}
     />
   );
