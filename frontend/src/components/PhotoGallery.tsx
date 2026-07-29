@@ -2,7 +2,6 @@ import { useState } from "react";
 
 import type { Photo } from "../schemas/photo";
 
-
 interface PhotoGalleryProps {
   photos: Photo[];
 }

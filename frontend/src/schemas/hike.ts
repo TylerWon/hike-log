@@ -13,9 +13,9 @@ const HikeSchema = z.object({
   notes: z.string(),
   photos: PhotoListSchema,
   rating: z.number().min(0).max(5).multipleOf(0.5),
-  trailName: z.string()
+  trailName: z.string(),
 });
 
-export const HikeListSchema = z.array(HikeSchema)
+export const HikeListSchema = z.array(HikeSchema);
 
-export type Hike = z.infer<typeof HikeSchema>
+export type Hike = z.infer<typeof HikeSchema>;
