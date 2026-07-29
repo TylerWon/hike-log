@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 
-import { fetchHikes } from "../../api/hikes";
-import HikeCard from "../HikeCard/HikeCard";
-import HikeCardSkeleton from "../HikeCard/HikeCardSkeleton";
-import HikeLogContent from "./HikeLogContent";
+import { fetchHikes } from "../api/hikes";
+import HikeCard from "./HikeCard";
+import HikeCardSkeleton from "./HikeCardSkeleton";
+import HikeLogContent from "./HikeLogContent/HikeLogContent";
 import HikeLogError from "./HikeLogError";
 
 export default function HikeLog() {

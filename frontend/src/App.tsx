@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
-import HikeLog from "./components/HikeLog/HikeLog";
+import HikeLog from "./components/HikeLog";
 
 const queryClient = new QueryClient();
 
