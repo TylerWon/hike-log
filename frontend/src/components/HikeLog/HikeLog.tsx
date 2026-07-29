@@ -5,6 +5,7 @@ import { fetchHikes } from "../../api/hikes";
 import HikeCard from "../HikeCard/HikeCard";
 import HikeCardSkeleton from "../HikeCard/HikeCardSkeleton";
 import HikeLogContent from "./HikeLogContent";
+import HikeLogError from "./HikeLogError";
 
 export default function HikeLog() {
   const [expandedCardId, setExpandedCardId] = useState<bigint | null>(null);
@@ -12,6 +13,7 @@ export default function HikeLog() {
   const hikes = useQuery({
     queryFn: fetchHikes,
     queryKey: ["hikes"],
+    refetchOnWindowFocus: false,
   });
 
   if (hikes.isPending) {
@@ -31,8 +33,7 @@ export default function HikeLog() {
   }
 
   if (hikes.isError) {
-    console.error(`Error while loading hikes: ${hikes.error}`);
-    return "Something went wrong. Please try again later.";
+    return <HikeLogError />;
   }
 
   const totalDistanceKm = hikes.data.reduce<number>((sum, h) => sum + h.distance, 0);
