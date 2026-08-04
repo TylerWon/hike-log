@@ -1,9 +1,13 @@
-FROM node:26-alpine
+# Use Debian-based image for Playwright
+FROM node:26-bookworm-slim
 
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm install
+RUN npm ci
+
+# Download chromium browser for Playwright. Playwright is used by Vitest Browser Mode for testing
+RUN npx playwright install --with-deps chromium
 
 COPY . .
 
