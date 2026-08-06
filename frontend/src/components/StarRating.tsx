@@ -1,16 +1,27 @@
 interface StarRatingProps {
-  rating: number; // 0–5, 0.5 steps
+  rating: number;
 }
 
 export default function StarRating({ rating }: StarRatingProps) {
+  // Clamp to [0, 5] and snap to the nearest 0.5
+  const clampedRating = Math.min(Math.max(Math.round(rating * 2) / 2, 0), 5);
+
   return (
-    <span aria-label={`${rating} out of 5 stars`} className="inline-flex items-center gap-0.5" role="img">
+    <span aria-label={`${clampedRating} out of 5 stars`} className="inline-flex items-center gap-0.5" role="img">
       {Array.from({ length: 5 }).map((_, i) => {
-        const fill = Math.min(Math.max(rating - i, 0), 1); // 0, 0.5, or 1
-        const id = `star-clip-${i}-${rating}`;
+        const fill = Math.min(Math.max(clampedRating - i, 0), 1); // 0, 0.5, or 1
+        const id = `star-${i}-${clampedRating}`;
 
         return (
-          <svg fill="none" height="12" key={i} viewBox="0 0 12 12" width="12" xmlns="http://www.w3.org/2000/svg">
+          <svg
+            aria-label={fill === 1 ? "Filled star" : fill === 0.5 ? "Half star" : "Empty star"}
+            fill="none"
+            height="12"
+            key={i}
+            role="img"
+            viewBox="0 0 12 12"
+            width="12"
+          >
             {/* clipPath controls how much of the filled star is shown (either all, half, or none) */}
             <defs>
               <clipPath id={id}>
