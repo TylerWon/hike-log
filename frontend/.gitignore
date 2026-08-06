@@ -21,3 +21,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Vitest
+__screenshots__/
+.vitest-attachments
