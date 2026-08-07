@@ -153,6 +153,6 @@ describe("PhotoGallery", () => {
     await clickCloseButtonInLightbox(screen);
 
     const photo = screen.getByRole("img", { exact: true, name: `Photo 1 lightbox` });
-    await expect.element(photo).not.toBeInTheDocument()
+    await expect.element(photo).not.toBeInTheDocument();
   });
 });

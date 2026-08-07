@@ -8,10 +8,10 @@ import Thumbnail from "../../components/Thumbnail";
 describe("Thumbnail", () => {
   test("displays placeholder svg when photo is not provided", async () => {
     const screen = await render(<Thumbnail photo={null} trailName="Grouse Grind" />);
-    
+
     const svg = screen.getByRole("img", { exact: true, name: "Grouse Grind thumbnail" });
-    await expect.element(svg).not.toHaveAttribute("src")
-  })
+    await expect.element(svg).not.toHaveAttribute("src");
+  });
 
   test("displays image when photo is provided", async () => {
     const photo: Photo = {
@@ -25,4 +25,4 @@ describe("Thumbnail", () => {
     const image = screen.getByRole("img", { exact: true, name: "Grouse Grind thumbnail" });
     await expect.element(image).toHaveAttribute("src", photo.srcUrl);
   });
-})
+});
