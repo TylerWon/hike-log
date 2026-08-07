@@ -9,7 +9,8 @@
     "format": "prettier . --write",
     "lint": "eslint . --fix",
     "preview": "vite preview",
-    "test": "vitest"
+    "test:watch": "vitest",
+    "test:once": "vitest run"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.101.4",

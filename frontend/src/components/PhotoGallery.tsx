@@ -25,17 +25,17 @@ export default function PhotoGallery({ photos }: PhotoGalleryProps) {
 
   return (
     <>
-      {/* Thumbnail strip */}
+      {/* Gallery */}
       <div className="flex gap-2 overflow-x-auto scrollbar-thin">
         {photos.map((photo, i) => (
           <button
-            aria-label={photo.caption ?? `Photo ${i + 1}`}
+            aria-label={`Photo ${i + 1} button`}
             className="w-[120px] h-[80px] shrink-0 rounded overflow-hidden bg-forest-800 cursor-pointer group/photo"
             key={i}
             onClick={() => setLightboxIndex(i)}
           >
             <img
-              alt={photo.caption ?? `Photo ${i + 1}`}
+              alt={`Photo ${i + 1} gallery`}
               className="w-full h-full object-cover transition-all duration-200 group-hover/photo:scale-105 group-hover/photo:brightness-110"
               loading="lazy"
               src={photo.srcUrl}
@@ -44,12 +44,12 @@ export default function PhotoGallery({ photos }: PhotoGalleryProps) {
         ))}
       </div>
 
-      {/* Lightbox */}
+      {/* Lightbox (shown when a photo is clicked) */}
       {lightboxIndex !== null && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#050805]/95" onClick={closeLightbox}>
           {/* Close */}
           <button
-            aria-label="Close"
+            aria-label="Close button"
             className="absolute top-4 right-4 text-forest-600 hover:text-cream-100 transition-colors p-2 focus:outline-none"
             onClick={closeLightbox}
           >
@@ -72,7 +72,7 @@ export default function PhotoGallery({ photos }: PhotoGalleryProps) {
             onClick={(e) => e.stopPropagation()} // Prevents lightbox from closing when image is clicked
           >
             <img
-              alt={photos[lightboxIndex].caption ?? `Photo ${lightboxIndex + 1}`}
+              alt={`Photo ${lightboxIndex + 1} lightbox`}
               className="max-h-[75vh] max-w-full w-auto object-contain rounded"
               src={photos[lightboxIndex].srcUrl.replace(/w=\d+/, "w=1200").replace(/h=\d+/, "h=800")} // Request desired image width and height to save bandwidth
             />
@@ -90,7 +90,7 @@ export default function PhotoGallery({ photos }: PhotoGalleryProps) {
           {photos.length > 1 && (
             <>
               <button
-                aria-label="Previous photo"
+                aria-label="Previous photo button"
                 className="absolute left-4 top-1/2 -translate-y-1/2 text-forest-600 hover:text-cream-100 transition-colors p-3 focus:outline-none"
                 onClick={(e) => {
                   e.stopPropagation();
@@ -111,7 +111,7 @@ export default function PhotoGallery({ photos }: PhotoGalleryProps) {
                 </svg>
               </button>
               <button
-                aria-label="Next photo"
+                aria-label="Next photo button"
                 className="absolute right-4 top-1/2 -translate-y-1/2 text-forest-600 hover:text-cream-100 transition-colors p-3 focus:outline-none"
                 onClick={(e) => {
                   e.stopPropagation();
