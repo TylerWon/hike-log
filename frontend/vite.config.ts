@@ -5,11 +5,10 @@ import react, { reactCompilerPreset } from "@vitejs/plugin-react";
 import { playwright } from "@vitest/browser-playwright";
 import { defineConfig } from "vite";
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), babel({ presets: [reactCompilerPreset()] }), tailwindcss()],
   server: {
-    // Settings for dev server to work with Docker Compose
+    // Settings for Vite dev server to work with Docker Compose
     host: true,
     port: 5173,
     watch: {
@@ -24,5 +23,7 @@ export default defineConfig({
       instances: [{ browser: "chromium" }],
       provider: playwright(),
     },
+    restoreMocks: true,
+    unstubGlobals: true,
   },
 });
