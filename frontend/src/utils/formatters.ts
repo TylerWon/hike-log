@@ -1,5 +1,5 @@
 /**
- * Takes an ISO date string and outputs it as "[month] [day], [year]" (ex. "Jun 26, 2026").
+ * Takes an ISO date string (i.e. YYYY-MM-DD) and outputs it as "[month] [day], [year]" (ex. "Jun 26, 2026").
  */
 export function formatDate(date: string): string {
   const d = new Date(date + "T12:00:00");
