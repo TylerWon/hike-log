@@ -16,14 +16,29 @@ export default defineConfig({
     },
   },
   test: {
-    // Vitest Browser Mode settings
-    browser: {
-      enabled: true,
-      headless: true,
-      instances: [{ browser: "chromium" }],
-      provider: playwright(),
-    },
-    // Vitest settings
+    // Vitest projects - allows tests to be run in different environments
+    projects: [
+      {
+        test: {
+          environment: "node",
+          include: ["src/tests/**/*.test.ts"],
+          name: "Unit Tests",
+        },
+      },
+      {
+        test: {
+          browser: {
+            enabled: true,
+            headless: true,
+            instances: [{ browser: "chromium" }],
+            provider: playwright(),
+          },
+          include: ["src/tests/**/*.test.tsx"],
+          name: "Component Tests",
+        },
+      },
+    ],
+    // Vitest settings (applies to all projects)
     restoreMocks: true,
     unstubGlobals: true,
   },
