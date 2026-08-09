@@ -23,6 +23,7 @@ export default defineConfig({
       instances: [{ browser: "chromium" }],
       provider: playwright(),
     },
+    // Vitest settings
     restoreMocks: true,
     unstubGlobals: true,
   },

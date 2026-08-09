@@ -25,7 +25,7 @@ const PHOTOS: Photo[] = [
  */
 async function checkGallery(screen: RenderResult, photos: Photo[]) {
   const gallery = screen.getByRole("img", { name: /Photo \d+ gallery/ });
-  expect(gallery.length).toBe(photos.length);
+  expect(gallery.length).toEqual(photos.length);
 
   for (let i: number = 0; i < gallery.length; i++) {
     const photo = gallery.nth(i);

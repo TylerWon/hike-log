@@ -8,13 +8,13 @@ import DifficultyBar from "../../components/DifficultyBar";
  */
 function checkBars(screen: RenderResult, filledCount: number, halfCount: number, emptyCount: number) {
   const filledBars = screen.getByRole("img", { exact: true, name: "Filled bar" });
-  expect(filledBars.length).toBe(filledCount);
+  expect(filledBars.length).toEqual(filledCount);
 
   const halfBars = screen.getByRole("img", { exact: true, name: "Half bar" });
-  expect(halfBars.length).toBe(halfCount);
+  expect(halfBars.length).toEqual(halfCount);
 
   const emptyBars = screen.getByRole("img", { exact: true, name: "Empty bar" });
-  expect(emptyBars.length).toBe(emptyCount);
+  expect(emptyBars.length).toEqual(emptyCount);
 }
 
 describe("DifficultyBar", () => {

@@ -8,13 +8,13 @@ import StarRating from "../../components/StarRating";
  */
 function checkStars(screen: RenderResult, filledCount: number, halfCount: number, emptyCount: number) {
   const filledStars = screen.getByRole("img", { exact: true, name: "Filled star" });
-  expect(filledStars.length).toBe(filledCount);
+  expect(filledStars.length).toEqual(filledCount);
 
   const halfStars = screen.getByRole("img", { exact: true, name: "Half star" });
-  expect(halfStars.length).toBe(halfCount);
+  expect(halfStars.length).toEqual(halfCount);
 
   const emptyStars = screen.getByRole("img", { exact: true, name: "Empty star" });
-  expect(emptyStars.length).toBe(emptyCount);
+  expect(emptyStars.length).toEqual(emptyCount);
 }
 
 describe("StarRating", () => {
