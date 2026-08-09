@@ -2,13 +2,15 @@ interface StarRatingProps {
   rating: number;
 }
 
+const MAX_RATING = 5;
+
 export default function StarRating({ rating }: StarRatingProps) {
-  // Clamp to [0, 5] and snap to the nearest 0.5
-  const clampedRating = Math.min(Math.max(Math.round(rating * 2) / 2, 0), 5);
+  // Clamp to [0, MAX_RATING] and snap to the nearest 0.5
+  const clampedRating = Math.min(Math.max(Math.round(rating * 2) / 2, 0), MAX_RATING);
 
   return (
     <span aria-label={`${clampedRating} out of 5 stars`} className="inline-flex items-center gap-0.5" role="img">
-      {Array.from({ length: 5 }).map((_, i) => {
+      {Array.from({ length: MAX_RATING }).map((_, i) => {
         const fill = Math.min(Math.max(clampedRating - i, 0), 1); // 0, 0.5, or 1
         const id = `star-${i}-${clampedRating}`;
 
