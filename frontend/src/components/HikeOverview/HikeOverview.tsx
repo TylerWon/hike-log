@@ -2,6 +2,7 @@ import "../../assets/styles/text.css";
 import type { Hike } from "../../schemas/hike";
 
 import { classnames } from "../../utils/classnames";
+import { formatDate, formatDuration } from "../../utils/formatters";
 import StarRating from "../StarRating";
 import Thumbnail from "../Thumbnail";
 import "./hike-overview.css";
@@ -96,27 +97,10 @@ export default function HikeOverview({ hike, index, isExpanded }: HikeOverviewPr
               <circle cx="5" cy="5" r="3.5" />
               <path d="M5 3v2l1.5 1.5" />
             </svg>
-            {formatDuration(Number(hike.duration))}
+            {formatDuration(hike.duration)}
           </span>
         </div>
       </div>
     </div>
   );
-}
-
-function formatDate(iso: string): string {
-  const d = new Date(iso + "T12:00:00");
-  return d.toLocaleDateString("en-CA", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
-}
-
-function formatDuration(minutes: number): string {
-  const h = Math.floor(minutes / 60);
-  const m = minutes % 60;
-  if (h === 0) return `${m}m`;
-  if (m === 0) return `${h}h`;
-  return `${h}h ${m}m`;
 }

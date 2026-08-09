@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 
 import { fetchHikes } from "../api/hikes";
+import { formatDuration } from "../utils/formatters";
 import HikeCard from "./HikeCard";
 import HikeCardSkeleton from "./HikeCardSkeleton";
 import HikeLogContent from "./HikeLogContent/HikeLogContent";
@@ -44,13 +45,6 @@ export default function HikeLog() {
     setExpandedCardId((prev) => (prev === id ? null : id));
   };
 
-  const formatTotalDuration = (minutes: number): string => {
-    const h = Math.floor(minutes / 60);
-    const m = minutes % 60;
-    if (m === 0) return `${h}h`;
-    return `${h}h ${m}m`;
-  };
-
   return (
     <HikeLogContent
       hikeCards={hikes.data.map((hike, i) => (
@@ -66,7 +60,7 @@ export default function HikeLog() {
         { label: "Hikes", value: <p className="overall-stat-value">{hikes.data.length}</p> },
         { label: "Distance", value: <p className="overall-stat-value">{totalDistanceKm.toFixed(1)} km</p> },
         { label: "Elevation", value: <p className="overall-stat-value">{totalElevationM.toLocaleString()} m</p> },
-        { label: "Time", value: <p className="overall-stat-value">{formatTotalDuration(Number(totalMinutes))}</p> },
+        { label: "Time", value: <p className="overall-stat-value">{formatDuration(totalMinutes)}</p> },
       ]}
     />
   );
