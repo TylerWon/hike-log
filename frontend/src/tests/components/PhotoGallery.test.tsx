@@ -25,7 +25,7 @@ async function checkGallery(screen: RenderResult, photos: Photo[]) {
  * `photos`.
  */
 async function checkLightbox(screen: RenderResult, photos: Photo[], index: number) {
-  const photo = screen.getByRole("img", { exact: true, name: `Photo ${index + 1} lightbox` });
+  const photo = screen.getByRole("img", { name: `Photo ${index + 1} lightbox` });
   await expect
     .element(photo)
     .toHaveAttribute("src", photos[index].srcUrl.replace(/w=\d+/, "w=1200").replace(/h=\d+/, "h=800"));
@@ -38,41 +38,41 @@ async function checkLightbox(screen: RenderResult, photos: Photo[], index: numbe
   const count = screen.getByText(`${index + 1} / ${photos.length}`);
   await expect.element(count).toBeInTheDocument();
 
-  const closeButton = screen.getByRole("button", { exact: true, name: "Close button" });
+  const closeButton = screen.getByRole("button", { name: "Close button" });
   await expect.element(closeButton).toBeInTheDocument();
 
   if (photos.length <= 1) {
-    const prevButton = screen.getByRole("button", { exact: true, name: "Previous photo button" });
+    const prevButton = screen.getByRole("button", { name: "Previous photo button" });
     await expect.element(prevButton).not.toBeInTheDocument();
 
-    const nextButton = screen.getByRole("button", { exact: true, name: "Next photo button" });
+    const nextButton = screen.getByRole("button", { name: "Next photo button" });
     await expect.element(nextButton).not.toBeInTheDocument();
   } else {
-    const prevButton = screen.getByRole("button", { exact: true, name: "Previous photo button" });
+    const prevButton = screen.getByRole("button", { name: "Previous photo button" });
     await expect.element(prevButton).toBeInTheDocument();
 
-    const nextButton = screen.getByRole("button", { exact: true, name: "Next photo button" });
+    const nextButton = screen.getByRole("button", { name: "Next photo button" });
     await expect.element(nextButton).toBeInTheDocument();
   }
 }
 
 async function clickCloseButtonInLightbox(screen: RenderResult) {
-  const closeButton = screen.getByRole("button", { exact: true, name: "Close button" });
+  const closeButton = screen.getByRole("button", { name: "Close button" });
   await closeButton.click();
 }
 
 async function clickFirstPhotoInGallery(screen: RenderResult) {
-  const firstPhotoButton = screen.getByRole("button", { exact: true, name: "Photo 1 button" });
+  const firstPhotoButton = screen.getByRole("button", { name: "Photo 1 button" });
   await firstPhotoButton.click();
 }
 
 async function clickNextButtonInLightbox(screen: RenderResult) {
-  const nextButton = screen.getByRole("button", { exact: true, name: "Next photo button" });
+  const nextButton = screen.getByRole("button", { name: "Next photo button" });
   await nextButton.click();
 }
 
 async function clickPrevButtonInLightbox(screen: RenderResult) {
-  const prevButton = screen.getByRole("button", { exact: true, name: "Previous photo button" });
+  const prevButton = screen.getByRole("button", { name: "Previous photo button" });
   await prevButton.click();
 }
 
@@ -139,7 +139,7 @@ describe("PhotoGallery", () => {
     await clickFirstPhotoInGallery(screen);
     await checkLightbox(screen, HIKE_FIXTURE.photos, 0);
     await clickCloseButtonInLightbox(screen);
-    const photo = screen.getByRole("img", { exact: true, name: `Photo 1 lightbox` });
+    const photo = screen.getByRole("img", { name: `Photo 1 lightbox` });
     await expect.element(photo).not.toBeInTheDocument();
   });
 });

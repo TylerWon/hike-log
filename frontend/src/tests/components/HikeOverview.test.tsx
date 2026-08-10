@@ -9,7 +9,7 @@ describe("HikeOverview", () => {
   test("displays hike information", async () => {
     const screen = await render(<HikeOverview hike={HIKE_FIXTURE} index={1} isExpanded={false} />);
 
-    const image = screen.getByRole("img", { exact: true, name: "Joffre Lakes thumbnail" });
+    const image = screen.getByRole("img", { name: "Joffre Lakes thumbnail" });
     await expect.element(image).toBeInTheDocument();
 
     const hikeNumber = screen.getByText("#01", { exact: true });
@@ -24,7 +24,7 @@ describe("HikeOverview", () => {
     const ratingNum = screen.getByText(`${HIKE_FIXTURE.rating}/5`, { exact: true });
     await expect.element(ratingNum).toBeInTheDocument();
 
-    const ratingStars = screen.getByRole("img", { exact: true, name: `${HIKE_FIXTURE.rating} out of 5 stars` });
+    const ratingStars = screen.getByRole("img", { name: `${HIKE_FIXTURE.rating} out of 5 stars` });
     await expect.element(ratingStars).toBeInTheDocument();
 
     const distance = screen.getByText(`${HIKE_FIXTURE.distance} km`, { exact: true });

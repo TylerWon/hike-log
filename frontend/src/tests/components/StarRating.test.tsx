@@ -7,13 +7,13 @@ import StarRating from "../../components/StarRating";
  * Checks the number of filled, half, and empty stars matches the provided counts.
  */
 function checkStars(screen: RenderResult, filledCount: number, halfCount: number, emptyCount: number) {
-  const filledStars = screen.getByRole("img", { exact: true, name: "Filled star" });
+  const filledStars = screen.getByRole("img", { name: "Filled star" });
   expect(filledStars.length).toEqual(filledCount);
 
-  const halfStars = screen.getByRole("img", { exact: true, name: "Half star" });
+  const halfStars = screen.getByRole("img", { name: "Half star" });
   expect(halfStars.length).toEqual(halfCount);
 
-  const emptyStars = screen.getByRole("img", { exact: true, name: "Empty star" });
+  const emptyStars = screen.getByRole("img", { name: "Empty star" });
   expect(emptyStars.length).toEqual(emptyCount);
 }
 

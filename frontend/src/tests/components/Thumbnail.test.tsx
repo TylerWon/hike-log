@@ -9,7 +9,7 @@ describe("Thumbnail", () => {
   test("displays placeholder svg when photo is not provided", async () => {
     const screen = await render(<Thumbnail photo={null} trailName="Grouse Grind" />);
 
-    const svg = screen.getByRole("img", { exact: true, name: "Grouse Grind thumbnail" });
+    const svg = screen.getByRole("img", { name: "Grouse Grind thumbnail" });
     await expect.element(svg).not.toHaveAttribute("src");
   });
 
@@ -22,7 +22,7 @@ describe("Thumbnail", () => {
     };
     const screen = await render(<Thumbnail photo={photo} trailName="Grouse Grind" />);
 
-    const image = screen.getByRole("img", { exact: true, name: "Grouse Grind thumbnail" });
+    const image = screen.getByRole("img", { name: "Grouse Grind thumbnail" });
     await expect.element(image).toHaveAttribute("src", photo.srcUrl);
   });
 });

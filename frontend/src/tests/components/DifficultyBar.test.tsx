@@ -7,13 +7,13 @@ import DifficultyBar from "../../components/DifficultyBar";
  * Checks the number of filled, half, and empty bars matches the provided counts.
  */
 function checkBars(screen: RenderResult, filledCount: number, halfCount: number, emptyCount: number) {
-  const filledBars = screen.getByRole("img", { exact: true, name: "Filled bar" });
+  const filledBars = screen.getByRole("img", { name: "Filled bar" });
   expect(filledBars.length).toEqual(filledCount);
 
-  const halfBars = screen.getByRole("img", { exact: true, name: "Half bar" });
+  const halfBars = screen.getByRole("img", { name: "Half bar" });
   expect(halfBars.length).toEqual(halfCount);
 
-  const emptyBars = screen.getByRole("img", { exact: true, name: "Empty bar" });
+  const emptyBars = screen.getByRole("img", { name: "Empty bar" });
   expect(emptyBars.length).toEqual(emptyCount);
 }
 

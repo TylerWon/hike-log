@@ -18,12 +18,11 @@ async function checkDetails(screen: RenderResult, hike: Hike) {
   await expect.element(difficultyLabel).toBeInTheDocument();
 
   const difficultyBar = screen.getByRole("img", {
-    exact: true,
     name: `${hike.difficulty} out of 10 difficulty`,
   });
   await expect.element(difficultyBar).toBeInTheDocument();
 
-  const allTrailsLink = screen.getByRole("link", { exact: true, name: "View on AllTrails" });
+  const allTrailsLink = screen.getByRole("link", { name: "View on AllTrails" });
   await expect.element(allTrailsLink).toHaveAttribute("href", hike.allTrailsUrl);
   await expect.element(allTrailsLink).toHaveAttribute("target", "_blank");
 
