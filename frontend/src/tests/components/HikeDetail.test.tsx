@@ -4,7 +4,7 @@ import { render, type RenderResult } from "vitest-browser-react";
 import type { Hike } from "../../schemas/hike";
 
 import HikeDetail from "../../components/HikeDetail";
-import { HIKE_FIXTURE } from "../fixtures/hikes";
+import { HIKE_FIXTURE } from "../fixtures/hike";
 
 /**
  * Checks that the difficulty, AllTrails link, notes, and photos of `hike` are displayed in the HikeDetails component.

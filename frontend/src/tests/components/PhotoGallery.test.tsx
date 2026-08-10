@@ -4,21 +4,7 @@ import { render, type RenderResult } from "vitest-browser-react";
 import type { Photo } from "../../schemas/photo";
 
 import PhotoGallery from "../../components/PhotoGallery";
-
-const PHOTOS: Photo[] = [
-  {
-    caption: "Upper Joffre Lake with the glacier above",
-    hikeId: BigInt(1),
-    id: BigInt(1),
-    srcUrl: "https://images.unsplash.com/photo-1780945008220-7edb56992450?w=800&h=600&fit=crop&auto=format",
-  },
-  {
-    caption: "Middle lake — flat calm in the morning",
-    hikeId: BigInt(1),
-    id: BigInt(2),
-    srcUrl: "https://images.unsplash.com/photo-1763593862654-52f923fa7d85?w=1200&h=800&fit=crop&auto=format",
-  },
-];
+import { HIKE_FIXTURE } from "../fixtures/hike";
 
 /**
  * Checks that the gallery displays `photos`.
@@ -97,34 +83,36 @@ describe("PhotoGallery", () => {
   });
 
   test("displays gallery of photos when photos are provided", async () => {
-    const screen = await render(<PhotoGallery photos={PHOTOS} />);
-    await checkGallery(screen, PHOTOS);
+    const screen = await render(<PhotoGallery photos={HIKE_FIXTURE.photos} />);
+    await checkGallery(screen, HIKE_FIXTURE.photos);
   });
 
   test("displays photo in a lightbox when it is clicked in the gallery", async () => {
-    const screen = await render(<PhotoGallery photos={PHOTOS} />);
+    const screen = await render(<PhotoGallery photos={HIKE_FIXTURE.photos} />);
 
-    await checkGallery(screen, PHOTOS);
+    await checkGallery(screen, HIKE_FIXTURE.photos);
     await clickFirstPhotoInGallery(screen);
-    await checkLightbox(screen, PHOTOS, 0);
+    await checkLightbox(screen, HIKE_FIXTURE.photos, 0);
   });
 
   test("switches between photos when next and prev buttons are clicked in the lightbox", async () => {
-    const screen = await render(<PhotoGallery photos={PHOTOS} />);
+    const screen = await render(<PhotoGallery photos={HIKE_FIXTURE.photos} />);
 
-    await checkGallery(screen, PHOTOS);
+    await checkGallery(screen, HIKE_FIXTURE.photos);
     await clickFirstPhotoInGallery(screen);
-    await checkLightbox(screen, PHOTOS, 0);
+    await checkLightbox(screen, HIKE_FIXTURE.photos, 0);
     await clickNextButtonInLightbox(screen);
-    await checkLightbox(screen, PHOTOS, 1);
+    await checkLightbox(screen, HIKE_FIXTURE.photos, 1);
     await clickNextButtonInLightbox(screen);
-    await checkLightbox(screen, PHOTOS, 0);
+    await checkLightbox(screen, HIKE_FIXTURE.photos, 2);
+    await clickNextButtonInLightbox(screen);
+    await checkLightbox(screen, HIKE_FIXTURE.photos, 0);
     await clickPrevButtonInLightbox(screen);
-    await checkLightbox(screen, PHOTOS, 1);
+    await checkLightbox(screen, HIKE_FIXTURE.photos, 2);
   });
 
   test("does not display next and prev buttons in the lightbox when only one photo is provided", async () => {
-    const photos: Photo[] = [structuredClone(PHOTOS[0])];
+    const photos = [HIKE_FIXTURE.photos[0]];
 
     const screen = await render(<PhotoGallery photos={photos} />);
 
@@ -134,7 +122,7 @@ describe("PhotoGallery", () => {
   });
 
   test("does not display caption in the lightbox when the photo has no caption", async () => {
-    const photos: Photo[] = [structuredClone(PHOTOS[0])];
+    const photos: Photo[] = [structuredClone(HIKE_FIXTURE.photos[0])];
     photos[0].caption = "";
 
     const screen = await render(<PhotoGallery photos={photos} />);
@@ -145,13 +133,12 @@ describe("PhotoGallery", () => {
   });
 
   test("closes lightbox when close button is clicked", async () => {
-    const screen = await render(<PhotoGallery photos={PHOTOS} />);
+    const screen = await render(<PhotoGallery photos={HIKE_FIXTURE.photos} />);
 
-    await checkGallery(screen, PHOTOS);
+    await checkGallery(screen, HIKE_FIXTURE.photos);
     await clickFirstPhotoInGallery(screen);
-    await checkLightbox(screen, PHOTOS, 0);
+    await checkLightbox(screen, HIKE_FIXTURE.photos, 0);
     await clickCloseButtonInLightbox(screen);
-
     const photo = screen.getByRole("img", { exact: true, name: `Photo 1 lightbox` });
     await expect.element(photo).not.toBeInTheDocument();
   });
