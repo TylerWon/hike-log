@@ -12,7 +12,7 @@ export default defineConfig({
     host: true,
     port: 5173,
     watch: {
-      ignored: ["**/src/tests/**"],
+      ignored: process.env.VITEST ? undefined : ["**/src/tests/**"], // prevent hot reload when test files are changed, unless Vitest is running
       usePolling: true,
     },
   },
