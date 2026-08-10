@@ -56,8 +56,11 @@ describe("HikeOverview", () => {
     const date = screen.getByText(formatDate(HIKE.date), { exact: true });
     await expect.element(date).toBeInTheDocument();
 
-    const rating = screen.getByText(`${HIKE.rating}/5`, { exact: true });
-    await expect.element(rating).toBeInTheDocument();
+    const ratingNum = screen.getByText(`${HIKE.rating}/5`, { exact: true });
+    await expect.element(ratingNum).toBeInTheDocument();
+
+    const ratingStars = screen.getByRole("img", { exact: true, name: `${HIKE.rating} out of 5 stars` });
+    await expect.element(ratingStars).toBeInTheDocument();
 
     const distance = screen.getByText(`${HIKE.distance} km`, { exact: true });
     await expect.element(distance).toBeInTheDocument();
