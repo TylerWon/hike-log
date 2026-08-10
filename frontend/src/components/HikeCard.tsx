@@ -34,7 +34,7 @@ export default function HikeCard({ hike, index, isExpanded, onClick }: HikeCardP
         }}
       >
         <div className="overflow-hidden" {...(!isExpanded && { inert: true })}>
-          <HikeDetail hike={hike} photos={hike.photos} />
+          <HikeDetail hike={hike} />
         </div>
       </div>
     </article>

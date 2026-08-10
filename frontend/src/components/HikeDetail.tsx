@@ -1,16 +1,14 @@
 import "../assets/styles/text.css";
 import type { Hike } from "../schemas/hike";
-import type { Photo } from "../schemas/photo";
 
 import DifficultyBar from "./DifficultyBar";
 import PhotoGallery from "./PhotoGallery";
 
 interface HikeDetailProps {
   hike: Hike;
-  photos: Photo[];
 }
 
-export default function HikeDetail({ hike, photos }: HikeDetailProps) {
+export default function HikeDetail({ hike }: HikeDetailProps) {
   return (
     <div className="border-t border-forest-800 px-4 py-5 flex flex-col gap-y-5">
       {/* Difficulty and AllTrails link */}
@@ -49,10 +47,10 @@ export default function HikeDetail({ hike, photos }: HikeDetailProps) {
         <p className="text-sm leading-relaxed text-cream-200">{hike.notes}</p>
       </div>
 
-      {photos.length > 0 && (
+      {hike.photos.length > 0 && (
         <div>
-          <p className="field-label mb-2">Photos ({photos.length})</p>
-          <PhotoGallery photos={photos} />
+          <p className="field-label mb-2">Photos ({hike.photos.length})</p>
+          <PhotoGallery photos={hike.photos} />
         </div>
       )}
     </div>

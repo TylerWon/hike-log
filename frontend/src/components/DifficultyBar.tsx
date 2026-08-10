@@ -9,7 +9,11 @@ export default function DifficultyBar({ difficulty }: DifficultyBarProps) {
   const clampedDifficulty = Math.min(Math.max(Math.round(difficulty * 2) / 2, 0), MAX_DIFFICULTY);
 
   return (
-    <span aria-label={`Difficulty ${clampedDifficulty} out of 10`} className="inline-flex items-center gap-0.5">
+    <span
+      aria-label={`${clampedDifficulty} out of 10 difficulty`}
+      className="inline-flex items-center gap-0.5"
+      role="img"
+    >
       {Array.from({ length: MAX_DIFFICULTY }).map((_, i) => {
         const fill = Math.min(Math.max(clampedDifficulty - i, 0), 1); // 0, 0.5, or 1
 
