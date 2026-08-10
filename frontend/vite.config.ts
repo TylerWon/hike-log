@@ -12,6 +12,7 @@ export default defineConfig({
     host: true,
     port: 5173,
     watch: {
+      ignored: ["**/src/tests/**"],
       usePolling: true,
     },
   },
