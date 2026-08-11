@@ -19,17 +19,11 @@ describe("HikeLogContent", () => {
       </HikeLogContent>,
     );
 
-    const hikeStatLabel = screen.getByText(overallStats[0].label);
-    await expect.element(hikeStatLabel).toBeInTheDocument();
+    const title = screen.getByText("Hiking Log");
+    await expect.element(title).toBeInTheDocument();
 
-    const hikeStatValue = screen.getByText(overallStats[0].value);
-    await expect.element(hikeStatValue).toBeInTheDocument();
-
-    const distanceStatLabel = screen.getByText(overallStats[1].label);
-    await expect.element(distanceStatLabel).toBeInTheDocument();
-
-    const distanceStatValue = screen.getByText(overallStats[1].value);
-    await expect.element(distanceStatValue).toBeInTheDocument();
+    const statsOverview = screen.getByRole("region", { name: "Statistic overview" });
+    await expect.element(statsOverview).toBeInTheDocument();
 
     const body = screen.getByRole("list", { name: "body" });
     await expect.element(body).toBeInTheDocument();

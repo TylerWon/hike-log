@@ -14,7 +14,7 @@ interface StatsOverviewProps {
 
 export default function StatsOverview({ stats }: StatsOverviewProps) {
   return (
-    <div className="flex flex-wrap gap-6">
+    <div aria-label="Statistic overview" className="flex flex-wrap gap-6" role="region">
       {stats.map((stat, i) => (
         <Fragment key={i}>
           <div>
