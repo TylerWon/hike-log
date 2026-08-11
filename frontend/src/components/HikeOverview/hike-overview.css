@@ -1,5 +1,0 @@
-@reference "../../index.css";
-
-.stat-container {
-  @apply inline-flex items-center;
-}

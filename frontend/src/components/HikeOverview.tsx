@@ -1,11 +1,10 @@
-import "../../assets/styles/text.css";
-import type { Hike } from "../../schemas/hike";
+import "../assets/styles/text.css";
+import type { Hike } from "../schemas/hike";
 
-import { classnames } from "../../utils/classnames";
-import { formatDate, formatDuration } from "../../utils/formatters";
-import StarRating from "../StarRating";
-import Thumbnail from "../Thumbnail";
-import "./hike-overview.css";
+import { classnames } from "../utils/classnames";
+import { formatDate, formatDuration } from "../utils/formatters";
+import StarRating from "./StarRating";
+import Thumbnail from "./Thumbnail";
 
 interface HikeOverviewProps {
   hike: Hike;
@@ -50,11 +49,11 @@ export default function HikeOverview({ hike, index, isExpanded }: HikeOverviewPr
 
         {/* Stats */}
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 mt-2.5">
-          <span className="stat-value stat-container gap-1.5">
+          <span className="stat-value inline-flex items-center gap-1.5">
             <StarRating rating={hike.rating} />
             {hike.rating}/5
           </span>
-          <span className="stat-value stat-container gap-1">
+          <span className="stat-value inline-flex items-center gap-1">
             <svg
               fill="none"
               height="10"
@@ -69,7 +68,7 @@ export default function HikeOverview({ hike, index, isExpanded }: HikeOverviewPr
             </svg>
             {hike.distance} km
           </span>
-          <span className="stat-value stat-container gap-1">
+          <span className="stat-value inline-flex items-center gap-1">
             <svg
               fill="none"
               height="10"
@@ -84,7 +83,7 @@ export default function HikeOverview({ hike, index, isExpanded }: HikeOverviewPr
             </svg>
             {hike.elevationGain} m
           </span>
-          <span className="stat-value stat-container gap-1">
+          <span className="stat-value inline-flex items-center gap-1">
             <svg
               fill="none"
               height="10"

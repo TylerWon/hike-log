@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { render } from "vitest-browser-react";
 
-import HikeOverview from "../../components/HikeOverview/HikeOverview";
+import HikeOverview from "../../components/HikeOverview";
 import { formatDate, formatDuration } from "../../utils/formatters";
 import { HIKE_FIXTURE } from "../fixtures/hike";
 
