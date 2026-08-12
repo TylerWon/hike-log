@@ -27,7 +27,9 @@ export default defineConfig({
         },
       },
       {
+        extends: true, // Inherit root config - ensures plugins are available
         test: {
+          // Configure Vitest Browser Mode to run component tests
           browser: {
             enabled: true,
             headless: true,
@@ -39,6 +41,7 @@ export default defineConfig({
           },
           include: ["src/tests/**/*.test.tsx"],
           name: "Component Tests",
+          setupFiles: ["./src/tests/component-test-setup.ts"], // Runs before every test file
         },
       },
     ],

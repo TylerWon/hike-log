@@ -13,7 +13,7 @@ interface HikeCardProps {
 
 export default function HikeCard({ hike, index, isExpanded, onClick }: HikeCardProps) {
   return (
-    <article
+    <div
       className={classnames(
         "border rounded-lg overflow-hidden transition-all duration-200",
         isExpanded ? "bg-forest-850 border-forest-700" : "bg-forest-900 border-forest-800",
@@ -26,6 +26,8 @@ export default function HikeCard({ hike, index, isExpanded, onClick }: HikeCardP
 
       {/* Hike details (shown when overview is clicked) */}
       <div
+        aria-label={`${hike.trailName} details wrapper`}
+        role="region"
         // Easier to use inline CSS here than Tailwind
         style={{
           display: "grid",
@@ -37,6 +39,6 @@ export default function HikeCard({ hike, index, isExpanded, onClick }: HikeCardP
           <HikeDetail hike={hike} />
         </div>
       </div>
-    </article>
+    </div>
   );
 }

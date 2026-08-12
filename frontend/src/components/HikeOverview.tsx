@@ -14,7 +14,7 @@ interface HikeOverviewProps {
 
 export default function HikeOverview({ hike, index, isExpanded }: HikeOverviewProps) {
   return (
-    <div className="flex gap-4 p-4">
+    <div aria-label={`${hike.trailName} overview`} className="flex gap-4 p-4" role="region">
       <Thumbnail photo={hike.photos.length > 0 ? hike.photos[0] : null} trailName={hike.trailName} />
 
       <div className="flex-1 min-w-0">

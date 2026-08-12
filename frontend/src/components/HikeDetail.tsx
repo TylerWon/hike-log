@@ -10,7 +10,11 @@ interface HikeDetailProps {
 
 export default function HikeDetail({ hike }: HikeDetailProps) {
   return (
-    <div className="border-t border-forest-800 px-4 py-5 flex flex-col gap-y-5">
+    <div
+      aria-label={`${hike.trailName} details`}
+      className="border-t border-forest-800 px-4 py-5 flex flex-col gap-y-5"
+      role="region"
+    >
       {/* Difficulty and AllTrails link */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-2">
