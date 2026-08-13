@@ -3,25 +3,25 @@ import { describe, expect, test } from "vitest";
 import { render, type RenderResult } from "vitest-browser-react";
 
 import HikeCard from "../../components/HikeCard";
-import { HIKE_FIXTURE } from "../fixtures/hike";
+import { HIKE_FIXTURE_1 } from "../fixtures/hike";
 
 /**
  * Checks that the card displays an overview of the hike. If the card is expanded, also verifies that more details about
  * the hike are shown.
  */
 async function checkCard(screen: RenderResult, isExpanded: boolean) {
-  const overview = screen.getByRole("region", { name: `${HIKE_FIXTURE.trailName} overview` });
+  const overview = screen.getByRole("region", { name: `${HIKE_FIXTURE_1.trailName} overview` });
   await expect.element(overview).toBeInTheDocument();
 
   // The details section appears in the DOM regardless of whether it should be visible to the user or not. We check
   // whether it is visible below
   const details = screen.getByRole("region", {
     includeHidden: true,
-    name: `${HIKE_FIXTURE.trailName} details`,
+    name: `${HIKE_FIXTURE_1.trailName} details`,
   });
   await expect.element(details).toBeInTheDocument();
 
-  const detailsWrapper = screen.getByRole("region", { name: `${HIKE_FIXTURE.trailName} details wrapper` });
+  const detailsWrapper = screen.getByRole("region", { name: `${HIKE_FIXTURE_1.trailName} details wrapper` });
 
   if (!isExpanded) {
     // When the card is not expanded, the details section be hidden from view. The wrapper of the detail section handles
@@ -35,13 +35,13 @@ async function checkCard(screen: RenderResult, isExpanded: boolean) {
 async function clickDetails(screen: RenderResult) {
   const details = screen.getByRole("region", {
     includeHidden: true,
-    name: `${HIKE_FIXTURE.trailName} details`,
+    name: `${HIKE_FIXTURE_1.trailName} details`,
   });
   await details.click();
 }
 
 async function clickOverview(screen: RenderResult) {
-  const overview = screen.getByRole("region", { name: `${HIKE_FIXTURE.trailName} overview` });
+  const overview = screen.getByRole("region", { name: `${HIKE_FIXTURE_1.trailName} overview` });
   await overview.click();
 }
 
@@ -53,12 +53,12 @@ function StatefulHikeCard() {
     setIsExpanded(!isExpanded);
   };
 
-  return <HikeCard hike={HIKE_FIXTURE} index={1} isExpanded={isExpanded} onClick={handleClick} />;
+  return <HikeCard hike={HIKE_FIXTURE_1} index={1} isExpanded={isExpanded} onClick={handleClick} />;
 }
 
 describe("HikeCard", () => {
   test("displays overview of the hike but no additional details by default", async () => {
-    const screen = await render(<HikeCard hike={HIKE_FIXTURE} index={1} isExpanded={false} onClick={() => {}} />);
+    const screen = await render(<HikeCard hike={HIKE_FIXTURE_1} index={1} isExpanded={false} onClick={() => {}} />);
     await checkCard(screen, false);
   });
 

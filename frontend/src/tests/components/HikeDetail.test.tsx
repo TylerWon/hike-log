@@ -4,7 +4,7 @@ import { render, type RenderResult } from "vitest-browser-react";
 import type { Hike } from "../../schemas/hike";
 
 import HikeDetail from "../../components/HikeDetail";
-import { HIKE_FIXTURE } from "../fixtures/hike";
+import { HIKE_FIXTURE_1 } from "../fixtures/hike";
 
 /**
  * Checks that the difficulty, AllTrails link, notes, and photos of `hike` are displayed in the HikeDetails component.
@@ -43,12 +43,12 @@ async function checkDetails(screen: RenderResult, hike: Hike) {
 
 describe("HikeDetail", () => {
   test("displays hike details", async () => {
-    const screen = await render(<HikeDetail hike={HIKE_FIXTURE} />);
-    await checkDetails(screen, HIKE_FIXTURE);
+    const screen = await render(<HikeDetail hike={HIKE_FIXTURE_1} />);
+    await checkDetails(screen, HIKE_FIXTURE_1);
   });
 
   test("does not display photo gallery when hike has no photos", async () => {
-    const hikes = structuredClone(HIKE_FIXTURE);
+    const hikes = structuredClone(HIKE_FIXTURE_1);
     hikes.photos = [];
     const screen = await render(<HikeDetail hike={hikes} />);
     await checkDetails(screen, hikes);

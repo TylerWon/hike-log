@@ -1,6 +1,10 @@
 export default function HikeCardSkeleton() {
   return (
-    <div className="rounded-lg border border-forest-800 bg-forest-900 p-4 flex gap-4">
+    <div
+      aria-label="Hike card skeleton"
+      className="rounded-lg border border-forest-800 bg-forest-900 p-4 flex gap-4"
+      role="region"
+    >
       {/* Thumbnail */}
       <div className="shrink-0 rounded shimmer w-[96px] h-[72px]" />
 

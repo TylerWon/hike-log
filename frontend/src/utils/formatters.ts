@@ -11,6 +11,14 @@ export function formatDate(date: string): string {
 }
 
 /**
+ * Takes a distance (in kilometres) and outputs it as "[distance] km" (ex. "51.2 km"). The distance will have 1 decimal
+ * point.
+ */
+export function formatDistance(distanceKm: number): string {
+  return `${distanceKm.toFixed(1)} km`;
+}
+
+/**
  * Takes a duration (in minutes) and outputs it as "[hours]h [minutes]m" (ex. "5h 20m") or just "[minutes]m" (ex. "58m")
  * if the duration is less than an hour.
  */
@@ -21,4 +29,11 @@ export function formatDuration(durationMins: bigint): string {
   if (h === 0) return `${m}m`;
   if (m === 0) return `${h}h`;
   return `${h}h ${m}m`;
+}
+
+/**
+ * Takes an elevation (in meters) and outputs it as "[elevation] m" (ex. "6,809 m").
+ */
+export function formatElevation(elevationM: bigint): string {
+  return `${elevationM.toLocaleString()} m`;
 }

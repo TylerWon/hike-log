@@ -4,7 +4,11 @@ interface HikeLogErrorProps {
 
 export default function HikeLogError({ onRetry = () => window.location.reload() }: HikeLogErrorProps) {
   return (
-    <div className="min-h-screen bg-forest-950 text-cream-100 flex items-center justify-center">
+    <div
+      aria-label="Hike log error"
+      className="min-h-screen bg-forest-950 text-cream-100 flex items-center justify-center"
+      role="region"
+    >
       <div className="flex flex-col items-center justify-center py-24 px-6 text-center">
         <div className="mb-4 relative">
           <svg fill="none" height="48" viewBox="0 0 48 48" width="48" xmlns="http://www.w3.org/2000/svg">

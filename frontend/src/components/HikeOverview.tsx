@@ -2,7 +2,7 @@ import "../assets/styles/text.css";
 import type { Hike } from "../schemas/hike";
 
 import { classnames } from "../utils/classnames";
-import { formatDate, formatDuration } from "../utils/formatters";
+import { formatDate, formatDistance, formatDuration, formatElevation } from "../utils/formatters";
 import StarRating from "./StarRating";
 import Thumbnail from "./Thumbnail";
 
@@ -66,7 +66,7 @@ export default function HikeOverview({ hike, index, isExpanded }: HikeOverviewPr
               <circle cx="5" cy="5" r="3.5" />
               <path d="M5 1.5v1M5 7.5v1M1.5 5h1M7.5 5h1" />
             </svg>
-            {hike.distance} km
+            {formatDistance(hike.distance)}
           </span>
           <span className="stat-value inline-flex items-center gap-1">
             <svg
@@ -81,7 +81,7 @@ export default function HikeOverview({ hike, index, isExpanded }: HikeOverviewPr
             >
               <path d="M2 8L5 2l3 6" />
             </svg>
-            {hike.elevationGain} m
+            {formatElevation(hike.elevationGain)}
           </span>
           <span className="stat-value inline-flex items-center gap-1">
             <svg

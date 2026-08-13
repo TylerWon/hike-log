@@ -14,10 +14,12 @@ interface HikeCardProps {
 export default function HikeCard({ hike, index, isExpanded, onClick }: HikeCardProps) {
   return (
     <div
+      aria-label={`${hike.trailName} card`}
       className={classnames(
         "border rounded-lg overflow-hidden transition-all duration-200",
         isExpanded ? "bg-forest-850 border-forest-700" : "bg-forest-900 border-forest-800",
       )}
+      role="region"
     >
       {/* Hike overview (always shown) */}
       <button aria-expanded={isExpanded} className="w-full text-left cursor-pointer group/hike-card" onClick={onClick}>

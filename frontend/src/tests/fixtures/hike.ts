@@ -1,6 +1,6 @@
 import type { Hike } from "../../schemas/hike";
 
-export const HIKE_FIXTURE: Hike = {
+export const HIKE_FIXTURE_1: Hike = {
   allTrailsUrl: "https://www.alltrails.com/trail/canada/british-columbia/joffre-lakes",
   date: "2026-05-17",
   difficulty: 5.5,
@@ -32,4 +32,26 @@ export const HIKE_FIXTURE: Hike = {
   ],
   rating: 4.5,
   trailName: "Joffre Lakes",
+};
+
+export const HIKE_FIXTURE_2: Hike = {
+  allTrailsUrl: "https://www.alltrails.com/trail/canada/british-columbia/grouse-grind",
+  date: "2025-08-02",
+  difficulty: 7,
+  distance: 5.6,
+  duration: BigInt(58),
+  elevationGain: BigInt(853),
+  id: BigInt(24),
+  notes:
+    "Finished in 58 minutes — a new PR. The trail itself is relentlessly steep with no real views until the top, but it's an excellent fitness benchmark. Busy on a Saturday afternoon. Took the gondola down.",
+  photos: [
+    {
+      caption: "Dense forest corridor on the Grind",
+      hikeId: BigInt(2),
+      id: BigInt(2),
+      srcUrl: "https://images.unsplash.com/photo-1562593028-1fe2d15bde36?w=800&h=600&fit=crop&auto=format",
+    },
+  ],
+  rating: 3,
+  trailName: "Grouse Grind",
 };
