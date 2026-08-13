@@ -10,7 +10,7 @@ export default function HikeLogContent({ children, overallStats }: HikeLogConten
     <div className="min-h-screen bg-forest-900 text-cream-100">
       {/* Title, stats overview */}
       <header className="max-w-3xl mx-auto px-6 pt-16 pb-10">
-        <h1 className="text-5xl font-bold font-serif leading-tight mb-6">Hiking Log</h1>
+        <h1 className="text-5xl font-bold font-serif leading-tight mb-6">Hike Log</h1>
         <StatsOverview stats={overallStats} />
         <div className="mt-8 h-px bg-forest-800" />
       </header>

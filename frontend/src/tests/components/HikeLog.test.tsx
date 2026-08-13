@@ -53,7 +53,7 @@ describe("HikeLog", () => {
 
     const screen = await renderHikeLog();
 
-    const title = screen.getByText("Hiking Log");
+    const title = screen.getByText("Hike Log");
     await expect.element(title).toBeInTheDocument();
 
     const hikesStatLabel = screen.getByText("Hikes");
@@ -81,7 +81,7 @@ describe("HikeLog", () => {
 
     const screen = await renderHikeLog();
 
-    const title = screen.getByText("Hiking Log");
+    const title = screen.getByText("Hike Log");
     await expect.element(title).toBeInTheDocument();
 
     const hikesStatLabel = screen.getByText("Hikes");

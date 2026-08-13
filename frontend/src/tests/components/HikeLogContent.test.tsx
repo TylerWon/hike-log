@@ -19,7 +19,7 @@ describe("HikeLogContent", () => {
       </HikeLogContent>,
     );
 
-    const title = screen.getByText("Hiking Log");
+    const title = screen.getByText("Hike Log");
     await expect.element(title).toBeInTheDocument();
 
     const statsOverview = screen.getByRole("region", { name: "Statistic overview" });
