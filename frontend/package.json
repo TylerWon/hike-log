@@ -39,6 +39,7 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.3",
     "globals": "^17.7.0",
+    "msw": "^2.15.0",
     "prettier": "^3.9.5",
     "tailwindcss": "^4.3.2",
     "typescript": "~6.0.2",
@@ -46,5 +47,8 @@
     "vite": "^8.1.1",
     "vitest": "^4.1.10",
     "vitest-browser-react": "^2.2.0"
+  },
+  "allowScripts": {
+    "msw@2.15.0": true
   }
 }
