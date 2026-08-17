@@ -8,7 +8,7 @@ const HikeSchema = z.object({
   difficulty: z.number().min(0).max(10).multipleOf(0.5),
   distance: z.number().nonnegative(),
   // "coerce" tries to convert the input to a bigint when the schema is parsed. This prevents an error that occurs when
-  // parsing a Response that was deserialized with json() as this json() deserializes all numbers to the Number type.
+  // parsing a Response that was deserialized with json() as json() deserializes all number-like values to the Number type.
   duration: z.coerce.bigint<bigint>(),
   elevationGain: z.coerce.bigint<bigint>(),
   id: z.coerce.bigint<bigint>(),
