@@ -69,7 +69,7 @@ describe("hikes", () => {
       });
       server.use(handler);
 
-      expect(fetchHikes()).rejects.toThrow();
+      await expect(fetchHikes()).rejects.toThrow();
     });
   });
 });
