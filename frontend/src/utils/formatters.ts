@@ -32,8 +32,9 @@ export function formatDuration(durationMins: bigint): string {
 }
 
 /**
- * Takes an elevation (in meters) and outputs it as "[elevation] m" (ex. "6,809 m").
+ * Takes an elevation (in meters) and outputs it as "[elevation] m" (ex. "6,809 m"). Every thousandth place will be
+ * separated with a comma.
  */
 export function formatElevation(elevationM: bigint): string {
-  return `${elevationM.toLocaleString()} m`;
+  return `${elevationM.toLocaleString("en-CA")} m`;
 }
