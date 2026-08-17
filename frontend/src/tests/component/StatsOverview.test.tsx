@@ -15,7 +15,7 @@ describe("StatsOverview", () => {
     const distanceLabel = screen.getByText(stats[0].label);
     await expect.element(distanceLabel).toBeInTheDocument();
 
-    const distanceValue = screen.getByText(stats[0].label);
+    const distanceValue = screen.getByText("22.1 km");
     await expect.element(distanceValue).toBeInTheDocument();
 
     const timeLabel = screen.getByText(stats[1].label);

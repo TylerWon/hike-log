@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 
-import { toSerializableJsonObj } from "../../utils/json";
+import { toSerializableJsonObj } from "../../../utils/json";
 
 describe("json", () => {
   describe("toSerializableJsonObj", () => {

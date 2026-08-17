@@ -2,9 +2,9 @@ import { http, HttpResponse } from "msw";
 import { setupServer, type SetupServer } from "msw/node";
 import { afterEach, beforeEach, describe, expect, test } from "vitest";
 
-import { fetchHikes } from "../../api/hikes";
-import { HIKE_FIXTURE_1, HIKE_FIXTURE_2 } from "../fixtures/hike";
-import { HIKES_API_RESPONSE_FIXTURE } from "../fixtures/hikes-api";
+import { fetchHikes } from "../../../api/hikes";
+import { HIKE_FIXTURE_1, HIKE_FIXTURE_2 } from "../../fixtures/hike";
+import { HIKES_API_RESPONSE_FIXTURE } from "../../fixtures/hikes-api";
 
 const API_URL = `${import.meta.env.VITE_API_URL}/hikes`;
 

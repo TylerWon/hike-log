@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 
-import { formatDate, formatDistance, formatDuration, formatElevation } from "../../utils/formatters";
+import { formatDate, formatDistance, formatDuration, formatElevation } from "../../../utils/formatters";
 
 describe("formatters", () => {
   describe("formatDate", () => {

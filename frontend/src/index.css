@@ -1,12 +1,16 @@
 @import "tailwindcss";
 
+/* Ensures utilities are generated even when CSS is first loaded from Vitest setup file (before component modules are in 
+the graph). */
+@source "./";
+
 @font-face {
   font-family: "Playfair Display";
   font-style: normal;
   font-weight: 100 900;
   font-display: swap;
   src:
-      /* Try user's device first, then app files, then external site */
+    /* Try user's device first, then app files, then external site */
     local("Playfair Display"),
     url("./assets/fonts/playfair-display.woff2") format("woff2"),
     url("https://static.figma.com/font/PlayfairDisplay_wght__1") format("woff2");
