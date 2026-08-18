@@ -8,9 +8,12 @@ interface ThumbnailProps {
 export default function Thumbnail({ photo, trailName }: ThumbnailProps) {
   if (!photo) {
     return (
-      <div className="shrink-0 rounded bg-sage-950 flex items-center justify-center w-[96px] h-[72px]">
+      <div
+        aria-label={`${trailName} thumbnail`}
+        className="shrink-0 rounded bg-sage-950 flex items-center justify-center w-[96px] h-[72px]"
+        role="region"
+      >
         <svg
-          aria-label={`${trailName} thumbnail`}
           className="stroke-forest-700"
           fill="none"
           height="24"
@@ -26,7 +29,11 @@ export default function Thumbnail({ photo, trailName }: ThumbnailProps) {
   }
 
   return (
-    <div className="shrink-0 rounded overflow-hidden bg-forest-800 w-[96px] h-[72px]">
+    <div
+      aria-label={`${trailName} thumbnail`}
+      className="shrink-0 rounded overflow-hidden bg-forest-800 w-[96px] h-[72px]"
+      role="region"
+    >
       <img
         alt={`${trailName} thumbnail`}
         className="w-full h-full object-cover transition-transform duration-300 group-hover/hike-card:scale-105 group-hover/hike-card:brightness-110"
