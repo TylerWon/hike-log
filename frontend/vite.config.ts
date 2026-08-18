@@ -16,9 +16,10 @@ export default defineConfig({
     },
   },
   test: {
-    // Vitest Projects. Projects allow tests to run in different environments. Every folder in /tests (except
-    // /tests/fixtures) will be treated as their own Project and have their own configuration file.
-    projects: ["src/tests/*", "!src/tests/fixtures"],
+    // Vitest Projects. Projects allow tests to run in different environments. Each folder listed will be treated as
+    // their own Project and have their own configuration file.
+    projects: ["src/tests/component", "src/tests/unit", "src/tests/visual"],
+
     // Vitest settings that apply to all projects
     restoreMocks: true,
     unstubGlobals: true,

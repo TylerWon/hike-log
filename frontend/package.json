@@ -14,7 +14,10 @@
     "test:unit:watch": "vitest --project 'Unit Tests'",
     "test:unit:once": "vitest run --project 'Unit Tests'",
     "test:component:watch": "vitest --project 'Component Tests'",
-    "test:component:once": "vitest run --project 'Component Tests'"
+    "test:component:once": "vitest run --project 'Component Tests'",
+    "test:visual:watch": "vitest --project 'Visual Tests'",
+    "test:visual:once": "vitest run --project 'Visual Tests'",
+    "test:visual:update": "vitest run --project 'Visual Tests' --update"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.101.4",
