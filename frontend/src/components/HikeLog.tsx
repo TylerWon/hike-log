@@ -33,13 +33,11 @@ export default function HikeLog() {
 
     return (
       <HikeLogContent overallStats={overallStats}>
-        <ol className="flex flex-col gap-3">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <li key={i}>
-              <HikeCardSkeleton />
-            </li>
-          ))}
-        </ol>
+        {Array.from({ length: 5 }).map((_, i) => (
+          <li key={i}>
+            <HikeCardSkeleton />
+          </li>
+        ))}
       </HikeLogContent>
     );
   }
@@ -61,18 +59,16 @@ export default function HikeLog() {
 
   return (
     <HikeLogContent overallStats={overallStats}>
-      <ol className="flex flex-col gap-3">
-        {hikes.data.map((hike, i) => (
-          <li key={i}>
-            <HikeCard
-              hike={hike}
-              index={i + 1}
-              isExpanded={expandedCardId === hike.id}
-              onClick={() => handleCardClick(hike.id)}
-            />
-          </li>
-        ))}
-      </ol>
+      {hikes.data.map((hike, i) => (
+        <li key={i}>
+          <HikeCard
+            hike={hike}
+            index={i + 1}
+            isExpanded={expandedCardId === hike.id}
+            onClick={() => handleCardClick(hike.id)}
+          />
+        </li>
+      ))}
     </HikeLogContent>
   );
 }

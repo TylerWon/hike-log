@@ -7,7 +7,7 @@ interface HikeLogContentProps {
 
 export default function HikeLogContent({ children, overallStats }: HikeLogContentProps) {
   return (
-    <div className="min-h-screen bg-forest-900 text-cream-100">
+    <div aria-label="Hike log content" className="min-h-screen bg-forest-900 text-cream-100" role="region">
       {/* Title, stats overview */}
       <header className="max-w-3xl mx-auto px-6 pt-16 pb-10">
         <h1 className="text-5xl font-bold font-serif leading-tight mb-6">Hike Log</h1>
@@ -16,7 +16,9 @@ export default function HikeLogContent({ children, overallStats }: HikeLogConten
       </header>
 
       {/* Body (hike cards) */}
-      <main className="max-w-3xl mx-auto px-6 pb-24">{children}</main>
+      <main className="max-w-3xl mx-auto px-6 pb-24">
+        <ol className="flex flex-col gap-3">{children}</ol>
+      </main>
     </div>
   );
 }

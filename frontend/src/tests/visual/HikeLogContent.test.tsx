@@ -7,7 +7,7 @@ import { formatDistance, formatDuration, formatElevation } from "../../utils/for
 import { HIKE_FIXTURE_1, HIKE_FIXTURE_2 } from "../fixtures/hike";
 
 describe("HikeLogContent", () => {
-  test("displays title, stats overview, and body", async () => {
+  test("displays component", async () => {
     const hikes = [HIKE_FIXTURE_1, HIKE_FIXTURE_2];
     const overallStats = [
       { label: "Hikes", value: hikes.length },
@@ -26,16 +26,7 @@ describe("HikeLogContent", () => {
       </HikeLogContent>,
     );
 
-    const title = screen.getByText("Hike Log");
-    await expect.element(title).toBeInTheDocument();
-
-    const statsOverview = screen.getByRole("region", { name: "Statistic overview" });
-    await expect.element(statsOverview).toBeInTheDocument();
-
-    const card1 = screen.getByRole("region", { name: `${HIKE_FIXTURE_1.trailName} card` });
-    await expect.element(card1).toBeInTheDocument();
-
-    const card2 = screen.getByRole("region", { name: `${HIKE_FIXTURE_2.trailName} card` });
-    await expect.element(card2).toBeInTheDocument();
+    const component = screen.getByRole("region", { name: "Hike log content" });
+    await expect(component).toMatchScreenshot();
   });
 });
