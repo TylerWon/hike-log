@@ -24,7 +24,7 @@ export default function PhotoGallery({ photos }: PhotoGalleryProps) {
   };
 
   return (
-    <>
+    <div aria-label="Photo gallery" role="region">
       {/* Gallery */}
       <div className="flex gap-2 overflow-x-auto scrollbar-thin">
         {photos.map((photo, i) => (
@@ -46,7 +46,12 @@ export default function PhotoGallery({ photos }: PhotoGalleryProps) {
 
       {/* Lightbox (shown when a photo is clicked) */}
       {lightboxIndex !== null && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#050805]/95" onClick={closeLightbox}>
+        <div
+          aria-label="Photo lightbox"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-[#050805]/95"
+          onClick={closeLightbox}
+          role="region"
+        >
           {/* Close */}
           <button
             aria-label="Close button"
@@ -135,6 +140,6 @@ export default function PhotoGallery({ photos }: PhotoGalleryProps) {
           )}
         </div>
       )}
-    </>
+    </div>
   );
 }

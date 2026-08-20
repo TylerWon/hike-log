@@ -1,5 +1,10 @@
 import type { Hike } from "../../schemas/hike";
 
+import grouse_grind_1 from "../assets/images/grouse_grind_1.avif";
+import joffre_lakes_1 from "../assets/images/joffre_lakes_1.avif";
+import joffre_lakes_2 from "../assets/images/joffre_lakes_2.avif";
+import joffre_lakes_3 from "../assets/images/joffre_lakes_3.avif";
+
 export const HIKE_FIXTURE_1: Hike = {
   allTrailsUrl: "https://www.alltrails.com/trail/canada/british-columbia/joffre-lakes",
   date: "2026-05-17",
@@ -15,19 +20,19 @@ export const HIKE_FIXTURE_1: Hike = {
       caption: "Upper Joffre Lake with the glacier above",
       hikeId: BigInt(1),
       id: BigInt(1),
-      srcUrl: "https://images.unsplash.com/photo-1780945008220-7edb56992450?w=800&h=600&fit=crop&auto=format",
+      srcUrl: new URL(joffre_lakes_1, import.meta.url).href,
     },
     {
       caption: "Middle lake — flat calm in the morning",
       hikeId: BigInt(1),
       id: BigInt(2),
-      srcUrl: "https://images.unsplash.com/photo-1763593862654-52f923fa7d85?w=1200&h=800&fit=crop&auto=format",
+      srcUrl: new URL(joffre_lakes_2, import.meta.url).href,
     },
     {
       caption: "Upper lake with the Matier Glacier",
       hikeId: BigInt(1),
       id: BigInt(3),
-      srcUrl: "https://images.unsplash.com/photo-1723045278368-1ec8fee8d6b6?w=1200&h=800&fit=crop&auto=format",
+      srcUrl: new URL(joffre_lakes_3, import.meta.url).href,
     },
   ],
   rating: 4.5,
@@ -49,7 +54,7 @@ export const HIKE_FIXTURE_2: Hike = {
       caption: "Dense forest corridor on the Grind",
       hikeId: BigInt(2),
       id: BigInt(2),
-      srcUrl: "https://images.unsplash.com/photo-1562593028-1fe2d15bde36?w=800&h=600&fit=crop&auto=format",
+      srcUrl: new URL(grouse_grind_1, import.meta.url).href,
     },
   ],
   rating: 3,
