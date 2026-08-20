@@ -39,7 +39,7 @@ function renderHikeLog() {
 }
 
 describe("HikeLog", () => {
-  test("displays an error when there was an issue getting the hike data", async () => {
+  test("displays an error when there was an issue getting the hikes", async () => {
     vi.mocked(fetchHikes).mockRejectedValue(new Error("Failed to retrieve hikes"));
 
     const screen = await renderHikeLog();
@@ -48,7 +48,7 @@ describe("HikeLog", () => {
     await expect.element(error).toBeInTheDocument();
   });
 
-  test("displays title and skeletons of the overall stats and hike cards when hike data is loading", async () => {
+  test("displays title and skeletons of the overall stats and hike cards when hikes are loading", async () => {
     vi.mocked(fetchHikes).mockImplementation(() => new Promise(() => {})); // never resolves
 
     const screen = await renderHikeLog();
@@ -75,7 +75,7 @@ describe("HikeLog", () => {
     expect(cardSkeletons.length).toEqual(5);
   });
 
-  test("displays title, overall stats, and hike cards when hike data exists", async () => {
+  test("displays title, overall stats, and hike cards when hikes are loaded", async () => {
     const hikes = [HIKE_FIXTURE_1, HIKE_FIXTURE_2];
     vi.mocked(fetchHikes).mockResolvedValue(hikes);
 
