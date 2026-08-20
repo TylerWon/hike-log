@@ -4,7 +4,7 @@ import { render } from "vitest-browser-react";
 import StatValueSkeleton from "../../components/StatValueSkeleton";
 
 describe("StatValueSkeleton", () => {
-  test("component looks correct", async () => {
+  test("displays component", async () => {
     const screen = await render(<StatValueSkeleton widthClass="w-16" />);
     const component = screen.getByRole("region", { name: "Statistic skeleton" });
     await expect(component).toMatchScreenshot();
