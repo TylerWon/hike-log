@@ -12,7 +12,7 @@ type Hike struct {
 	// The name of the trail that was hiked.
 	TrailName string `json:"trailName"`
 
-	// The date of the hike. YYYY-MM-DD format.
+	// The date of the hike. ISO 8601 format (i.e. YYYY-MM-DDTHH:MM:SSZ), but the time is automatically set to midnight.
 	Date datatypes.Date `json:"date"`
 
 	// Notes on the hike.
