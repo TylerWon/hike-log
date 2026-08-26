@@ -34,8 +34,6 @@ func (h *Handler) HealthCheck(c *gin.Context) {
 /*
 Returns all Hikes in reverse chronological order by Date.
 
-Input: None
-
 Returns:
 1. 200 OK when successful
 - Response body: list of Hikes
@@ -59,7 +57,7 @@ func (h *Handler) ListHike(c *gin.Context) {
 /*
 Creates a Hike.
 
-Input: CreateHikeRequest
+Request body: createHikeRequest
 
 Returns:
 1. 201 Created when successful

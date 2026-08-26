@@ -16,13 +16,13 @@ func registerCustomValidators() (*validator.Validate, error) {
 		return nil, errors.New("Failed to register custom validators")
 	}
 
-	v.RegisterValidation("halfstep", halfStepValidator)
+	v.RegisterValidation("divisibleByHalf", divisibleByHalfValidator)
 
 	return v, nil
 }
 
 // Checks that a float field is divisible by 0.5
-func halfStepValidator(fl validator.FieldLevel) bool {
+func divisibleByHalfValidator(fl validator.FieldLevel) bool {
 	switch fl.Field().Kind() {
 	case reflect.Float32, reflect.Float64:
 		doubled := fl.Field().Float() * 2

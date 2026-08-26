@@ -21,27 +21,27 @@ func (suite *validationTestSuite) SetupTest() {
 	suite.v = v
 }
 
-func (suite *validationTestSuite) TestHalfStepValidator_ReturnsErrorForNonFloatField() {
+func (suite *validationTestSuite) TestDivisibleByHalfValidator_ReturnsErrorForNonFloatField() {
 	type sample struct {
-		Value string `binding:"halfstep"`
+		Value string `binding:"divisibleByHalf"`
 	}
 
 	err := suite.v.Struct(sample{"test"})
 	suite.NotNil(err)
 }
 
-func (suite *validationTestSuite) TestHalfStepValidator_ReturnsErrorForValueUndivisibleByPointFive() {
+func (suite *validationTestSuite) TestDivisibleByHalfValidator_ReturnsErrorForValueUndivisibleByPointFive() {
 	type sample struct {
-		Value float32 `binding:"halfstep"`
+		Value float32 `binding:"divisibleByHalf"`
 	}
 
 	err := suite.v.Struct(sample{2.3})
 	suite.NotNil(err)
 }
 
-func (suite *validationTestSuite) TestHalfStepValidator_ValidationSucceeds() {
+func (suite *validationTestSuite) TestDivisibleByHalfValidator_ValidationSucceeds() {
 	type sample struct {
-		Value float32 `binding:"halfstep"`
+		Value float32 `binding:"divisibleByHalf"`
 	}
 
 	err := suite.v.Struct(sample{0})
