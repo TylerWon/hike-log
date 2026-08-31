@@ -73,7 +73,11 @@ func (h *Handler) CreateHike(c *gin.Context) {
 		return
 	}
 
-	parsed, _ := time.Parse("2006-01-02", req.Date) // convert date string to datatypes.Date
+	parsed, err := time.Parse("2006-01-02", req.Date) // convert date string to datatypes.Date
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
 	hike := models.Hike{
 		TrailName:     req.TrailName,
