@@ -18,13 +18,28 @@ func New(handler *handler.Handler) *gin.Engine {
 	router.Use(cors.New(corsConfig))
 
 	// Routes
+	// /api
 	api := router.Group("/api")
 	{
+		// /api/v1
 		v1 := api.Group("/v1")
 		{
+			// /api/v1/hikes
 			hikes := v1.Group("/hikes")
-			hikes.GET("", handler.ListHike)
-			hikes.POST("", handler.CreateHike)
+			{
+				hikes.GET("", handler.ListHike)
+				hikes.POST("", handler.CreateHike)
+
+				// /api/v1/hikes/:hikeId
+				hike := hikes.Group("/:hikeId")
+				{
+					// /api/v1/hikes/:hikeId/photos
+					photos := hike.Group("/photos")
+					{
+						photos.POST("/upload-url", handler.CreatePhotoUploadURL)
+					}
+				}
+			}
 		}
 	}
 

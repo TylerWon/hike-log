@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/TylerWon/hike-log/backend/aws"
 	"github.com/TylerWon/hike-log/backend/database"
 	"github.com/TylerWon/hike-log/backend/handler"
 	"github.com/TylerWon/hike-log/backend/router"
@@ -23,7 +24,12 @@ func main() {
 		log.Fatal("Failed to setup database: ", err)
 	}
 
-	handler := handler.New(db)
+	s3Client, err := aws.NewS3Client()
+	if err != nil {
+		log.Fatal("Failed to setup S3 client: ", err)
+	}
+
+	handler := handler.New(db, s3Client)
 	router := router.New(handler)
 
 	router.Run()

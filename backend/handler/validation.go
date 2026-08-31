@@ -9,7 +9,15 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-// Registers custom struct field validators to be used by Gin for model validation
+var VALID_IMAGE_TYPES = map[string]struct{}{
+	"image/jpeg": {},
+	"image/png":  {},
+	"image/webp": {},
+	"image/heic": {},
+	"image/heif": {},
+}
+
+// Registers custom struct field validators used by Gin for model validation
 func registerCustomValidators() (*validator.Validate, error) {
 	v, ok := binding.Validator.Engine().(*validator.Validate)
 	if !ok {
@@ -17,6 +25,7 @@ func registerCustomValidators() (*validator.Validate, error) {
 	}
 
 	v.RegisterValidation("divisibleByHalf", divisibleByHalfValidator)
+	v.RegisterValidation("validImageType", validImageTypeValidator)
 
 	return v, nil
 }
@@ -31,4 +40,13 @@ func divisibleByHalfValidator(fl validator.FieldLevel) bool {
 	default:
 		return false
 	}
+}
+
+// Checks that a string field is a valid image MIME type
+func validImageTypeValidator(fl validator.FieldLevel) bool {
+	if fl.Field().Kind() != reflect.String {
+		return false
+	}
+	_, ok := VALID_IMAGE_TYPES[fl.Field().String()]
+	return ok
 }
