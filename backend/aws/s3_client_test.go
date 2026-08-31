@@ -2,10 +2,13 @@ package aws_test
 
 import (
 	"context"
+	"errors"
 	"net/url"
 	"testing"
 
 	"github.com/TylerWon/hike-log/backend/aws"
+	"github.com/TylerWon/hike-log/backend/testutils"
+	v4 "github.com/aws/aws-sdk-go-v2/aws/signer/v4"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -13,8 +16,21 @@ type s3ClientTestSuite struct {
 	suite.Suite
 }
 
+func (suite *s3ClientTestSuite) TestCreatePresignedPutObjectRequest_ReturnsErrorWhenRequestCannotBeCreated() {
+	mockPresignClient := testutils.MockPresignClient{
+		PresignPutObjectResult: &v4.PresignedHTTPRequest{},
+		PresignPutObjectError:  errors.New("Simulated error"),
+	}
+
+	s3Client, err := aws.NewS3Client(mockPresignClient)
+	suite.NoError(err)
+
+	_, err = s3Client.CreatePresignedPutObjectRequest(context.TODO(), "abc", "application/json", 5000)
+	suite.Error(err)
+}
+
 func (suite *s3ClientTestSuite) TestCreatePresignedPutObjectRequest_ReturnsPresignedRequest() {
-	s3Client, err := aws.NewS3Client()
+	s3Client, err := aws.NewS3Client(nil)
 	suite.NoError(err)
 
 	request, err := s3Client.CreatePresignedPutObjectRequest(context.TODO(), "abc", "application/json", 5000)

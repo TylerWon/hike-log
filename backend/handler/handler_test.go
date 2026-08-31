@@ -78,7 +78,7 @@ type handlerTestSuite struct {
 
 func (suite *handlerTestSuite) SetupTest() {
 	suite.db = testutils.SetupTestDB(suite.T())
-	s3Client, err := aws.NewS3Client()
+	s3Client, err := aws.NewS3Client(nil)
 	if err != nil {
 		suite.T().Fatal("Failed to setup S3 client: ", err)
 	}
