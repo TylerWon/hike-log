@@ -6,9 +6,9 @@ services:
     ports:
       - "8080:8080"
     volumes:
+      # Mount backend source code so changes are reflected without restarting the container
       - ./backend:/app
-    env_file:
-      ./backend/.env.local
+    env_file: ./backend/.env.local
     healthcheck:
       test: ["CMD-SHELL", "wget -O - http://localhost:8080/health"]
       interval: 10s
@@ -16,6 +16,8 @@ services:
       retries: 5
     depends_on:
       db:
+        condition: service_healthy
+      localstack:
         condition: service_healthy
     restart: unless-stopped
 
@@ -26,10 +28,11 @@ services:
     ports:
       - "5173:5173"
     volumes:
+      # Mounts frontend source code so changes are reflected without restarting the container
       - ./frontend:/app
+      # Anonymous volume that shields the container's node_modules from being overwritten by the above bind mount
       - /app/node_modules
-    env_file:
-      ./frontend/.env.local
+    env_file: ./frontend/.env.local
     depends_on:
       backend:
         condition: service_healthy
@@ -44,6 +47,7 @@ services:
       - POSTGRES_PASSWORD=password
       - POSTGRES_DB=hike_log
     volumes:
+      # Named volume for database data
       - pg_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d hike_log"]
@@ -52,5 +56,35 @@ services:
       retries: 5
     restart: unless-stopped
 
+  localstack:
+    image: localstack/localstack
+    ports:
+      # LocalStack Gateway
+      - "127.0.0.1:4566:4566"
+      # External services port range
+      - "127.0.0.1:4510-4559:4510-4559"
+      # LocalStack HTTPS Gateway
+      - "127.0.0.1:443:443"
+    environment:
+      - LOCALSTACK_AUTH_TOKEN=${LOCALSTACK_AUTH_TOKEN}
+      # Persist LocalStack data to a volume
+      - PERSISTENCE=1
+    volumes:
+      # Named volume for LocalStack's data
+      - localstack:/var/lib/localstack
+      # Gives LocalStack access to the host Docker daemon
+      - /var/run/docker.sock:/var/run/docker.sock
+      # Mounts LocalStack init script as a ready hook that runs once the container is healthy
+      - ./localstack/init.sh:/etc/localstack/init/ready.d/init.sh
+      # Mounts CORS configuration file used in init script
+      - ./localstack/cors.json:/etc/localstack/init/ready.d/cors.json
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
 volumes:
   pg_data:
+  localstack:
