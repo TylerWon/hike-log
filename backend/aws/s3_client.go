@@ -22,8 +22,8 @@ type S3Client struct {
 	bucketName    string
 }
 
-// Creates a new S3Client. The presign client can optionally be provided.
-func NewS3Client(presignClient presignClient) (*S3Client, error) {
+// Creates a new S3Client.
+func NewS3Client() (*S3Client, error) {
 	// LoadDefaultConfig loads configuration from all the SDK's supported sources (env vars, ~/.aws/config,
 	// ~/.aws/credentials) and resolves the credentials using the SDK's default credential chain
 	cfg, err := config.LoadDefaultConfig(context.TODO())
@@ -32,15 +32,18 @@ func NewS3Client(presignClient presignClient) (*S3Client, error) {
 	}
 	client := s3.NewFromConfig(cfg)
 
-	if presignClient == nil {
-		presignClient = s3.NewPresignClient(client)
-	}
+	presignClient := s3.NewPresignClient(client)
 
 	bucketName := os.Getenv("AWS_S3_BUCKET_NAME")
 	if bucketName == "" {
 		return nil, errors.New("Bucket name could not be retrieved from AWS_S3_BUCKET_NAME env var")
 	}
 
+	return &S3Client{presignClient, bucketName}, nil
+}
+
+// Creates a new S3Client. Allows injection of internal dependencies to allow for mocking.
+func newTestS3Client(presignClient presignClient, bucketName string) (*S3Client, error) {
 	return &S3Client{presignClient, bucketName}, nil
 }
 

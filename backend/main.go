@@ -24,7 +24,7 @@ func main() {
 		log.Fatal("Failed to setup database: ", err)
 	}
 
-	s3Client, err := aws.NewS3Client(nil)
+	s3Client, err := aws.NewS3Client()
 	if err != nil {
 		log.Fatal("Failed to setup S3 client: ", err)
 	}
