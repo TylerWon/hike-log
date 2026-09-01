@@ -5,6 +5,7 @@ package handler_test
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -239,7 +240,7 @@ func (suite *handlerTestSuite) TestCreatePhotoUploadURL_ReturnsErrorWhenContentL
 	hikes := createHikes(suite.T(), suite.db, 1)
 
 	body := map[string]any{
-		"contentType":   "text/html",
+		"contentType":   "image/jpeg",
 		"contentLength": -1,
 	}
 	reqBody := serializeRequestBodyToJSON(suite.T(), body)
@@ -247,12 +248,31 @@ func (suite *handlerTestSuite) TestCreatePhotoUploadURL_ReturnsErrorWhenContentL
 	suite.Equal(http.StatusBadRequest, res.Code)
 
 	body = map[string]any{
-		"contentType":   "text/html",
+		"contentType":   "image/jpeg",
 		"contentLength": 10485761,
 	}
 	reqBody = serializeRequestBodyToJSON(suite.T(), body)
 	res = sendRequest(suite.router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos/upload-url", hikes[0].ID), reqBody)
 	suite.Equal(http.StatusBadRequest, res.Code)
+}
+
+func (suite *handlerTestSuite) TestCreatePhotoUploadURL_ReturnsErrorWhenURLCannotBeCreated() {
+	s3Client := aws.MockS3Client{
+		CreatePresignedPutObjectRequestResult: nil,
+		CreatePresignedPutObjectRequestError:  errors.New("Something went wrong"),
+	}
+	handler := handler.New(suite.db, s3Client)
+	suite.router = testutils.SetupTestRouter(handler)
+
+	hikes := createHikes(suite.T(), suite.db, 1)
+
+	body := map[string]any{
+		"contentType":   "image/jpeg",
+		"contentLength": 100,
+	}
+	reqBody := serializeRequestBodyToJSON(suite.T(), body)
+	res := sendRequest(suite.router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos/upload-url", hikes[0].ID), reqBody)
+	suite.Equal(http.StatusInternalServerError, res.Code)
 }
 
 func (suite *handlerTestSuite) TestCreatePhotoUploadURL_ReturnsUploadURL() {

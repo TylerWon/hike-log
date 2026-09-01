@@ -18,11 +18,11 @@ import (
 // A Handler handles the request-response lifecycle for API routes.
 type Handler struct {
 	db       *gorm.DB
-	s3Client *aws.S3Client
+	s3Client aws.S3Client
 }
 
 // Creates a new Handler
-func New(db *gorm.DB, s3Client *aws.S3Client) *Handler {
+func New(db *gorm.DB, s3Client aws.S3Client) *Handler {
 	_, err := registerCustomValidators()
 	if err != nil {
 		log.Fatal("Error while registering custom validators: ", err)
