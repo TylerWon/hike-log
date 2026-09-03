@@ -73,8 +73,9 @@ func createHikes(t *testing.T, store store.Store, n int) []models.Hike {
 
 type handlerTestSuite struct {
 	suite.Suite
-	router *gin.Engine
-	store  store.Store
+	router   *gin.Engine
+	store    store.Store
+	s3Client aws.S3Client
 }
 
 func (suite *handlerTestSuite) SetupTest() {
@@ -83,12 +84,28 @@ func (suite *handlerTestSuite) SetupTest() {
 	if err != nil {
 		suite.T().Fatal("Failed to setup S3 client: ", err)
 	}
-	handler := handler.New(suite.store, s3Client)
+	suite.s3Client = s3Client
+	handler := handler.New(suite.store, suite.s3Client)
 	suite.router = testutils.SetupTestRouter(handler)
 }
 
 func (suite *handlerTestSuite) TearDownTest() {
 	testutils.TeardownTestDB(suite.T(), suite.store)
+}
+
+func (suite *handlerTestSuite) TestListHike_ReturnsErrorWhenDBErrors() {
+	createHikes(suite.T(), suite.store, 2) // create before store is mocked
+
+	mockStore := store.MockStore{
+		ListHikesResult: nil,
+		ListHikesError:  errors.New("Something went wrong"),
+	}
+	handler := handler.New(&mockStore, suite.s3Client)
+	suite.router = testutils.SetupTestRouter(handler)
+
+	res := sendRequest(suite.router, http.MethodGet, "/api/v1/hikes", nil)
+
+	suite.Equal(http.StatusInternalServerError, res.Code)
 }
 
 func (suite *handlerTestSuite) TestListHike_ReturnsNothingWhenThereAreNoHikes() {
@@ -151,6 +168,28 @@ func (suite *handlerTestSuite) TestCreateHike_ReturnsErrorWhenRequestBodyIsMissi
 	res := sendRequest(suite.router, http.MethodPost, "/api/v1/hikes", reqBody)
 
 	suite.Equal(http.StatusBadRequest, res.Code)
+}
+
+func (suite *handlerTestSuite) TestCreateHike_ReturnsErrorWhenDBErrors() {
+	mockStore := store.MockStore{CreateHikeError: errors.New("Something went wrong")}
+	handler := handler.New(&mockStore, suite.s3Client)
+	suite.router = testutils.SetupTestRouter(handler)
+
+	body := map[string]any{
+		"trailName":     "Trail 1",
+		"date":          "2026-02-05",
+		"notes":         "Easy hike",
+		"rating":        4.5,
+		"difficulty":    3,
+		"distance":      8.2,
+		"elevationGain": 1200,
+		"duration":      60,
+		"allTrailsUrl":  "https://www.alltrails.com/",
+	}
+	reqBody := serializeRequestBodyToJSON(suite.T(), body)
+	res := sendRequest(suite.router, http.MethodPost, "/api/v1/hikes", reqBody)
+
+	suite.Equal(http.StatusInternalServerError, res.Code)
 }
 
 func (suite *handlerTestSuite) TestCreateHike_CreatesAndReturnsHike() {
@@ -256,15 +295,34 @@ func (suite *handlerTestSuite) TestCreatePhotoUploadURL_ReturnsErrorWhenContentL
 	suite.Equal(http.StatusBadRequest, res.Code)
 }
 
-func (suite *handlerTestSuite) TestCreatePhotoUploadURL_ReturnsErrorWhenURLCannotBeCreated() {
-	s3Client := aws.MockS3Client{
+func (suite *handlerTestSuite) TestCreatePhotoUploadURL_ReturnsErrorWhenS3Errors() {
+	mockS3Client := aws.MockS3Client{
 		CreatePresignedPutObjectRequestResult: nil,
 		CreatePresignedPutObjectRequestError:  errors.New("Something went wrong"),
 	}
-	handler := handler.New(suite.store, s3Client)
+	handler := handler.New(suite.store, &mockS3Client)
 	suite.router = testutils.SetupTestRouter(handler)
 
 	hikes := createHikes(suite.T(), suite.store, 1)
+
+	body := map[string]any{
+		"contentType":   "image/jpeg",
+		"contentLength": 100,
+	}
+	reqBody := serializeRequestBodyToJSON(suite.T(), body)
+	res := sendRequest(suite.router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos/upload-url", hikes[0].ID), reqBody)
+	suite.Equal(http.StatusInternalServerError, res.Code)
+}
+
+func (suite *handlerTestSuite) TestCreatePhotoUploadURL_ReturnsErrorWhenDBErrors() {
+	hikes := createHikes(suite.T(), suite.store, 1) // create before store is mocked
+
+	mockStore := store.MockStore{
+		GetHikeByIDResult: nil,
+		GetHikeByIDError:  errors.New("Something went wrong"),
+	}
+	handler := handler.New(&mockStore, suite.s3Client)
+	suite.router = testutils.SetupTestRouter(handler)
 
 	body := map[string]any{
 		"contentType":   "image/jpeg",
