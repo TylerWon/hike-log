@@ -12,7 +12,7 @@ type MockPresignClient struct {
 	PresignPutObjectError  error
 }
 
-func (m MockPresignClient) PresignPutObject(ctx context.Context, params *s3.PutObjectInput, optFns ...func(*s3.PresignOptions)) (*v4.PresignedHTTPRequest, error) {
+func (m *MockPresignClient) PresignPutObject(ctx context.Context, params *s3.PutObjectInput, optFns ...func(*s3.PresignOptions)) (*v4.PresignedHTTPRequest, error) {
 	return m.PresignPutObjectResult, m.PresignPutObjectError
 }
 
@@ -21,6 +21,6 @@ type MockS3Client struct {
 	CreatePresignedPutObjectRequestError  error
 }
 
-func (m MockS3Client) CreatePresignedPutObjectRequest(ctx context.Context, objectKey string, contentType string, contentLength int64) (*v4.PresignedHTTPRequest, error) {
+func (m *MockS3Client) CreatePresignedPutObjectRequest(ctx context.Context, objectKey string, contentType string, contentLength int64) (*v4.PresignedHTTPRequest, error) {
 	return m.CreatePresignedPutObjectRequestResult, m.CreatePresignedPutObjectRequestError
 }

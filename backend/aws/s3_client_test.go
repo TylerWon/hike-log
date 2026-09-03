@@ -20,7 +20,7 @@ func (suite *s3ClientTestSuite) TestCreatePresignedPutObjectRequest_ReturnsError
 		PresignPutObjectError:  errors.New("Simulated error"),
 	}
 
-	s3Client, err := NewTestS3Client(mockPresignClient, "hike-log")
+	s3Client, err := NewTestS3Client(&mockPresignClient, "hike-log")
 	suite.NoError(err)
 
 	_, err = s3Client.CreatePresignedPutObjectRequest(context.TODO(), "abc", "application/json", 5000)
