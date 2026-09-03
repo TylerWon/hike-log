@@ -9,6 +9,7 @@ import (
 
 	"github.com/TylerWon/hike-log/backend/aws"
 	"github.com/TylerWon/hike-log/backend/models"
+	"github.com/TylerWon/hike-log/backend/store"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"gorm.io/datatypes"
@@ -17,18 +18,18 @@ import (
 
 // A Handler handles the request-response lifecycle for API routes.
 type Handler struct {
-	db       *gorm.DB
+	store    store.Store
 	s3Client aws.S3Client
 }
 
 // Creates a new Handler
-func New(db *gorm.DB, s3Client aws.S3Client) *Handler {
+func New(store store.Store, s3Client aws.S3Client) *Handler {
 	_, err := registerCustomValidators()
 	if err != nil {
 		log.Fatal("Error while registering custom validators: ", err)
 	}
 
-	return &Handler{db, s3Client}
+	return &Handler{store, s3Client}
 }
 
 // Returns a 200 OK. Used for application health checks.
@@ -43,12 +44,10 @@ Returns:
  1. 200 OK and a list of [models.Hike] when successful
  2. 500 Internal Server Error and an error message when there is an unexpected error
 */
-func (h *Handler) ListHike(c *gin.Context) {
-	var hikes []models.Hike
-
-	result := h.db.Preload("Photos").Order("date desc, trail_name").Find(&hikes)
-	if result.Error != nil {
-		log.Println("Failed to list hikes: ", result.Error)
+func (h *Handler) ListHikes(c *gin.Context) {
+	hikes, err := h.store.ListHikes()
+	if err != nil {
+		log.Println("Failed to list hikes: ", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": http.StatusText(http.StatusInternalServerError)})
 		return
 	}
@@ -90,10 +89,9 @@ func (h *Handler) CreateHike(c *gin.Context) {
 		Duration:      req.Duration,
 		AllTrailsUrl:  req.AllTrailsUrl,
 	}
-
-	result := h.db.Create(&hike)
-	if result.Error != nil {
-		log.Println("Failed to create hike: ", result.Error)
+	err = h.store.CreateHike(&hike)
+	if err != nil {
+		log.Println("Failed to create hike: ", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": http.StatusText(http.StatusInternalServerError)})
 		return
 	}
@@ -124,14 +122,13 @@ func (h *Handler) CreatePhotoUploadURL(c *gin.Context) {
 		return
 	}
 
-	var hike models.Hike
-	result := h.db.First(&hike, params.HikeID)
-	if result.Error != nil {
-		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+	_, err := h.store.GetHikeByID(params.HikeID)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{"error": http.StatusText(http.StatusNotFound)})
 			return
 		}
-		log.Printf("Failed to get hike (id=%d): %v", params.HikeID, result.Error)
+		log.Printf("Failed to get hike (id=%d): %v", params.HikeID, err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": http.StatusText(http.StatusInternalServerError)})
 		return
 	}

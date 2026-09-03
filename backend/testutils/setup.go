@@ -8,12 +8,12 @@ import (
 	"github.com/TylerWon/hike-log/backend/database"
 	"github.com/TylerWon/hike-log/backend/handler"
 	"github.com/TylerWon/hike-log/backend/router"
+	"github.com/TylerWon/hike-log/backend/store"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 // Configures a fresh database to use during testing.
-func SetupTestDB(t *testing.T) *gorm.DB {
+func SetupTestDB(t *testing.T) store.Store {
 	// Connect to the default 'postgres' database
 	dbConfig := database.DbConfig{
 		DbHost:     os.Getenv("DB_HOST"),
@@ -45,24 +45,22 @@ func SetupTestDB(t *testing.T) *gorm.DB {
 		t.Fatal("Failed to create test database: ", result.Error)
 	}
 
-	// Setup the test database
+	// Create store connected to the test database
 	dbConfig.DbName = testDbName
-	db, err = database.Setup(dbConfig)
+	store, err := store.New(dbConfig)
 	if err != nil {
 		t.Fatal("Failed to setup test database: ", err)
 	}
 
-	return db
+	return store
 }
 
 // Cleans up the test database.
-func TeardownTestDB(t *testing.T, db *gorm.DB) {
-	sqlDb, err := db.DB()
+func TeardownTestDB(t *testing.T, store store.Store) {
+	err := store.CloseConnection()
 	if err != nil {
 		t.Fatal("Failed to teardown test database: ", err)
 	}
-
-	sqlDb.Close()
 }
 
 // Configures a router to use during testing.

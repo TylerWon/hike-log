@@ -17,11 +17,11 @@ import (
 	"github.com/TylerWon/hike-log/backend/aws"
 	"github.com/TylerWon/hike-log/backend/handler"
 	"github.com/TylerWon/hike-log/backend/models"
+	"github.com/TylerWon/hike-log/backend/store"
 	"github.com/TylerWon/hike-log/backend/testutils"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/suite"
 	"gorm.io/datatypes"
-	"gorm.io/gorm"
 )
 
 // Serializes a request body to JSON
@@ -42,7 +42,7 @@ func sendRequest(router *gin.Engine, method string, endpoint string, body io.Rea
 }
 
 // Creates n Hikes, saves them to the database, and returns them.
-func createHikes(t *testing.T, db *gorm.DB, n int) []models.Hike {
+func createHikes(t *testing.T, store store.Store, n int) []models.Hike {
 	var hikes []models.Hike
 	for i := range n {
 		photos := []models.Photo{
@@ -63,9 +63,9 @@ func createHikes(t *testing.T, db *gorm.DB, n int) []models.Hike {
 		hikes = append(hikes, hike)
 	}
 
-	result := db.Create(&hikes)
-	if result.Error != nil {
-		t.Fatal("Failed to create hikes: ", result.Error)
+	err := store.CreateHikes(hikes)
+	if err != nil {
+		t.Fatal("Failed to create hikes: ", err)
 	}
 
 	return hikes
@@ -74,21 +74,21 @@ func createHikes(t *testing.T, db *gorm.DB, n int) []models.Hike {
 type handlerTestSuite struct {
 	suite.Suite
 	router *gin.Engine
-	db     *gorm.DB
+	store  store.Store
 }
 
 func (suite *handlerTestSuite) SetupTest() {
-	suite.db = testutils.SetupTestDB(suite.T())
+	suite.store = testutils.SetupTestDB(suite.T())
 	s3Client, err := aws.NewS3Client()
 	if err != nil {
 		suite.T().Fatal("Failed to setup S3 client: ", err)
 	}
-	handler := handler.New(suite.db, s3Client)
+	handler := handler.New(suite.store, s3Client)
 	suite.router = testutils.SetupTestRouter(handler)
 }
 
 func (suite *handlerTestSuite) TearDownTest() {
-	testutils.TeardownTestDB(suite.T(), suite.db)
+	testutils.TeardownTestDB(suite.T(), suite.store)
 }
 
 func (suite *handlerTestSuite) TestListHike_ReturnsNothingWhenThereAreNoHikes() {
@@ -104,7 +104,7 @@ func (suite *handlerTestSuite) TestListHike_ReturnsNothingWhenThereAreNoHikes() 
 }
 
 func (suite *handlerTestSuite) TestListHike_ReturnsHikes() {
-	hikes := createHikes(suite.T(), suite.db, 2)
+	hikes := createHikes(suite.T(), suite.store, 2)
 
 	res := sendRequest(suite.router, http.MethodGet, "/api/v1/hikes", nil)
 
@@ -212,7 +212,7 @@ func (suite *handlerTestSuite) TestCreatePhotoUploadURL_ReturnsErrorWhenHikeDoes
 }
 
 func (suite *handlerTestSuite) TestCreatePhotoUploadURL_ReturnsErrorWhenRequestBodyIsMissingFields() {
-	hikes := createHikes(suite.T(), suite.db, 1)
+	hikes := createHikes(suite.T(), suite.store, 1)
 
 	body := map[string]any{
 		"contentLength": 100,
@@ -224,7 +224,7 @@ func (suite *handlerTestSuite) TestCreatePhotoUploadURL_ReturnsErrorWhenRequestB
 }
 
 func (suite *handlerTestSuite) TestCreatePhotoUploadURL_ReturnsErrorWhenContentTypeIsNotAnImageType() {
-	hikes := createHikes(suite.T(), suite.db, 1)
+	hikes := createHikes(suite.T(), suite.store, 1)
 
 	body := map[string]any{
 		"contentType":   "text/html",
@@ -237,7 +237,7 @@ func (suite *handlerTestSuite) TestCreatePhotoUploadURL_ReturnsErrorWhenContentT
 }
 
 func (suite *handlerTestSuite) TestCreatePhotoUploadURL_ReturnsErrorWhenContentLengthIsOutsideBounds() {
-	hikes := createHikes(suite.T(), suite.db, 1)
+	hikes := createHikes(suite.T(), suite.store, 1)
 
 	body := map[string]any{
 		"contentType":   "image/jpeg",
@@ -261,10 +261,10 @@ func (suite *handlerTestSuite) TestCreatePhotoUploadURL_ReturnsErrorWhenURLCanno
 		CreatePresignedPutObjectRequestResult: nil,
 		CreatePresignedPutObjectRequestError:  errors.New("Something went wrong"),
 	}
-	handler := handler.New(suite.db, s3Client)
+	handler := handler.New(suite.store, s3Client)
 	suite.router = testutils.SetupTestRouter(handler)
 
-	hikes := createHikes(suite.T(), suite.db, 1)
+	hikes := createHikes(suite.T(), suite.store, 1)
 
 	body := map[string]any{
 		"contentType":   "image/jpeg",
@@ -276,7 +276,7 @@ func (suite *handlerTestSuite) TestCreatePhotoUploadURL_ReturnsErrorWhenURLCanno
 }
 
 func (suite *handlerTestSuite) TestCreatePhotoUploadURL_ReturnsUploadURL() {
-	hikes := createHikes(suite.T(), suite.db, 1)
+	hikes := createHikes(suite.T(), suite.store, 1)
 
 	body := map[string]any{
 		"contentType":   "image/jpeg",

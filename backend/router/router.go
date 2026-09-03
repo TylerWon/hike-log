@@ -27,7 +27,7 @@ func New(handler *handler.Handler) *gin.Engine {
 			// /api/v1/hikes
 			hikes := v1.Group("/hikes")
 			{
-				hikes.GET("", handler.ListHike)
+				hikes.GET("", handler.ListHikes)
 				hikes.POST("", handler.CreateHike)
 
 				// /api/v1/hikes/:hikeId
