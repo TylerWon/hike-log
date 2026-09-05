@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	dbConfig := database.DbConfig{
+	dbConfig := database.DBConfig{
 		DbHost:     os.Getenv("DB_HOST"),
 		DbPort:     os.Getenv("DB_PORT"),
 		DbName:     os.Getenv("DB_NAME"),

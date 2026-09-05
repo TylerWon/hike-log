@@ -7,6 +7,7 @@ import (
 
 // Store handles all interactions with the database for the app.
 type Store interface {
+	CloseConnection() error
 	CreateHike(hike *models.Hike) error
 	CreateHikes(hike []models.Hike) error
 	GetHikeByID(id uint) (*models.Hike, error)
@@ -19,7 +20,7 @@ type storeImpl struct {
 }
 
 // Creates a Store connected to the database specified in the given dbConfig.
-func New(dbConfig database.DbConfig) (Store, error) {
+func New(dbConfig database.DBConfig) (Store, error) {
 	db, err := database.Connect(dbConfig)
 	if err != nil {
 		return nil, err

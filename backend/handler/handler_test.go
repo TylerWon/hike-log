@@ -74,23 +74,26 @@ func createHikes(t *testing.T, store store.Store, n int) []models.Hike {
 type handlerTestSuite struct {
 	suite.Suite
 	router   *gin.Engine
+	suiteDB  *testutils.TestSuiteDB
 	store    store.Store
 	s3Client aws.S3Client
 }
 
-func (suite *handlerTestSuite) SetupTest() {
-	suite.store = testutils.SetupTestDB(suite.T())
-	s3Client, err := aws.NewS3Client()
-	if err != nil {
-		suite.T().Fatal("Failed to setup S3 client: ", err)
-	}
-	suite.s3Client = s3Client
-	handler := handler.New(suite.store, suite.s3Client)
-	suite.router = testutils.SetupTestRouter(handler)
+func (suite *handlerTestSuite) SetupSuite() {
+	suite.suiteDB = testutils.NewTestSuiteDB(suite.T())
+	suite.store = testutils.NewStore(suite.T(), suite.suiteDB)
 }
 
-func (suite *handlerTestSuite) TearDownTest() {
-	testutils.TeardownTestDB(suite.T(), suite.store)
+func (suite *handlerTestSuite) TearDownSuite() {
+	testutils.TeardownStore(suite.T(), suite.store)
+	suite.suiteDB.Teardown(suite.T())
+}
+
+func (suite *handlerTestSuite) SetupTest() {
+	suite.suiteDB.Reset(suite.T())
+	suite.s3Client = testutils.NewS3Client(suite.T())
+	handler := handler.New(suite.store, suite.s3Client)
+	suite.router = testutils.NewRouter(suite.T(), handler)
 }
 
 func (suite *handlerTestSuite) TestListHike_ReturnsErrorWhenDBErrors() {
@@ -101,7 +104,7 @@ func (suite *handlerTestSuite) TestListHike_ReturnsErrorWhenDBErrors() {
 		ListHikesError:  errors.New("Something went wrong"),
 	}
 	handler := handler.New(&mockStore, suite.s3Client)
-	suite.router = testutils.SetupTestRouter(handler)
+	suite.router = testutils.NewRouter(suite.T(), handler)
 
 	res := sendRequest(suite.router, http.MethodGet, "/api/v1/hikes", nil)
 
@@ -173,7 +176,7 @@ func (suite *handlerTestSuite) TestCreateHike_ReturnsErrorWhenRequestBodyIsMissi
 func (suite *handlerTestSuite) TestCreateHike_ReturnsErrorWhenDBErrors() {
 	mockStore := store.MockStore{CreateHikeError: errors.New("Something went wrong")}
 	handler := handler.New(&mockStore, suite.s3Client)
-	suite.router = testutils.SetupTestRouter(handler)
+	suite.router = testutils.NewRouter(suite.T(), handler)
 
 	body := map[string]any{
 		"trailName":     "Trail 1",
@@ -301,7 +304,7 @@ func (suite *handlerTestSuite) TestCreatePhotoUploadURL_ReturnsErrorWhenS3Errors
 		CreatePresignedPutObjectRequestError:  errors.New("Something went wrong"),
 	}
 	handler := handler.New(suite.store, &mockS3Client)
-	suite.router = testutils.SetupTestRouter(handler)
+	suite.router = testutils.NewRouter(suite.T(), handler)
 
 	hikes := createHikes(suite.T(), suite.store, 1)
 
@@ -322,7 +325,7 @@ func (suite *handlerTestSuite) TestCreatePhotoUploadURL_ReturnsErrorWhenDBErrors
 		GetHikeByIDError:  errors.New("Something went wrong"),
 	}
 	handler := handler.New(&mockStore, suite.s3Client)
-	suite.router = testutils.SetupTestRouter(handler)
+	suite.router = testutils.NewRouter(suite.T(), handler)
 
 	body := map[string]any{
 		"contentType":   "image/jpeg",
