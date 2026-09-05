@@ -16,8 +16,8 @@ type S3Client interface {
 	CreatePresignedPutObjectRequest(ctx context.Context, objectKey string, contentType string, contentLength int64) (*v4.PresignedHTTPRequest, error)
 }
 
-// S3ClientImpl is an implementation of the S3Client interface.
-type S3ClientImpl struct {
+// s3ClientImpl is an implementation of the S3Client interface.
+type s3ClientImpl struct {
 	presignClient presignClient
 	bucketName    string
 }
@@ -44,16 +44,16 @@ func NewS3Client() (S3Client, error) {
 		return nil, errors.New("Bucket name could not be retrieved from AWS_S3_BUCKET_NAME env var")
 	}
 
-	return &S3ClientImpl{presignClient, bucketName}, nil
+	return &s3ClientImpl{presignClient, bucketName}, nil
 }
 
 // Creates a new S3Client. Allows injection of internal dependencies to allow for mocking.
 func NewTestS3Client(presignClient presignClient, bucketName string) (S3Client, error) {
-	return &S3ClientImpl{presignClient, bucketName}, nil
+	return &s3ClientImpl{presignClient, bucketName}, nil
 }
 
 // Creates a presigned request that can be used to put an object in the bucket. The request expires after 900 seconds.
-func (s3Client *S3ClientImpl) CreatePresignedPutObjectRequest(
+func (s3Client *s3ClientImpl) CreatePresignedPutObjectRequest(
 	ctx context.Context,
 	objectKey string,
 	contentType string,

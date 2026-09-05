@@ -3,21 +3,19 @@ package store
 import (
 	"github.com/TylerWon/hike-log/backend/database"
 	"github.com/TylerWon/hike-log/backend/models"
-	"gorm.io/gorm"
 )
 
 // Store handles all interactions with the database for the app.
 type Store interface {
-	CloseConnection() error
 	CreateHike(hike *models.Hike) error
 	CreateHikes(hike []models.Hike) error
 	GetHikeByID(id uint) (*models.Hike, error)
 	ListHikes() ([]models.Hike, error)
 }
 
-// StoreImpl is an implementation of the Store interface.
-type StoreImpl struct {
-	db *gorm.DB
+// storeImpl is an implementation of the Store interface.
+type storeImpl struct {
+	db database.Database
 }
 
 // Creates a Store connected to the database specified in the given dbConfig.
@@ -32,11 +30,11 @@ func New(dbConfig database.DbConfig) (Store, error) {
 		return nil, err
 	}
 
-	return &StoreImpl{db}, nil
+	return &storeImpl{db}, nil
 }
 
 // Ends the connection to the database.
-func (store *StoreImpl) CloseConnection() error {
+func (store *storeImpl) CloseConnection() error {
 	sqlDb, err := store.db.DB()
 	if err != nil {
 		return err
@@ -51,7 +49,7 @@ func (store *StoreImpl) CloseConnection() error {
 }
 
 // Creates a Hike.
-func (store *StoreImpl) CreateHike(hike *models.Hike) error {
+func (store *storeImpl) CreateHike(hike *models.Hike) error {
 	result := store.db.Create(hike)
 
 	if result.Error != nil {
@@ -62,7 +60,7 @@ func (store *StoreImpl) CreateHike(hike *models.Hike) error {
 }
 
 // Creates Hikes.
-func (store *StoreImpl) CreateHikes(hike []models.Hike) error {
+func (store *storeImpl) CreateHikes(hike []models.Hike) error {
 	result := store.db.Create(hike)
 
 	if result.Error != nil {
@@ -73,7 +71,7 @@ func (store *StoreImpl) CreateHikes(hike []models.Hike) error {
 }
 
 // Returns the Hike with the given ID.
-func (store *StoreImpl) GetHikeByID(id uint) (*models.Hike, error) {
+func (store *storeImpl) GetHikeByID(id uint) (*models.Hike, error) {
 	var hike models.Hike
 
 	result := store.db.First(&hike, id)
@@ -84,8 +82,8 @@ func (store *StoreImpl) GetHikeByID(id uint) (*models.Hike, error) {
 	return &hike, nil
 }
 
-// Returns all Hikes in reverse chronological order by Date.
-func (store *StoreImpl) ListHikes() ([]models.Hike, error) {
+// Returns all Hikes and their Photos in reverse chronological order by Date.
+func (store *storeImpl) ListHikes() ([]models.Hike, error) {
 	var hikes []models.Hike
 
 	result := store.db.Preload("Photos").Order("date desc, trail_name").Find(&hikes)
