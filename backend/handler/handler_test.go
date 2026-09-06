@@ -3,13 +3,10 @@
 package handler_test
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
-	"net/http/httptest"
 	"net/url"
 	"testing"
 	"time"
@@ -23,53 +20,6 @@ import (
 	"github.com/stretchr/testify/suite"
 	"gorm.io/datatypes"
 )
-
-// Serializes a request body to JSON
-func serializeRequestBodyToJSON(t *testing.T, body map[string]any) *bytes.Reader {
-	rawBody, err := json.Marshal(body)
-	if err != nil {
-		t.Fatal(err)
-	}
-	return bytes.NewReader(rawBody)
-}
-
-// Sends a request to the provided endpoint and returns the response.
-func sendRequest(router *gin.Engine, method string, endpoint string, body io.Reader) *httptest.ResponseRecorder {
-	req := httptest.NewRequest(method, endpoint, body)
-	res := httptest.NewRecorder()
-	router.ServeHTTP(res, req)
-	return res
-}
-
-// Creates n Hikes, saves them to the database, and returns them.
-func createHikes(t *testing.T, store store.Store, n int) []models.Hike {
-	var hikes []models.Hike
-	for i := range n {
-		photos := []models.Photo{
-			{SrcUrl: "https://example.com/photo-1.jpg"},
-		}
-		hike := models.Hike{
-			TrailName:     fmt.Sprintf("Trail %d", i),
-			Date:          datatypes.Date(time.Date(2026, 1, i, 0, 0, 0, 0, time.UTC)),
-			Notes:         "Hike notes",
-			Rating:        3,
-			Difficulty:    9,
-			Distance:      10,
-			ElevationGain: 1000,
-			Duration:      120,
-			AllTrailsUrl:  "https://www.alltrails.com/",
-			Photos:        photos,
-		}
-		hikes = append(hikes, hike)
-	}
-
-	err := store.CreateHikes(hikes)
-	if err != nil {
-		t.Fatal("Failed to create hikes: ", err)
-	}
-
-	return hikes
-}
 
 type handlerTestSuite struct {
 	suite.Suite
@@ -97,22 +47,22 @@ func (suite *handlerTestSuite) SetupTest() {
 }
 
 func (suite *handlerTestSuite) TestListHike_ReturnsErrorWhenDBErrors() {
-	createHikes(suite.T(), suite.store, 2) // create before store is mocked
+	testutils.CreateHikes(suite.T(), suite.store, 2, true) // create before store is mocked
 
 	mockStore := store.MockStore{
 		ListHikesResult: nil,
 		ListHikesError:  errors.New("Something went wrong"),
 	}
 	handler := handler.New(&mockStore, suite.s3Client)
-	suite.router = testutils.NewRouter(suite.T(), handler)
+	router := testutils.NewRouter(suite.T(), handler)
 
-	res := sendRequest(suite.router, http.MethodGet, "/api/v1/hikes", nil)
+	res := testutils.SendRequest(router, http.MethodGet, "/api/v1/hikes", nil)
 
 	suite.Equal(http.StatusInternalServerError, res.Code)
 }
 
 func (suite *handlerTestSuite) TestListHike_ReturnsNothingWhenThereAreNoHikes() {
-	res := sendRequest(suite.router, http.MethodGet, "/api/v1/hikes", nil)
+	res := testutils.SendRequest(suite.router, http.MethodGet, "/api/v1/hikes", nil)
 
 	suite.Equal(http.StatusOK, res.Code)
 
@@ -124,9 +74,9 @@ func (suite *handlerTestSuite) TestListHike_ReturnsNothingWhenThereAreNoHikes() 
 }
 
 func (suite *handlerTestSuite) TestListHike_ReturnsHikes() {
-	hikes := createHikes(suite.T(), suite.store, 2)
+	hikes := testutils.CreateHikes(suite.T(), suite.store, 2, true)
 
-	res := sendRequest(suite.router, http.MethodGet, "/api/v1/hikes", nil)
+	res := testutils.SendRequest(suite.router, http.MethodGet, "/api/v1/hikes", nil)
 
 	suite.Equal(http.StatusOK, res.Code)
 
@@ -151,8 +101,8 @@ func (suite *handlerTestSuite) TestCreateHike_ReturnsErrorWhenRequestBodyHasInva
 		"duration":      60.5, // float instead of uint
 		"allTrailsUrl":  "https://www.alltrails.com/",
 	}
-	reqBody := serializeRequestBodyToJSON(suite.T(), body)
-	res := sendRequest(suite.router, http.MethodPost, "/api/v1/hikes", reqBody)
+	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
+	res := testutils.SendRequest(suite.router, http.MethodPost, "/api/v1/hikes", reqBody)
 
 	suite.Equal(http.StatusBadRequest, res.Code)
 }
@@ -167,8 +117,8 @@ func (suite *handlerTestSuite) TestCreateHike_ReturnsErrorWhenRequestBodyIsMissi
 		"duration":      60,
 		"allTrailsUrl":  "https://www.alltrails.com/",
 	}
-	reqBody := serializeRequestBodyToJSON(suite.T(), body)
-	res := sendRequest(suite.router, http.MethodPost, "/api/v1/hikes", reqBody)
+	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
+	res := testutils.SendRequest(suite.router, http.MethodPost, "/api/v1/hikes", reqBody)
 
 	suite.Equal(http.StatusBadRequest, res.Code)
 }
@@ -176,7 +126,7 @@ func (suite *handlerTestSuite) TestCreateHike_ReturnsErrorWhenRequestBodyIsMissi
 func (suite *handlerTestSuite) TestCreateHike_ReturnsErrorWhenDBErrors() {
 	mockStore := store.MockStore{CreateHikeError: errors.New("Something went wrong")}
 	handler := handler.New(&mockStore, suite.s3Client)
-	suite.router = testutils.NewRouter(suite.T(), handler)
+	router := testutils.NewRouter(suite.T(), handler)
 
 	body := map[string]any{
 		"trailName":     "Trail 1",
@@ -189,8 +139,8 @@ func (suite *handlerTestSuite) TestCreateHike_ReturnsErrorWhenDBErrors() {
 		"duration":      60,
 		"allTrailsUrl":  "https://www.alltrails.com/",
 	}
-	reqBody := serializeRequestBodyToJSON(suite.T(), body)
-	res := sendRequest(suite.router, http.MethodPost, "/api/v1/hikes", reqBody)
+	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
+	res := testutils.SendRequest(router, http.MethodPost, "/api/v1/hikes", reqBody)
 
 	suite.Equal(http.StatusInternalServerError, res.Code)
 }
@@ -207,8 +157,8 @@ func (suite *handlerTestSuite) TestCreateHike_CreatesAndReturnsHike() {
 		"duration":      60,
 		"allTrailsUrl":  "https://www.alltrails.com/",
 	}
-	reqBody := serializeRequestBodyToJSON(suite.T(), body)
-	res := sendRequest(suite.router, http.MethodPost, "/api/v1/hikes", reqBody)
+	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
+	res := testutils.SendRequest(suite.router, http.MethodPost, "/api/v1/hikes", reqBody)
 
 	suite.Equal(http.StatusCreated, res.Code)
 
@@ -236,8 +186,8 @@ func (suite *handlerTestSuite) TestCreatePhotoUploadURL_ReturnsErrorWhenHikeIDIs
 		"contentType":   "image/jpeg",
 		"contentLength": 100,
 	}
-	reqBody := serializeRequestBodyToJSON(suite.T(), body)
-	res := sendRequest(suite.router, http.MethodPost, "/api/v1/hikes/abc/photos/upload-url", reqBody)
+	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
+	res := testutils.SendRequest(suite.router, http.MethodPost, "/api/v1/hikes/abc/photos/upload-url", reqBody)
 
 	suite.Equal(http.StatusBadRequest, res.Code)
 }
@@ -247,54 +197,54 @@ func (suite *handlerTestSuite) TestCreatePhotoUploadURL_ReturnsErrorWhenHikeDoes
 		"contentType":   "image/jpeg",
 		"contentLength": 100,
 	}
-	reqBody := serializeRequestBodyToJSON(suite.T(), body)
-	res := sendRequest(suite.router, http.MethodPost, "/api/v1/hikes/1/photos/upload-url", reqBody)
+	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
+	res := testutils.SendRequest(suite.router, http.MethodPost, "/api/v1/hikes/1/photos/upload-url", reqBody)
 
 	suite.Equal(http.StatusNotFound, res.Code)
 }
 
 func (suite *handlerTestSuite) TestCreatePhotoUploadURL_ReturnsErrorWhenRequestBodyIsMissingFields() {
-	hikes := createHikes(suite.T(), suite.store, 1)
+	hikes := testutils.CreateHikes(suite.T(), suite.store, 1, true)
 
 	body := map[string]any{
 		"contentLength": 100,
 	}
-	reqBody := serializeRequestBodyToJSON(suite.T(), body)
-	res := sendRequest(suite.router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos/upload-url", hikes[0].ID), reqBody)
+	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
+	res := testutils.SendRequest(suite.router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos/upload-url", hikes[0].ID), reqBody)
 
 	suite.Equal(http.StatusBadRequest, res.Code)
 }
 
 func (suite *handlerTestSuite) TestCreatePhotoUploadURL_ReturnsErrorWhenContentTypeIsNotAnImageType() {
-	hikes := createHikes(suite.T(), suite.store, 1)
+	hikes := testutils.CreateHikes(suite.T(), suite.store, 1, true)
 
 	body := map[string]any{
 		"contentType":   "text/html",
 		"contentLength": 100,
 	}
-	reqBody := serializeRequestBodyToJSON(suite.T(), body)
-	res := sendRequest(suite.router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos/upload-url", hikes[0].ID), reqBody)
+	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
+	res := testutils.SendRequest(suite.router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos/upload-url", hikes[0].ID), reqBody)
 
 	suite.Equal(http.StatusBadRequest, res.Code)
 }
 
 func (suite *handlerTestSuite) TestCreatePhotoUploadURL_ReturnsErrorWhenContentLengthIsOutsideBounds() {
-	hikes := createHikes(suite.T(), suite.store, 1)
+	hikes := testutils.CreateHikes(suite.T(), suite.store, 1, true)
 
 	body := map[string]any{
 		"contentType":   "image/jpeg",
 		"contentLength": -1,
 	}
-	reqBody := serializeRequestBodyToJSON(suite.T(), body)
-	res := sendRequest(suite.router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos/upload-url", hikes[0].ID), reqBody)
+	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
+	res := testutils.SendRequest(suite.router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos/upload-url", hikes[0].ID), reqBody)
 	suite.Equal(http.StatusBadRequest, res.Code)
 
 	body = map[string]any{
 		"contentType":   "image/jpeg",
 		"contentLength": 10485761,
 	}
-	reqBody = serializeRequestBodyToJSON(suite.T(), body)
-	res = sendRequest(suite.router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos/upload-url", hikes[0].ID), reqBody)
+	reqBody = testutils.SerializeJSONRequestBody(suite.T(), body)
+	res = testutils.SendRequest(suite.router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos/upload-url", hikes[0].ID), reqBody)
 	suite.Equal(http.StatusBadRequest, res.Code)
 }
 
@@ -304,47 +254,47 @@ func (suite *handlerTestSuite) TestCreatePhotoUploadURL_ReturnsErrorWhenS3Errors
 		CreatePresignedPutObjectRequestError:  errors.New("Something went wrong"),
 	}
 	handler := handler.New(suite.store, &mockS3Client)
-	suite.router = testutils.NewRouter(suite.T(), handler)
+	router := testutils.NewRouter(suite.T(), handler)
 
-	hikes := createHikes(suite.T(), suite.store, 1)
+	hikes := testutils.CreateHikes(suite.T(), suite.store, 1, true)
 
 	body := map[string]any{
 		"contentType":   "image/jpeg",
 		"contentLength": 100,
 	}
-	reqBody := serializeRequestBodyToJSON(suite.T(), body)
-	res := sendRequest(suite.router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos/upload-url", hikes[0].ID), reqBody)
+	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
+	res := testutils.SendRequest(router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos/upload-url", hikes[0].ID), reqBody)
 	suite.Equal(http.StatusInternalServerError, res.Code)
 }
 
 func (suite *handlerTestSuite) TestCreatePhotoUploadURL_ReturnsErrorWhenDBErrors() {
-	hikes := createHikes(suite.T(), suite.store, 1) // create before store is mocked
+	hikes := testutils.CreateHikes(suite.T(), suite.store, 1, true) // create before store is mocked
 
 	mockStore := store.MockStore{
 		GetHikeByIDResult: nil,
 		GetHikeByIDError:  errors.New("Something went wrong"),
 	}
 	handler := handler.New(&mockStore, suite.s3Client)
-	suite.router = testutils.NewRouter(suite.T(), handler)
+	router := testutils.NewRouter(suite.T(), handler)
 
 	body := map[string]any{
 		"contentType":   "image/jpeg",
 		"contentLength": 100,
 	}
-	reqBody := serializeRequestBodyToJSON(suite.T(), body)
-	res := sendRequest(suite.router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos/upload-url", hikes[0].ID), reqBody)
+	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
+	res := testutils.SendRequest(router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos/upload-url", hikes[0].ID), reqBody)
 	suite.Equal(http.StatusInternalServerError, res.Code)
 }
 
 func (suite *handlerTestSuite) TestCreatePhotoUploadURL_ReturnsUploadURL() {
-	hikes := createHikes(suite.T(), suite.store, 1)
+	hikes := testutils.CreateHikes(suite.T(), suite.store, 1, true)
 
 	body := map[string]any{
 		"contentType":   "image/jpeg",
 		"contentLength": 100,
 	}
-	reqBody := serializeRequestBodyToJSON(suite.T(), body)
-	res := sendRequest(suite.router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos/upload-url", hikes[0].ID), reqBody)
+	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
+	res := testutils.SendRequest(suite.router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos/upload-url", hikes[0].ID), reqBody)
 
 	suite.Equal(http.StatusOK, res.Code)
 
