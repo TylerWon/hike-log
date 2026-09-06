@@ -9,6 +9,8 @@ import (
 )
 
 // Database is a thin wrapper around the gorm.DB type.
+// Chainable methods (Preload, Order) return a Database. Terminal methods (Find, First, etc.) return *gorm.DB so the
+// GORM result can be exposed.
 type Database interface {
 	AutoMigrate(dst ...interface{}) error
 	Create(value interface{}) (tx *gorm.DB)
@@ -16,8 +18,8 @@ type Database interface {
 	Exec(sql string, values ...interface{}) (tx *gorm.DB)
 	Find(dest interface{}, conds ...interface{}) (tx *gorm.DB)
 	First(dest interface{}, conds ...interface{}) (tx *gorm.DB)
-	Order(value interface{}) (tx *gorm.DB)
-	Preload(query string, args ...interface{}) (tx *gorm.DB)
+	Order(value interface{}) Database
+	Preload(query string, args ...interface{}) Database
 	Raw(sql string, values ...interface{}) (tx *gorm.DB)
 }
 
@@ -59,14 +61,14 @@ func (database *databaseImpl) AutoMigrate(dst ...interface{}) error {
 	return database.db.AutoMigrate(dst...)
 }
 
-// Returns `*sql.DB`.
-func (database *databaseImpl) DB() (*sql.DB, error) {
-	return database.db.DB()
-}
-
 // Inserts value, returning the inserted data's primary key in value's id
 func (database *databaseImpl) Create(value interface{}) (tx *gorm.DB) {
 	return database.db.Create(value)
+}
+
+// Returns `*sql.DB`.
+func (database *databaseImpl) DB() (*sql.DB, error) {
+	return database.db.DB()
 }
 
 // Executes raw SQL DDL (INSERT, UPDATE, DELETE, etc.)
@@ -85,13 +87,13 @@ func (database *databaseImpl) First(dest interface{}, conds ...interface{}) (tx 
 }
 
 // Specifies the order when retrieving records from database
-func (database *databaseImpl) Order(value interface{}) (tx *gorm.DB) {
-	return database.db.Order(value)
+func (database *databaseImpl) Order(value interface{}) Database {
+	return &databaseImpl{database.db.Order(value)}
 }
 
 // Preload associations with given conditions
-func (database *databaseImpl) Preload(query string, args ...interface{}) (tx *gorm.DB) {
-	return database.db.Preload(query, args...)
+func (database *databaseImpl) Preload(query string, args ...interface{}) Database {
+	return &databaseImpl{database.db.Preload(query, args...)}
 }
 
 // Executes a raw SQL query (SELECT)

@@ -47,7 +47,6 @@ func (suite *handlerTestSuite) SetupTest() {
 }
 
 func (suite *handlerTestSuite) TestListHike_ReturnsErrorWhenDBErrors() {
-	testutils.CreateHikes(suite.T(), suite.store, 2, true) // create before store is mocked
 
 	mockStore := store.MockStore{
 		ListHikesResult: nil,
@@ -55,6 +54,8 @@ func (suite *handlerTestSuite) TestListHike_ReturnsErrorWhenDBErrors() {
 	}
 	handler := handler.New(&mockStore, suite.s3Client)
 	router := testutils.NewRouter(suite.T(), handler)
+
+	testutils.CreateHikes(suite.T(), 2, suite.store, true, true)
 
 	res := testutils.SendRequest(router, http.MethodGet, "/api/v1/hikes", nil)
 
@@ -74,7 +75,7 @@ func (suite *handlerTestSuite) TestListHike_ReturnsNothingWhenThereAreNoHikes() 
 }
 
 func (suite *handlerTestSuite) TestListHike_ReturnsHikes() {
-	hikes := testutils.CreateHikes(suite.T(), suite.store, 2, true)
+	hikes := testutils.CreateHikes(suite.T(), 2, suite.store, true, true)
 
 	res := testutils.SendRequest(suite.router, http.MethodGet, "/api/v1/hikes", nil)
 
@@ -204,7 +205,7 @@ func (suite *handlerTestSuite) TestCreatePhotoUploadURL_ReturnsErrorWhenHikeDoes
 }
 
 func (suite *handlerTestSuite) TestCreatePhotoUploadURL_ReturnsErrorWhenRequestBodyIsMissingFields() {
-	hikes := testutils.CreateHikes(suite.T(), suite.store, 1, true)
+	hikes := testutils.CreateHikes(suite.T(), 1, suite.store, false, true)
 
 	body := map[string]any{
 		"contentLength": 100,
@@ -216,7 +217,7 @@ func (suite *handlerTestSuite) TestCreatePhotoUploadURL_ReturnsErrorWhenRequestB
 }
 
 func (suite *handlerTestSuite) TestCreatePhotoUploadURL_ReturnsErrorWhenContentTypeIsNotAnImageType() {
-	hikes := testutils.CreateHikes(suite.T(), suite.store, 1, true)
+	hikes := testutils.CreateHikes(suite.T(), 1, suite.store, false, true)
 
 	body := map[string]any{
 		"contentType":   "text/html",
@@ -229,7 +230,7 @@ func (suite *handlerTestSuite) TestCreatePhotoUploadURL_ReturnsErrorWhenContentT
 }
 
 func (suite *handlerTestSuite) TestCreatePhotoUploadURL_ReturnsErrorWhenContentLengthIsOutsideBounds() {
-	hikes := testutils.CreateHikes(suite.T(), suite.store, 1, true)
+	hikes := testutils.CreateHikes(suite.T(), 1, suite.store, false, true)
 
 	body := map[string]any{
 		"contentType":   "image/jpeg",
@@ -256,7 +257,7 @@ func (suite *handlerTestSuite) TestCreatePhotoUploadURL_ReturnsErrorWhenS3Errors
 	handler := handler.New(suite.store, &mockS3Client)
 	router := testutils.NewRouter(suite.T(), handler)
 
-	hikes := testutils.CreateHikes(suite.T(), suite.store, 1, true)
+	hikes := testutils.CreateHikes(suite.T(), 1, suite.store, false, true)
 
 	body := map[string]any{
 		"contentType":   "image/jpeg",
@@ -268,14 +269,14 @@ func (suite *handlerTestSuite) TestCreatePhotoUploadURL_ReturnsErrorWhenS3Errors
 }
 
 func (suite *handlerTestSuite) TestCreatePhotoUploadURL_ReturnsErrorWhenDBErrors() {
-	hikes := testutils.CreateHikes(suite.T(), suite.store, 1, true) // create before store is mocked
-
 	mockStore := store.MockStore{
 		GetHikeByIDResult: nil,
 		GetHikeByIDError:  errors.New("Something went wrong"),
 	}
 	handler := handler.New(&mockStore, suite.s3Client)
 	router := testutils.NewRouter(suite.T(), handler)
+
+	hikes := testutils.CreateHikes(suite.T(), 1, suite.store, false, true)
 
 	body := map[string]any{
 		"contentType":   "image/jpeg",
@@ -287,7 +288,7 @@ func (suite *handlerTestSuite) TestCreatePhotoUploadURL_ReturnsErrorWhenDBErrors
 }
 
 func (suite *handlerTestSuite) TestCreatePhotoUploadURL_ReturnsUploadURL() {
-	hikes := testutils.CreateHikes(suite.T(), suite.store, 1, true)
+	hikes := testutils.CreateHikes(suite.T(), 1, suite.store, false, true)
 
 	body := map[string]any{
 		"contentType":   "image/jpeg",

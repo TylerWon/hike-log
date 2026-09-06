@@ -10,13 +10,12 @@ import (
 	"gorm.io/datatypes"
 )
 
-// Creates n Hikes and returns them. Saves them to the database if specified.
-func CreateHikes(t *testing.T, store store.Store, n int, save bool) []models.Hike {
+// Creates n Hikes and returns them. Optionally can add Photos to the Hikes and save the Hikes to the database.
+func CreateHikes(t *testing.T, n int, store store.Store, photos bool, save bool) []models.Hike {
+	t.Helper()
+
 	var hikes []models.Hike
 	for i := range n {
-		photos := []models.Photo{
-			{SrcUrl: "https://example.com/photo-1.jpg"},
-		}
 		hike := models.Hike{
 			TrailName:     fmt.Sprintf("Trail %d", i),
 			Date:          datatypes.Date(time.Date(2026, 1, i, 0, 0, 0, 0, time.UTC)),
@@ -27,8 +26,14 @@ func CreateHikes(t *testing.T, store store.Store, n int, save bool) []models.Hik
 			ElevationGain: 1000,
 			Duration:      120,
 			AllTrailsUrl:  "https://www.alltrails.com/",
-			Photos:        photos,
 		}
+
+		if photos {
+			hike.Photos = []models.Photo{
+				{SrcUrl: "https://example.com/photo-1.jpg"},
+			}
+		}
+
 		hikes = append(hikes, hike)
 	}
 

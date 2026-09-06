@@ -34,6 +34,11 @@ func New(dbConfig database.DBConfig) (Store, error) {
 	return &storeImpl{db}, nil
 }
 
+// Creates a new Store. Allows injection of internal dependencies to allow for mocking.
+func NewTestStore(db database.Database) Store {
+	return &storeImpl{db}
+}
+
 // Ends the connection to the database.
 func (store *storeImpl) CloseConnection() error {
 	sqlDb, err := store.db.DB()
