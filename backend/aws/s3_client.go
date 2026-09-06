@@ -48,8 +48,8 @@ func NewS3Client() (S3Client, error) {
 }
 
 // Creates a new S3Client. Allows injection of internal dependencies to allow for mocking.
-func NewTestS3Client(presignClient presignClient, bucketName string) (S3Client, error) {
-	return &s3ClientImpl{presignClient, bucketName}, nil
+func NewTestS3Client(presignClient presignClient, bucketName string) S3Client {
+	return &s3ClientImpl{presignClient, bucketName}
 }
 
 // Creates a presigned request that can be used to put an object in the bucket. The request expires after 900 seconds.
