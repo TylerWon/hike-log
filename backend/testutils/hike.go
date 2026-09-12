@@ -10,8 +10,8 @@ import (
 	"gorm.io/datatypes"
 )
 
-// Creates n Hikes and returns them. Optionally can add Photos to the Hikes and save the Hikes to the database.
-func CreateHikes(t *testing.T, n int, store store.Store, photos bool, save bool) []models.Hike {
+// Constructs n Hikes and returns them. Optionally can add Photos to the Hikes and save the Hikes to the database.
+func ConstructHikes(t *testing.T, n int, store store.Store, photos bool, save bool) []models.Hike {
 	t.Helper()
 
 	var hikes []models.Hike
@@ -38,7 +38,7 @@ func CreateHikes(t *testing.T, n int, store store.Store, photos bool, save bool)
 	}
 
 	if save {
-		err := store.CreateHikes(hikes)
+		err := store.CreateModel(hikes)
 		if err != nil {
 			t.Fatal("Failed to save hikes: ", err)
 		}

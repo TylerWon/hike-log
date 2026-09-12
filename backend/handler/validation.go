@@ -4,9 +4,12 @@ import (
 	"errors"
 	"math"
 	"reflect"
+	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
+	"github.com/google/uuid"
 )
 
 var VALID_IMAGE_TYPES = map[string]struct{}{
@@ -26,6 +29,7 @@ func registerCustomValidators() (*validator.Validate, error) {
 
 	v.RegisterValidation("divisibleByHalf", divisibleByHalfValidator)
 	v.RegisterValidation("validImageType", validImageTypeValidator)
+	v.RegisterValidation("validObjectKey", validObjectKeyValidator)
 
 	return v, nil
 }
@@ -49,4 +53,32 @@ func validImageTypeValidator(fl validator.FieldLevel) bool {
 	}
 	_, ok := VALID_IMAGE_TYPES[fl.Field().String()]
 	return ok
+}
+
+// Checks that a string field is a valid S3 object key. Format is "hikes/<hike_id>/photos/<uuid>".
+func validObjectKeyValidator(fl validator.FieldLevel) bool {
+	if fl.Field().Kind() != reflect.String {
+		return false
+	}
+
+	parts := strings.Split(fl.Field().String(), "/")
+	if len(parts) != 4 || parts[0] != "hikes" {
+		return false
+	}
+
+	_, err := strconv.ParseUint(parts[1], 10, 64)
+	if err != nil {
+		return false
+	}
+
+	if parts[2] != "photos" {
+		return false
+	}
+
+	_, err = uuid.Parse(parts[3])
+	if err != nil {
+		return false
+	}
+
+	return true
 }

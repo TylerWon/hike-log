@@ -8,8 +8,7 @@ import (
 // Store handles all interactions with the database for the app.
 type Store interface {
 	CloseConnection() error
-	CreateHike(hike *models.Hike) error
-	CreateHikes(hike []models.Hike) error
+	CreateModel(model interface{}) error
 	GetHikeByID(id uint) (*models.Hike, error)
 	ListHikes() ([]models.Hike, error)
 }
@@ -54,20 +53,9 @@ func (store *storeImpl) CloseConnection() error {
 	return nil
 }
 
-// Creates a Hike.
-func (store *storeImpl) CreateHike(hike *models.Hike) error {
-	result := store.db.Create(hike)
-
-	if result.Error != nil {
-		return result.Error
-	}
-
-	return nil
-}
-
-// Creates Hikes.
-func (store *storeImpl) CreateHikes(hike []models.Hike) error {
-	result := store.db.Create(hike)
+// Creates the provided model/models.
+func (store *storeImpl) CreateModel(model interface{}) error {
+	result := store.db.Create(model)
 
 	if result.Error != nil {
 		return result.Error

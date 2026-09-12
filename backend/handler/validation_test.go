@@ -27,16 +27,16 @@ func (suite *validationTestSuite) TestDivisibleByHalfValidator_ReturnsErrorForNo
 	}
 
 	err := suite.validator.Struct(sample{"test"})
-	suite.NotNil(err)
+	suite.Error(err)
 }
 
-func (suite *validationTestSuite) TestDivisibleByHalfValidator_ReturnsErrorForValueUndivisibleByPointFive() {
+func (suite *validationTestSuite) TestDivisibleByHalfValidator_ReturnsErrorForValueUndivisibleByHalf() {
 	type sample struct {
 		Value float32 `binding:"divisibleByHalf"`
 	}
 
 	err := suite.validator.Struct(sample{2.3})
-	suite.NotNil(err)
+	suite.Error(err)
 }
 
 func (suite *validationTestSuite) TestDivisibleByHalfValidator_ValidationSucceeds() {
@@ -45,13 +45,13 @@ func (suite *validationTestSuite) TestDivisibleByHalfValidator_ValidationSucceed
 	}
 
 	err := suite.validator.Struct(sample{0})
-	suite.Nil(err)
+	suite.NoError(err)
 
 	err = suite.validator.Struct(sample{0.5})
-	suite.Nil(err)
+	suite.NoError(err)
 
 	err = suite.validator.Struct(sample{1.0})
-	suite.Nil(err)
+	suite.NoError(err)
 }
 
 func (suite *validationTestSuite) TestValidImageTypeValidator_ReturnsErrorForNonStringField() {
@@ -60,22 +60,22 @@ func (suite *validationTestSuite) TestValidImageTypeValidator_ReturnsErrorForNon
 	}
 
 	err := suite.validator.Struct(sample{2})
-	suite.NotNil(err)
+	suite.Error(err)
 }
 
-func (suite *validationTestSuite) TestValidImageTypeValidator_ReturnsErrorForNonImageType() {
+func (suite *validationTestSuite) TestValidImageTypeValidator_ReturnsErrorForInvalidImageType() {
 	type sample struct {
 		Value string `binding:"validImageType"`
 	}
 
 	err := suite.validator.Struct(sample{"text/html"})
-	suite.NotNil(err)
+	suite.Error(err)
 
 	err = suite.validator.Struct(sample{"application/json"})
-	suite.NotNil(err)
+	suite.Error(err)
 
 	err = suite.validator.Struct(sample{"video/mp4"})
-	suite.NotNil(err)
+	suite.Error(err)
 }
 
 func (suite *validationTestSuite) TestValidImageTypeValidator_ValidationSucceeds() {
@@ -84,19 +84,58 @@ func (suite *validationTestSuite) TestValidImageTypeValidator_ValidationSucceeds
 	}
 
 	err := suite.validator.Struct(sample{"image/jpeg"})
-	suite.Nil(err)
+	suite.NoError(err)
 
 	err = suite.validator.Struct(sample{"image/png"})
-	suite.Nil(err)
+	suite.NoError(err)
 
 	err = suite.validator.Struct(sample{"image/webp"})
-	suite.Nil(err)
+	suite.NoError(err)
 
 	err = suite.validator.Struct(sample{"image/heic"})
-	suite.Nil(err)
+	suite.NoError(err)
 
 	err = suite.validator.Struct(sample{"image/heif"})
-	suite.Nil(err)
+	suite.NoError(err)
+}
+
+func (suite *validationTestSuite) TestValidObjectKeyValidator_ReturnsErrorForNonStringField() {
+	type sample struct {
+		Value bool `binding:"validObjectKey"`
+	}
+
+	err := suite.validator.Struct(sample{true})
+	suite.Error(err)
+}
+
+func (suite *validationTestSuite) TestValidObjectKeyValidator_ReturnsErrorForInvalidObjectKey() {
+	type sample struct {
+		Value string `binding:"validObjectKey"`
+	}
+
+	err := suite.validator.Struct(sample{"hikes/"})
+	suite.Error(err)
+
+	err = suite.validator.Struct(sample{"hikes/asgbsdfg123/"})
+	suite.Error(err)
+
+	err = suite.validator.Struct(sample{"hikes/1/files/"})
+	suite.Error(err)
+
+	err = suite.validator.Struct(sample{"hikes/1/photos/1"})
+	suite.Error(err)
+
+	err = suite.validator.Struct(sample{"hikes/1/photos/asdf091123asdf"})
+	suite.Error(err)
+}
+
+func (suite *validationTestSuite) TestValidObjectKeyValidator_ValidationSucceeds() {
+	type sample struct {
+		Value string `binding:"validObjectKey"`
+	}
+
+	err := suite.validator.Struct(sample{"hikes/1/photos/acde070d-8c4c-4f0d-9d8a-162843c10333"})
+	suite.NoError(err)
 }
 
 func TestValidationTestSuite(t *testing.T) {

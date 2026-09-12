@@ -36,6 +36,7 @@ func New(handler *handler.Handler) *gin.Engine {
 					// /api/v1/hikes/:hikeId/photos
 					photos := hike.Group("/photos")
 					{
+						photos.POST("/", handler.CreatePhoto)
 						photos.POST("/upload-url", handler.CreatePhotoUploadURL)
 					}
 				}

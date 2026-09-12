@@ -36,3 +36,11 @@ type createPhotoUploadURLRequest struct {
 	// Size of the image in bytes. Must be between 0 to 10 MB.
 	ContentLength uint `json:"contentLength" binding:"required,gte=0,lte=10485760"`
 }
+
+type createPhotoRequest struct {
+	// The key that is assigned to the photo in the S3 bucket. Must be in the format "hikes/<hike_id>/photos/<uuid>".
+	ObjectKey string `json:"objectKey" binding:"required,validObjectKey"`
+
+	// Caption for the photo.
+	Caption string `json:"caption"`
+}
