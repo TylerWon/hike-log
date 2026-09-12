@@ -11,6 +11,9 @@ type Photo struct {
 	// Caption for the photo.
 	Caption string `json:"caption"`
 
+	// The position of the photo in the display order. Starts at 1.
+	DisplayOrder uint `json:"displayOrder"`
+
 	// The Hike the photo was taken on.
 	HikeID uint `json:"hikeId"`
 }

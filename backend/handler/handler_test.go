@@ -1,5 +1,3 @@
-// By adding _test to the package name, this file belongs to its own package separate from handler. This ensures the
-// tests can only access the public API exposed by the handler package.
 package handler_test
 
 import (
@@ -314,8 +312,9 @@ func (suite *handlerTestSuite) TestCreatePhotoUploadURL_ReturnsUploadURL() {
 
 func (suite *handlerTestSuite) TestCreatePhoto_ReturnsErrorWhenHikeIDIsInvalid() {
 	body := map[string]any{
-		"objectKey": "hikes/1/photos/acde070d-8c4c-4f0d-9d8a-162843c10333",
-		"caption":   "Caption",
+		"objectKey":    "hikes/1/photos/acde070d-8c4c-4f0d-9d8a-162843c10333",
+		"caption":      "Caption",
+		"displayOrder": 1,
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
 	res := testutils.SendRequest(suite.router, http.MethodPost, "/api/v1/hikes/abc/photos/", reqBody)
@@ -325,8 +324,9 @@ func (suite *handlerTestSuite) TestCreatePhoto_ReturnsErrorWhenHikeIDIsInvalid()
 
 func (suite *handlerTestSuite) TestCreatePhoto_ReturnsErrorWhenHikeDoesNotExist() {
 	body := map[string]any{
-		"objectKey": "hikes/1/photos/acde070d-8c4c-4f0d-9d8a-162843c10333",
-		"caption":   "Caption",
+		"objectKey":    "hikes/1/photos/acde070d-8c4c-4f0d-9d8a-162843c10333",
+		"caption":      "Caption",
+		"displayOrder": 1,
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
 	res := testutils.SendRequest(suite.router, http.MethodPost, "/api/v1/hikes/1/photos/", reqBody)
@@ -338,7 +338,8 @@ func (suite *handlerTestSuite) TestCreatePhoto_ReturnsErrorWhenRequestBodyIsMiss
 	hikes := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)
 
 	body := map[string]any{
-		"caption": "Caption",
+		"caption":      "Caption",
+		"displayOrder": 1,
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
 	res := testutils.SendRequest(suite.router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos/", hikes[0].ID), reqBody)
@@ -350,8 +351,9 @@ func (suite *handlerTestSuite) TestCreatePhoto_ReturnsErrorWhenObjectKeyIsInvali
 	hikes := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)
 
 	body := map[string]any{
-		"objectKey": "acde070d-8c4c-4f0d-9d8a-162843c10333",
-		"caption":   "Caption",
+		"objectKey":    "acde070d-8c4c-4f0d-9d8a-162843c10333",
+		"caption":      "Caption",
+		"displayOrder": 1,
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
 	res := testutils.SendRequest(suite.router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos/", hikes[0].ID), reqBody)
@@ -363,8 +365,9 @@ func (suite *handlerTestSuite) TestCreatePhoto_ReturnsErrorWhenPathAndObjectKeyH
 	hikes := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)
 
 	body := map[string]any{
-		"objectKey": fmt.Sprintf("hikes/%d/photos/acde070d-8c4c-4f0d-9d8a-162843c10333", hikes[0].ID+1),
-		"caption":   "Caption",
+		"objectKey":    fmt.Sprintf("hikes/%d/photos/acde070d-8c4c-4f0d-9d8a-162843c10333", hikes[0].ID+1),
+		"caption":      "Caption",
+		"displayOrder": 1,
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
 	res := testutils.SendRequest(suite.router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos/", hikes[0].ID), reqBody)
@@ -376,8 +379,9 @@ func (suite *handlerTestSuite) TestCreatePhoto_ReturnsErrorWhenPhotoDoesNotExist
 	hikes := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)
 
 	body := map[string]any{
-		"objectKey": fmt.Sprintf("hikes/%d/photos/acde070d-8c4c-4f0d-9d8a-162843c10333", hikes[0].ID),
-		"caption":   "Caption",
+		"objectKey":    fmt.Sprintf("hikes/%d/photos/acde070d-8c4c-4f0d-9d8a-162843c10333", hikes[0].ID),
+		"caption":      "Caption",
+		"displayOrder": 1,
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
 	res := testutils.SendRequest(suite.router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos/", hikes[0].ID), reqBody)
@@ -396,8 +400,9 @@ func (suite *handlerTestSuite) TestCreatePhoto_ReturnsErrorWhenS3Errors() {
 	hikes := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)
 
 	body := map[string]any{
-		"objectKey": fmt.Sprintf("hikes/%d/photos/acde070d-8c4c-4f0d-9d8a-162843c10333", hikes[0].ID),
-		"caption":   "Caption",
+		"objectKey":    fmt.Sprintf("hikes/%d/photos/acde070d-8c4c-4f0d-9d8a-162843c10333", hikes[0].ID),
+		"caption":      "Caption",
+		"displayOrder": 1,
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
 	res := testutils.SendRequest(router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos/", hikes[0].ID), reqBody)
@@ -416,8 +421,9 @@ func (suite *handlerTestSuite) TestCreatePhoto_ReturnsErrorWhenDBErrors() {
 	hikes := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)
 
 	body := map[string]any{
-		"objectKey": fmt.Sprintf("hikes/%d/photos/acde070d-8c4c-4f0d-9d8a-162843c10333", hikes[0].ID),
-		"caption":   "Caption",
+		"objectKey":    fmt.Sprintf("hikes/%d/photos/acde070d-8c4c-4f0d-9d8a-162843c10333", hikes[0].ID),
+		"caption":      "Caption",
+		"displayOrder": 1,
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
 	res := testutils.SendRequest(router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos/", hikes[0].ID), reqBody)
@@ -433,8 +439,9 @@ func (suite *handlerTestSuite) TestCreatePhoto_CreatesPhoto() {
 	suite.NoError(err)
 
 	body := map[string]any{
-		"objectKey": objectKey,
-		"caption":   "Caption",
+		"objectKey":    objectKey,
+		"caption":      "Caption",
+		"displayOrder": 1,
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
 	res := testutils.SendRequest(suite.router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos/", hikes[0].ID), reqBody)
@@ -446,10 +453,11 @@ func (suite *handlerTestSuite) TestCreatePhoto_CreatesPhoto() {
 	suite.NoError(err)
 
 	expected := models.Photo{
-		ID:      response.ID,
-		SrcUrl:  fmt.Sprintf("http://localstack:4566/hike-log/%s", objectKey),
-		Caption: "Caption",
-		HikeID:  hikes[0].ID,
+		ID:           response.ID,
+		SrcUrl:       fmt.Sprintf("http://localstack:4566/hike-log/%s", objectKey),
+		Caption:      "Caption",
+		DisplayOrder: 1,
+		HikeID:       hikes[0].ID,
 	}
 	suite.Equal(expected, response)
 

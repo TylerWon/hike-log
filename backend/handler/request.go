@@ -43,4 +43,8 @@ type createPhotoRequest struct {
 
 	// Caption for the photo.
 	Caption string `json:"caption"`
+
+	// The position of the photo in the display order. Starts at 1 since Gin's "required" treats Go zero values as
+	// missing, so 0 fails validation.
+	DisplayOrder uint `json:"displayOrder" binding:"required,gt=0"`
 }

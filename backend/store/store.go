@@ -3,6 +3,7 @@ package store
 import (
 	"github.com/TylerWon/hike-log/backend/database"
 	"github.com/TylerWon/hike-log/backend/models"
+	"gorm.io/gorm"
 )
 
 // Store handles all interactions with the database for the app.
@@ -76,11 +77,13 @@ func (store *storeImpl) GetHikeByID(id uint) (*models.Hike, error) {
 	return &hike, nil
 }
 
-// Returns all Hikes and their Photos in reverse chronological order by Date.
+// Returns all Hikes and their Photos in reverse chronological order by Date. The Photos are sorted by DisplayOrder.
 func (store *storeImpl) ListHikes() ([]models.Hike, error) {
 	var hikes []models.Hike
 
-	result := store.db.Preload("Photos").Order("date desc, trail_name").Find(&hikes)
+	result := store.db.
+		Preload("Photos", func(db *gorm.DB) *gorm.DB { return db.Order("display_order") }).
+		Order("date desc, trail_name").Find(&hikes)
 	if result.Error != nil {
 		return nil, result.Error
 	}

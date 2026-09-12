@@ -30,7 +30,7 @@ func ConstructHikes(t *testing.T, n int, store store.Store, photos bool, save bo
 
 		if photos {
 			hike.Photos = []models.Photo{
-				{SrcUrl: "https://example.com/photo-1.jpg"},
+				{SrcUrl: "https://example.com/photo-1.jpg", Caption: "Caption", DisplayOrder: 0},
 			}
 		}
 

@@ -41,7 +41,7 @@ func (h *Handler) HealthCheck(c *gin.Context) {
 }
 
 /*
-Returns all Hikes in reverse chronological order by Date.
+Returns all Hikes and their Photos in reverse chronological order by Date. The Photos are sorted by DisplayOrder.
 
 Returns:
  1. 200 OK and a list of [models.Hike] when successful
@@ -100,7 +100,7 @@ func (h *Handler) CreateHike(c *gin.Context) {
 }
 
 /*
-Creates a presigned URL that can be used to upload a photo for a Hike to the S3 bucket.
+Creates a presigned URL that can be used to upload a Photo for a Hike to the S3 bucket.
 
 The request that uses the presigned URL must include the same headers that were provided to generate the URL (i.e.
 Content-Type and Content-Length).
@@ -199,9 +199,10 @@ func (h *Handler) CreatePhoto(c *gin.Context) {
 
 	srcURL := h.s3Client.GetObjectURL(req.ObjectKey, os.Getenv("ENV"))
 	photo := models.Photo{
-		SrcUrl:  srcURL,
-		Caption: req.Caption,
-		HikeID:  params.HikeID,
+		SrcUrl:       srcURL,
+		Caption:      req.Caption,
+		DisplayOrder: req.DisplayOrder,
+		HikeID:       params.HikeID,
 	}
 	err = h.store.CreateModel(&photo)
 	if err != nil {
