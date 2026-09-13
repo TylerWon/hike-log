@@ -30,7 +30,11 @@ func ConstructHikes(t *testing.T, n int, store store.Store, photos bool, save bo
 
 		if photos {
 			hike.Photos = []models.Photo{
-				{SrcUrl: "https://example.com/photo-1.jpg", Caption: "Caption", DisplayOrder: 0},
+				{
+					SrcUrl:       fmt.Sprintf("http://localstack:4566/hike-log/hikes/%d/photos/acde070d-8c4c-4f0d-9d8a-162843c10333", i),
+					Caption:      "Caption",
+					DisplayOrder: 1,
+				},
 			}
 		}
 

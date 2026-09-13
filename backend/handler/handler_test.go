@@ -16,6 +16,9 @@ import (
 	"github.com/TylerWon/hike-log/backend/models"
 	"github.com/TylerWon/hike-log/backend/store"
 	"github.com/TylerWon/hike-log/backend/testutils"
+	aws_sdk "github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/suite"
 	"gorm.io/datatypes"
@@ -180,6 +183,93 @@ func (suite *handlerTestSuite) TestCreateHike_CreatesAndReturnsHike() {
 		AllTrailsUrl:  "https://www.alltrails.com/",
 	}
 	suite.Equal(expected, response)
+}
+
+func (suite *handlerTestSuite) TestDeleteHike_ReturnsErrorWhenHikeIDIsInvalid() {
+	res := testutils.SendRequest(suite.router, http.MethodDelete, "/api/v1/hikes/abc/", nil)
+	suite.Equal(http.StatusBadRequest, res.Code)
+}
+
+func (suite *handlerTestSuite) TestDeleteHike_ReturnsErrorWhenHikeDoesNotExist() {
+	res := testutils.SendRequest(suite.router, http.MethodDelete, "/api/v1/hikes/1/", nil)
+	suite.Equal(http.StatusNotFound, res.Code)
+}
+
+func (suite *handlerTestSuite) TestDeleteHike_ReturnsErrorWhenDBErrors() {
+	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, true, true)[0]
+
+	mockStore := store.MockStore{DeleteModelError: errors.New("Something went wrong")}
+	handler := handler.New(&mockStore, suite.s3Client)
+	router := testutils.NewRouter(suite.T(), handler)
+
+	res := testutils.SendRequest(router, http.MethodDelete, fmt.Sprintf("/api/v1/hikes/%d/", hike.ID), nil)
+	suite.Equal(http.StatusInternalServerError, res.Code)
+}
+
+func (suite *handlerTestSuite) TestDeleteHike_DeletesHikeAndPhotosWhenS3Errors() {
+	mockS3Client := aws.MockS3Client{
+		ListObjectsResult:   &s3.ListObjectsV2Output{Contents: []types.Object{{Key: aws_sdk.String("test")}}},
+		DeleteObjectsResult: nil,
+		DeleteObjectsError:  errors.New("Something went wrong"),
+	}
+	handler := handler.New(suite.store, &mockS3Client)
+	router := testutils.NewRouter(suite.T(), handler)
+
+	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, true, true)[0]
+
+	photo := hike.Photos[0]
+	objectKey := suite.s3Client.GetObjectKey(photo.SrcUrl, "local")
+	_, err := suite.s3Client.PutObject(
+		context.TODO(),
+		objectKey,
+		strings.NewReader("content"),
+		"image/png",
+	)
+	suite.NoError(err)
+
+	res := testutils.SendRequest(router, http.MethodDelete, fmt.Sprintf("/api/v1/hikes/%d/", hike.ID), nil)
+	suite.Equal(http.StatusOK, res.Code)
+
+	_, err = suite.store.GetHikeByID(hike.ID)
+	suite.Error(err)
+
+	_, err = suite.store.GetPhotoByID(photo.ID)
+	suite.Error(err)
+
+	exists, err := suite.s3Client.DoesObjectExist(context.TODO(), objectKey)
+	suite.NoError(err)
+	suite.True(exists)
+
+	suite.s3Client.DeleteObject(context.TODO(), objectKey)
+}
+
+func (suite *handlerTestSuite) TestDeleteHike_DeletesHikeAndPhotosAndS3Objects() {
+	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, true, true)[0]
+
+	photo := hike.Photos[0]
+	objectKey := suite.s3Client.GetObjectKey(photo.SrcUrl, "local")
+	_, err := suite.s3Client.PutObject(
+		context.TODO(),
+		objectKey,
+		strings.NewReader("content"),
+		"image/png",
+	)
+	suite.NoError(err)
+
+	res := testutils.SendRequest(suite.router, http.MethodDelete, fmt.Sprintf("/api/v1/hikes/%d/", hike.ID), nil)
+	suite.Equal(http.StatusOK, res.Code)
+
+	_, err = suite.store.GetHikeByID(hike.ID)
+	suite.Error(err)
+
+	_, err = suite.store.GetPhotoByID(photo.ID)
+	suite.Error(err)
+
+	exists, err := suite.s3Client.DoesObjectExist(context.TODO(), objectKey)
+	suite.NoError(err)
+	suite.True(exists)
+
+	suite.s3Client.DeleteObject(context.TODO(), objectKey)
 }
 
 func (suite *handlerTestSuite) TestCreatePhotoUploadURL_ReturnsErrorWhenHikeIDIsInvalid() {

@@ -94,6 +94,58 @@ func (suite *s3ClientTestSuite) TestDeleteObject_NoErrorWhenObjectDoesNotExist()
 	suite.NoError(err)
 }
 
+func (suite *s3ClientTestSuite) TestDeleteObjects_ReturnsErrorWhenS3Errors() {
+	mockClient := MockClient{
+		DeleteObjectsResult: nil,
+		DeleteObjectsError:  errors.New("Something went wrong"),
+	}
+
+	s3Client := NewTestS3Client(&mockClient, &MockPresignClient{}, "hike-log")
+
+	_, err := s3Client.DeleteObjects(context.TODO(), []string{"abc", "def"})
+	suite.Error(err)
+}
+
+func (suite *s3ClientTestSuite) TestDeleteObjects_DeletesObjects() {
+	s3Client, err := NewS3Client()
+	suite.NoError(err)
+
+	objectKey1 := fmt.Sprintf("delete-objects-1-%d", time.Now().UnixNano())
+	_, err = s3Client.PutObject(context.TODO(), objectKey1, strings.NewReader("content"), "text/plain")
+	suite.NoError(err)
+
+	objectKey2 := fmt.Sprintf("delete-objects-2-%d", time.Now().UnixNano())
+	_, err = s3Client.PutObject(context.TODO(), objectKey2, strings.NewReader("content"), "text/plain")
+	suite.NoError(err)
+
+	_, err = s3Client.DeleteObjects(context.TODO(), []string{objectKey1, objectKey2})
+	suite.NoError(err)
+
+	exists, err := s3Client.DoesObjectExist(context.TODO(), objectKey1)
+	suite.NoError(err)
+	suite.False(exists)
+
+	exists, err = s3Client.DoesObjectExist(context.TODO(), objectKey2)
+	suite.NoError(err)
+	suite.False(exists)
+}
+
+func (suite *s3ClientTestSuite) TestDeleteObjects_NoErrorWhenObjectDoesNotExist() {
+	s3Client, err := NewS3Client()
+	suite.NoError(err)
+
+	objectKey := fmt.Sprintf("delete-objects-%d", time.Now().UnixNano())
+	_, err = s3Client.PutObject(context.TODO(), objectKey, strings.NewReader("content"), "text/plain")
+	suite.NoError(err)
+
+	_, err = s3Client.DeleteObjects(context.TODO(), []string{objectKey, "abc"})
+	suite.NoError(err)
+
+	exists, err := s3Client.DoesObjectExist(context.TODO(), objectKey)
+	suite.NoError(err)
+	suite.False(exists)
+}
+
 func (suite *s3ClientTestSuite) TestDoesObjectExist_ReturnsErrorWhenS3Errors() {
 	mockClient := MockClient{
 		HeadObjectResult: nil,
@@ -129,6 +181,34 @@ func (suite *s3ClientTestSuite) TestDoesObjectExist_ReturnsTrueWhenObjectExists(
 
 	_, err = s3Client.DeleteObject(context.TODO(), objectKey)
 	suite.NoError(err)
+}
+
+func (suite *s3ClientTestSuite) TestGetObjectKey_ReturnsObjectKeyFromPathStyleURLInLocalEnvironment() {
+	awsEndpointURL := "http://localstack:4566"
+	bucketName := "hike-log"
+	objectKey := "test"
+
+	suite.T().Setenv("AWS_ENDPOINT_URL", awsEndpointURL)
+
+	s3Client := NewTestS3Client(&MockClient{}, &MockPresignClient{}, bucketName)
+
+	objectURL := s3Client.GetObjectURL(objectKey, "local")
+	actual := s3Client.GetObjectKey(objectURL, "local")
+	suite.Equal(objectKey, actual)
+}
+
+func (suite *s3ClientTestSuite) TestGetObjectKey_ReturnsObjectKeyFromVirtualHostStyleURLInNonLocalEnvironment() {
+	awsRegion := "us-east-1"
+	bucketName := "hike-log"
+	objectKey := "test"
+
+	suite.T().Setenv("AWS_REGION", awsRegion)
+
+	s3Client := NewTestS3Client(&MockClient{}, &MockPresignClient{}, bucketName)
+
+	objectURL := s3Client.GetObjectURL(objectKey, "production")
+	actual := s3Client.GetObjectKey(objectURL, "production")
+	suite.Equal(objectKey, actual)
 }
 
 func (suite *s3ClientTestSuite) TestGetObjectURL_ReturnsPathStyleURLInLocalEnvironment() {

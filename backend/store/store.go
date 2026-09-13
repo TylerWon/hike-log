@@ -10,7 +10,9 @@ import (
 type Store interface {
 	CloseConnection() error
 	CreateModel(model interface{}) error
+	DeleteModel(model interface{}) error
 	GetHikeByID(id uint) (*models.Hike, error)
+	GetPhotoByID(id uint) (*models.Photo, error)
 	ListHikes() ([]models.Hike, error)
 }
 
@@ -65,6 +67,18 @@ func (store *storeImpl) CreateModel(model interface{}) error {
 	return nil
 }
 
+// Deletes the provided model/models. The model(s) should have their ID set. Deleting a non-existent model does not
+// result in error.
+func (store *storeImpl) DeleteModel(model interface{}) error {
+	result := store.db.Delete(model)
+
+	if result.Error != nil {
+		return result.Error
+	}
+
+	return nil
+}
+
 // Returns the Hike with the given ID.
 func (store *storeImpl) GetHikeByID(id uint) (*models.Hike, error) {
 	var hike models.Hike
@@ -75,6 +89,18 @@ func (store *storeImpl) GetHikeByID(id uint) (*models.Hike, error) {
 	}
 
 	return &hike, nil
+}
+
+// Returns the Photo with the given ID.
+func (store *storeImpl) GetPhotoByID(id uint) (*models.Photo, error) {
+	var photo models.Photo
+
+	result := store.db.First(&photo, id)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return &photo, nil
 }
 
 // Returns all Hikes and their Photos in reverse chronological order by Date. The Photos are sorted by DisplayOrder.

@@ -13,9 +13,14 @@ type MockS3Client struct {
 	CreatePresignedPutObjectRequestError  error
 	DeleteObjectResult                    *s3.DeleteObjectOutput
 	DeleteObjectError                     error
+	DeleteObjectsResult                   *s3.DeleteObjectsOutput
+	DeleteObjectsError                    error
 	DoesObjectExistResult                 bool
 	DoesObjectExistError                  error
+	GetObjectKeyResult                    string
 	GetObjectURLResult                    string
+	ListObjectsResult                     *s3.ListObjectsV2Output
+	ListObjectsError                      error
 	PutObjectResult                       *s3.PutObjectOutput
 	PutObjectError                        error
 }
@@ -33,12 +38,24 @@ func (m *MockS3Client) DeleteObject(ctx context.Context, objectKey string) (*s3.
 	return m.DeleteObjectResult, m.DeleteObjectError
 }
 
+func (m *MockS3Client) DeleteObjects(ctx context.Context, objectKeys []string) (*s3.DeleteObjectsOutput, error) {
+	return m.DeleteObjectsResult, m.DeleteObjectsError
+}
+
 func (m *MockS3Client) DoesObjectExist(ctx context.Context, objectKey string) (bool, error) {
 	return m.DoesObjectExistResult, m.DoesObjectExistError
 }
 
+func (m *MockS3Client) GetObjectKey(objectURL string, env string) string {
+	return m.GetObjectKeyResult
+}
+
 func (m *MockS3Client) GetObjectURL(objectKey string, env string) string {
 	return m.GetObjectURLResult
+}
+
+func (m *MockS3Client) ListObjects(ctx context.Context, prefix string) (*s3.ListObjectsV2Output, error) {
+	return m.ListObjectsResult, m.ListObjectsError
 }
 
 func (m *MockS3Client) PutObject(
@@ -51,12 +68,16 @@ func (m *MockS3Client) PutObject(
 }
 
 type MockClient struct {
-	DeleteObjectResult *s3.DeleteObjectOutput
-	DeleteObjectError  error
-	HeadObjectResult   *s3.HeadObjectOutput
-	HeadObjectError    error
-	PutObjectResult    *s3.PutObjectOutput
-	PutObjectError     error
+	DeleteObjectResult  *s3.DeleteObjectOutput
+	DeleteObjectError   error
+	DeleteObjectsResult *s3.DeleteObjectsOutput
+	DeleteObjectsError  error
+	HeadObjectResult    *s3.HeadObjectOutput
+	HeadObjectError     error
+	ListObjectsResult   *s3.ListObjectsV2Output
+	ListObjectsError    error
+	PutObjectResult     *s3.PutObjectOutput
+	PutObjectError      error
 }
 
 func (m *MockClient) DeleteObject(
@@ -67,12 +88,28 @@ func (m *MockClient) DeleteObject(
 	return m.DeleteObjectResult, m.DeleteObjectError
 }
 
+func (m *MockClient) DeleteObjects(
+	ctx context.Context,
+	params *s3.DeleteObjectsInput,
+	optFns ...func(*s3.Options),
+) (*s3.DeleteObjectsOutput, error) {
+	return m.DeleteObjectsResult, m.DeleteObjectsError
+}
+
 func (m *MockClient) HeadObject(
 	ctx context.Context,
 	params *s3.HeadObjectInput,
 	optFns ...func(*s3.Options),
 ) (*s3.HeadObjectOutput, error) {
 	return m.HeadObjectResult, m.HeadObjectError
+}
+
+func (m *MockClient) ListObjectsV2(
+	ctx context.Context,
+	params *s3.ListObjectsV2Input,
+	optFns ...func(*s3.Options),
+) (*s3.ListObjectsV2Output, error) {
+	return m.ListObjectsResult, m.ListObjectsError
 }
 
 func (m *MockClient) PutObject(

@@ -37,5 +37,5 @@ type Hike struct {
 	AllTrailsUrl string `json:"allTrailsUrl"`
 
 	// Photos taken on the hike. The Hike may not have any photos.
-	Photos []Photo `json:"photos"`
+	Photos []Photo `json:"photos" gorm:"constraint:OnDelete:CASCADE"`
 }

@@ -11,6 +11,7 @@ type MockDatabase struct {
 	CreateResult     *gorm.DB
 	DBResult         *sql.DB
 	DBError          error
+	DeleteResult     *gorm.DB
 	ExecResult       *gorm.DB
 	FindResult       *gorm.DB
 	FirstResult      *gorm.DB
@@ -27,6 +28,10 @@ func (m *MockDatabase) Create(value interface{}) (tx *gorm.DB) {
 
 func (m *MockDatabase) DB() (*sql.DB, error) {
 	return m.DBResult, m.DBError
+}
+
+func (m *MockDatabase) Delete(value interface{}, conds ...interface{}) (tx *gorm.DB) {
+	return m.DeleteResult
 }
 
 func (m *MockDatabase) Exec(sql string, values ...interface{}) (tx *gorm.DB) {

@@ -100,6 +100,67 @@ func (h *Handler) CreateHike(c *gin.Context) {
 }
 
 /*
+Deletes a Hike.
+
+Also deletes any Photos associated with the Hike, and the photo objects stored in the S3 bucket. These deletes can fail
+and the endpoint will still return a success.
+
+Path parameters: [deleteHikePathParams]
+
+Returns:
+ 1. 200 OK when successful
+ 2. 404 Not Found and an error message when the Hike does not exist
+ 3. 500 Internal Server Error and an error message when there is an unexpected error
+*/
+func (h *Handler) DeleteHike(c *gin.Context) {
+	var params deleteHikePathParams
+	if err := c.ShouldBindUri(&params); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	_, err := h.store.GetHikeByID(params.HikeID)
+	if err != nil {
+		handleHikeDoesNotExistError(c, err, params.HikeID)
+		return
+	}
+
+	// Note 1: Delete cascades to Photos
+	// Note 2: Deletion order matters here. Delete DB models first then S3 objects. This avoids a dangling pointer
+	// when S3 objects are deleted first but models fail to delete.
+	err = h.store.DeleteModel(&models.Hike{ID: params.HikeID})
+	if err != nil {
+		log.Printf("Failed to delete Hike (id=%d): %v", params.HikeID, err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": http.StatusText(http.StatusInternalServerError)})
+		return
+	}
+
+	objectKeyPrefix := fmt.Sprintf("hikes/%d/photos/", params.HikeID)
+	result, err := h.s3Client.ListObjects(c, objectKeyPrefix)
+	if err != nil {
+		log.Printf("Failed to list S3 Photo objects for Hike (id=%d): %v", params.HikeID, err)
+		c.JSON(http.StatusOK, gin.H{"message": "ok"}) // return OK since Hike technically deleted, only orphan S3 objects
+		return
+	}
+
+	if len(result.Contents) > 0 {
+		var objectKeys []string
+		for _, object := range result.Contents {
+			objectKeys = append(objectKeys, *object.Key)
+		}
+
+		_, err := h.s3Client.DeleteObjects(c, objectKeys)
+		if err != nil {
+			log.Printf("Failed to delete S3 Photo objects for Hike (id=%d): %v", params.HikeID, err)
+			c.JSON(http.StatusOK, gin.H{"message": "ok"}) // return OK since Hike technically deleted, only orphan S3 objects
+			return
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "ok"})
+}
+
+/*
 Creates a presigned URL that can be used to upload a Photo for a Hike to the S3 bucket.
 
 The request that uses the presigned URL must include the same headers that were provided to generate the URL (i.e.
@@ -112,7 +173,7 @@ Request body: [createPhotoUploadURLRequest]
 Returns:
  1. 200 OK and [createPhotoUploadURLResponse] when successful
  2. 400 Bad Request and an error message when input is bad
- 3. 404 Not Found and an error message when the hike does not exist
+ 3. 404 Not Found and an error message when the Photo does not exist
  4. 500 Internal Server Error and an error message when there is an unexpected error
 */
 func (h *Handler) CreatePhotoUploadURL(c *gin.Context) {
@@ -157,7 +218,7 @@ Request body: [createPhotoRequest]
 Returns:
  1. 201 Created and the [models.Photo] when successful
  2. 400 Bad Request and an error message when input is bad
- 3. 404 Not Found and an error message when the hike does not exist
+ 3. 404 Not Found and an error message when the Photo does not exist
  4. 500 Internal Server Error and an error message when there is an unexpected error
 */
 func (h *Handler) CreatePhoto(c *gin.Context) {

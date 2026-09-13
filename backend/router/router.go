@@ -33,6 +33,8 @@ func New(handler *handler.Handler) *gin.Engine {
 				// /api/v1/hikes/:hikeId
 				hike := hikes.Group("/:hikeId")
 				{
+					hike.DELETE("/", handler.DeleteHike)
+
 					// /api/v1/hikes/:hikeId/photos
 					photos := hike.Group("/photos")
 					{

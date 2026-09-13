@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/TylerWon/hike-log/backend/database"
+	"github.com/TylerWon/hike-log/backend/models"
 	"github.com/TylerWon/hike-log/backend/store"
 	"github.com/TylerWon/hike-log/backend/testutils"
 	"github.com/stretchr/testify/suite"
@@ -69,6 +70,42 @@ func (suite *storeTestSuite) TestCreateModel_CreatesModels() {
 	suite.Equal(hikes[1], *result)
 }
 
+func (suite *storeTestSuite) TestDeleteModel_ReturnsErrorWhenDBErrors() {
+	mockDatabase := database.MockDatabase{
+		DeleteResult: &gorm.DB{Error: errors.New("Something went wrong")},
+	}
+	store := store.NewTestStore(&mockDatabase)
+
+	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)[0]
+	err := store.DeleteModel(&hike)
+	suite.Error(err)
+}
+
+func (suite *storeTestSuite) TestDeleteModel_ReturnsErrorWhenHikeDoesNotExist() {
+	err := suite.store.DeleteModel(&models.Hike{ID: 1})
+	suite.NoError(err)
+}
+
+func (suite *storeTestSuite) TestDeleteModel_DeletesModel() {
+	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)[0]
+	err := suite.store.DeleteModel(&hike)
+	suite.NoError(err)
+
+	_, err = suite.store.GetHikeByID(hike.ID)
+	suite.Error(err)
+}
+
+func (suite *storeTestSuite) TestDeleteModel_DeletesModels() {
+	hikes := testutils.ConstructHikes(suite.T(), 2, suite.store, false, true)
+	err := suite.store.DeleteModel(&hikes)
+	suite.NoError(err)
+
+	_, err = suite.store.GetHikeByID(hikes[0].ID)
+	suite.Error(err)
+	_, err = suite.store.GetHikeByID(hikes[1].ID)
+	suite.Error(err)
+}
+
 func (suite *storeTestSuite) TestGetHikeByID_ReturnsErrorWhenHikeDoesNotExist() {
 	_, err := suite.store.GetHikeByID(1)
 	suite.Error(err)
@@ -92,6 +129,33 @@ func (suite *storeTestSuite) TestGetHikeByID_ReturnsHike() {
 
 	suite.NoError(err)
 	suite.Equal(hike, *result)
+}
+
+func (suite *storeTestSuite) TestGetPhotoByID_ReturnsErrorWhenPhotoDoesNotExist() {
+	_, err := suite.store.GetPhotoByID(1)
+	suite.Error(err)
+}
+
+func (suite *storeTestSuite) TestGetPhotoByID_ReturnsErrorWhenDBErrors() {
+	mockDatabase := database.MockDatabase{
+		FirstResult: &gorm.DB{Error: errors.New("Something went wrong")},
+	}
+	store := store.NewTestStore(&mockDatabase)
+
+	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, true, true)[0]
+	photo := hike.Photos[0]
+	_, err := store.GetPhotoByID(photo.ID)
+
+	suite.Error(err)
+}
+
+func (suite *storeTestSuite) TestGetPhotoByID_ReturnsPhoto() {
+	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, true, true)[0]
+	photo := hike.Photos[0]
+	result, err := suite.store.GetPhotoByID(photo.ID)
+
+	suite.NoError(err)
+	suite.Equal(hike.Photos[0], *result)
 }
 
 func (suite *storeTestSuite) TestListHikes_ReturnsErrorWhenDBErrors() {
