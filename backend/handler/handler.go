@@ -74,8 +74,8 @@ func (h *Handler) CreateHike(c *gin.Context) {
 		return
 	}
 
-	// Skip validation here since Data is validated when request body gets binded to [createHikeRequest]
-	parsed, _ := time.Parse("2006-01-02", req.Date) // convert date string to datatypes.Date
+	// Skip validation here since Date is validated when request body gets binded to [createHikeRequest]
+	parsed, _ := time.Parse("2006-01-02", req.Date) // convert date string to time.Time
 
 	hike := models.Hike{
 		TrailName:     req.TrailName,
@@ -101,10 +101,10 @@ func (h *Handler) CreateHike(c *gin.Context) {
 /*
 Deletes a Hike.
 
-Also deletes any Photos associated with the Hike, and the photo objects stored in the S3 bucket. These deletes can fail
-and the endpoint will still return a success.
+Also deletes any Photos associated with the Hike, and the photo objects stored in the S3 bucket. S3 clean-up is best-
+effort and does not result in an error on failure.
 
-Path parameters: [deleteHikePathParams]
+Path parameters: [hikeIDPathParam]
 
 Returns:
  1. 200 OK when successful
@@ -112,7 +112,7 @@ Returns:
  3. 500 Internal Server Error and an error message when there is an unexpected error
 */
 func (h *Handler) DeleteHike(c *gin.Context) {
-	var params deleteHikePathParams
+	var params hikeIDPathParam
 	if err := c.ShouldBindUri(&params); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -160,12 +160,68 @@ func (h *Handler) DeleteHike(c *gin.Context) {
 }
 
 /*
+Updates a Hike.
+
+Path parameters: [hikeIDPathParam]
+
+Request body: [updateHikeRequest]
+
+Returns:
+ 1. 200 OK when successful
+ 2. 404 Not Found and an error message when the Hike does not exist
+ 3. 500 Internal Server Error and an error message when there is an unexpected error
+*/
+func (h *Handler) UpdateHike(c *gin.Context) {
+	var params hikeIDPathParam
+	if err := c.ShouldBindUri(&params); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	_, err := h.store.GetHikeByID(params.HikeID)
+	if err != nil {
+		handleHikeDoesNotExistError(c, err, params.HikeID)
+		return
+	}
+
+	var req updateHikeRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Skip validation here since Date is validated when request body gets binded to [updateHikeRequest]
+	parsed, _ := time.Parse("2006-01-02", req.Date) // convert date string to time.Time
+
+	hike := models.Hike{
+		ID:            params.HikeID,
+		TrailName:     req.TrailName,
+		Date:          datatypes.Date(parsed),
+		Notes:         req.Notes,
+		Rating:        req.Rating,
+		Difficulty:    req.Difficulty,
+		Distance:      req.Distance,
+		ElevationGain: req.ElevationGain,
+		Duration:      req.Duration,
+		AllTrailsUrl:  req.AllTrailsUrl,
+	}
+	err = h.store.UpdateModel(&hike)
+	if err != nil {
+		log.Println("Failed to update Hike: ", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": http.StatusText(http.StatusInternalServerError)})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "ok"})
+}
+
+/*
 Creates a presigned URL that can be used to upload a Photo for a Hike to the S3 bucket.
 
 The request that uses the presigned URL must include the same headers that were provided to generate the URL (i.e.
 Content-Type and Content-Length).
 
-Path parameters: [createPhotoUploadURLPathParams]
+Path parameters: [hikeIDPathParam]
 
 Request body: [createPhotoUploadURLRequest]
 
@@ -176,7 +232,7 @@ Returns:
  4. 500 Internal Server Error and an error message when there is an unexpected error
 */
 func (h *Handler) CreatePhotoUploadURL(c *gin.Context) {
-	var params createPhotoUploadURLPathParams
+	var params hikeIDPathParam
 	if err := c.ShouldBindUri(&params); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -221,7 +277,7 @@ Returns:
  4. 500 Internal Server Error and an error message when there is an unexpected error
 */
 func (h *Handler) CreatePhoto(c *gin.Context) {
-	var params createPhotoPathParams
+	var params hikeIDPathParam
 	if err := c.ShouldBindUri(&params); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

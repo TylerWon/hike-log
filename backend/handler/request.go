@@ -29,6 +29,8 @@ type createHikeRequest struct {
 	AllTrailsUrl string `json:"allTrailsUrl" binding:"required,url"`
 }
 
+type updateHikeRequest = createHikeRequest
+
 type createPhotoUploadURLRequest struct {
 	// MIME type of the image. Must be a valid image type.
 	ContentType string `json:"contentType" binding:"required,validImageType"`

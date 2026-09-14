@@ -11,6 +11,7 @@ type MockStore struct {
 	GetPhotoByIDError  error
 	ListHikesResult    []models.Hike
 	ListHikesError     error
+	UpdateModelError   error
 }
 
 func (m *MockStore) CloseConnection() error {
@@ -35,4 +36,8 @@ func (m *MockStore) GetPhotoByID(id uint) (*models.Photo, error) {
 
 func (m *MockStore) ListHikes() ([]models.Hike, error) {
 	return m.ListHikesResult, m.ListHikesError
+}
+
+func (m *MockStore) UpdateModel(model interface{}) error {
+	return m.UpdateModelError
 }

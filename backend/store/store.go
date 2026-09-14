@@ -14,6 +14,7 @@ type Store interface {
 	GetHikeByID(id uint) (*models.Hike, error)
 	GetPhotoByID(id uint) (*models.Photo, error)
 	ListHikes() ([]models.Hike, error)
+	UpdateModel(model interface{}) error
 }
 
 // storeImpl is an implementation of the Store interface.
@@ -115,4 +116,15 @@ func (store *storeImpl) ListHikes() ([]models.Hike, error) {
 	}
 
 	return hikes, nil
+}
+
+// Updates the provided model. Updating a non-existent model does not result in error.
+func (store *storeImpl) UpdateModel(model interface{}) error {
+	result := store.db.Update(model)
+
+	if result.Error != nil {
+		return result.Error
+	}
+
+	return nil
 }

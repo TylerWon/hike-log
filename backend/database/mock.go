@@ -16,6 +16,7 @@ type MockDatabase struct {
 	FindResult       *gorm.DB
 	FirstResult      *gorm.DB
 	RawResult        *gorm.DB
+	UpdatesResult    *gorm.DB
 }
 
 func (m *MockDatabase) AutoMigrate(dst ...interface{}) error {
@@ -30,7 +31,7 @@ func (m *MockDatabase) DB() (*sql.DB, error) {
 	return m.DBResult, m.DBError
 }
 
-func (m *MockDatabase) Delete(value interface{}, conds ...interface{}) (tx *gorm.DB) {
+func (m *MockDatabase) Delete(value interface{}) (tx *gorm.DB) {
 	return m.DeleteResult
 }
 
@@ -56,4 +57,8 @@ func (m *MockDatabase) Preload(query string, args ...interface{}) Database {
 
 func (m *MockDatabase) Raw(sql string, values ...interface{}) (tx *gorm.DB) {
 	return m.RawResult
+}
+
+func (m *MockDatabase) Update(value interface{}) (tx *gorm.DB) {
+	return m.UpdatesResult
 }

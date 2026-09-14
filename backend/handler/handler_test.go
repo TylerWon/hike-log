@@ -272,6 +272,118 @@ func (suite *handlerTestSuite) TestDeleteHike_DeletesHikeAndPhotosAndS3Objects()
 	suite.s3Client.DeleteObject(context.TODO(), objectKey)
 }
 
+func (suite *handlerTestSuite) TestUpdateHike_ReturnsErrorWhenHikeIDIsInvalid() {
+	res := testutils.SendRequest(suite.router, http.MethodPut, "/api/v1/hikes/abc/", nil)
+	suite.Equal(http.StatusBadRequest, res.Code)
+}
+
+func (suite *handlerTestSuite) TestUpdateHike_ReturnsErrorWhenHikeDoesNotExist() {
+	res := testutils.SendRequest(suite.router, http.MethodPut, "/api/v1/hikes/1/", nil)
+	suite.Equal(http.StatusNotFound, res.Code)
+}
+
+func (suite *handlerTestSuite) TestUpdateHike_ReturnsErrorWhenRequestBodyHasInvalidFields() {
+	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)[0]
+
+	body := map[string]any{
+		"trailName":     "Trail 1",
+		"date":          "05-02-2026", // DD-MM-YYYY instead of YYYY-MM-DD
+		"notes":         "Easy hike",
+		"rating":        4.5,
+		"difficulty":    3,
+		"distance":      "8.2 km", // string instead of float
+		"elevationGain": 1200,
+		"duration":      60.5, // float instead of uint
+		"allTrailsUrl":  "https://www.alltrails.com/",
+	}
+	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
+	res := testutils.SendRequest(suite.router, http.MethodPut, fmt.Sprintf("/api/v1/hikes/%d/", hike.ID), reqBody)
+
+	suite.Equal(http.StatusBadRequest, res.Code)
+}
+
+func (suite *handlerTestSuite) TestUpdateHike_ReturnsErrorWhenRequestBodyIsMissingFields() {
+	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)[0]
+
+	body := map[string]any{
+		"date":          "2026-02-05",
+		"notes":         "Easy hike",
+		"rating":        4.5,
+		"distance":      8.2,
+		"elevationGain": 1200,
+		"duration":      60,
+		"allTrailsUrl":  "https://www.alltrails.com/",
+	}
+	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
+	res := testutils.SendRequest(suite.router, http.MethodPut, fmt.Sprintf("/api/v1/hikes/%d/", hike.ID), reqBody)
+
+	suite.Equal(http.StatusBadRequest, res.Code)
+}
+
+func (suite *handlerTestSuite) TestUpdateHike_ReturnsErrorWhenDBErrors() {
+	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)[0]
+
+	mockStore := store.MockStore{
+		GetHikeByIDResult: &hike,
+		UpdateModelError:  errors.New("Something went wrong"),
+	}
+	handler := handler.New(&mockStore, suite.s3Client)
+	router := testutils.NewRouter(suite.T(), handler)
+
+	body := map[string]any{
+		"trailName":     "Updated Trail",
+		"date":          "2026-02-05",
+		"notes":         "Updated notes",
+		"rating":        4.5,
+		"difficulty":    3,
+		"distance":      8.2,
+		"elevationGain": 1200,
+		"duration":      60,
+		"allTrailsUrl":  "https://www.alltrails.com/",
+	}
+	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
+	res := testutils.SendRequest(router, http.MethodPut, fmt.Sprintf("/api/v1/hikes/%d/", hike.ID), reqBody)
+
+	suite.Equal(http.StatusInternalServerError, res.Code)
+}
+
+func (suite *handlerTestSuite) TestUpdateHike_UpdatesHike() {
+	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)[0]
+
+	body := map[string]any{
+		"trailName":     "Updated Trail",
+		"date":          "2026-03-15",
+		"notes":         "Updated notes",
+		"rating":        4.5,
+		"difficulty":    3,
+		"distance":      8.2,
+		"elevationGain": 1200,
+		"duration":      60,
+		"allTrailsUrl":  "https://www.alltrails.com/updated",
+	}
+	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
+	res := testutils.SendRequest(suite.router, http.MethodPut, fmt.Sprintf("/api/v1/hikes/%d/", hike.ID), reqBody)
+
+	suite.Equal(http.StatusOK, res.Code)
+
+	updated, err := suite.store.GetHikeByID(hike.ID)
+	suite.NoError(err)
+
+	expected := models.Hike{
+		ID:            hike.ID,
+		TrailName:     "Updated Trail",
+		Date:          datatypes.Date(time.Date(2026, 3, 15, 0, 0, 0, 0, time.UTC)),
+		Notes:         "Updated notes",
+		Rating:        4.5,
+		Difficulty:    3,
+		Distance:      8.2,
+		ElevationGain: 1200,
+		Duration:      60,
+		AllTrailsUrl:  "https://www.alltrails.com/updated",
+	}
+	suite.Equal(expected, *updated)
+}
+
 func (suite *handlerTestSuite) TestCreatePhotoUploadURL_ReturnsErrorWhenHikeIDIsInvalid() {
 	body := map[string]any{
 		"contentType":   "image/jpeg",

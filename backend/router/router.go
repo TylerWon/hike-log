@@ -34,6 +34,7 @@ func New(handler *handler.Handler) *gin.Engine {
 				hike := hikes.Group("/:hikeId")
 				{
 					hike.DELETE("/", handler.DeleteHike)
+					hike.PUT("/", handler.UpdateHike)
 
 					// /api/v1/hikes/:hikeId/photos
 					photos := hike.Group("/photos")

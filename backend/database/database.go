@@ -15,13 +15,14 @@ type Database interface {
 	AutoMigrate(dst ...interface{}) error
 	Create(value interface{}) (tx *gorm.DB)
 	DB() (*sql.DB, error)
-	Delete(value interface{}, conds ...interface{}) (tx *gorm.DB)
+	Delete(value interface{}) (tx *gorm.DB)
 	Exec(sql string, values ...interface{}) (tx *gorm.DB)
 	Find(dest interface{}, conds ...interface{}) (tx *gorm.DB)
 	First(dest interface{}, conds ...interface{}) (tx *gorm.DB)
 	Order(value interface{}) Database
 	Preload(query string, args ...interface{}) Database
 	Raw(sql string, values ...interface{}) (tx *gorm.DB)
+	Update(value interface{}) (tx *gorm.DB)
 }
 
 // databaseImpl is an implementation of the Database interface.
@@ -62,7 +63,7 @@ func (database *databaseImpl) AutoMigrate(dst ...interface{}) error {
 	return database.db.AutoMigrate(dst...)
 }
 
-// Inserts value, returning the inserted data's primary key in value's id.
+// Inserts value, returning the inserted data's primary key in value's id. value can be a single model or multiple.
 func (database *databaseImpl) Create(value interface{}) (tx *gorm.DB) {
 	return database.db.Create(value)
 }
@@ -72,9 +73,9 @@ func (database *databaseImpl) DB() (*sql.DB, error) {
 	return database.db.DB()
 }
 
-// Deletes value matching given conditions conds.
-func (database *databaseImpl) Delete(value interface{}, conds ...interface{}) (tx *gorm.DB) {
-	return database.db.Delete(value, conds...)
+// Deletes value. value can be a single model or multiple and the model(s) should have their ID set.
+func (database *databaseImpl) Delete(value interface{}) (tx *gorm.DB) {
+	return database.db.Delete(value)
 }
 
 // Executes raw SQL DDL (INSERT, UPDATE, DELETE, etc.).
@@ -105,4 +106,9 @@ func (database *databaseImpl) Preload(query string, args ...interface{}) Databas
 // Executes a raw SQL query (SELECT).
 func (database *databaseImpl) Raw(sql string, values ...interface{}) (tx *gorm.DB) {
 	return database.db.Raw(sql, values...)
+}
+
+// Updates all fields of value. value is a model.
+func (database *databaseImpl) Update(value interface{}) (tx *gorm.DB) {
+	return database.db.Select("*").Updates(value)
 }
