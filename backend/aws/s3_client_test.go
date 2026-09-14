@@ -16,6 +16,24 @@ type s3ClientTestSuite struct {
 	suite.Suite
 }
 
+func (suite *s3ClientTestSuite) TestCreatePhotoObjectKey_ReturnsKeyWithExpectedFormat() {
+	s3Client := NewTestS3Client(&MockClient{}, &MockPresignClient{}, "hike-log")
+
+	hikeId := uint(42)
+	objectKey := s3Client.CreatePhotoObjectKey(hikeId)
+
+	suite.Regexp(fmt.Sprintf(`^hikes/%d/photos/[0-9a-f-]{36}$`, hikeId), objectKey)
+}
+
+func (suite *s3ClientTestSuite) TestCreatePhotoObjectKey_ReturnsUniqueKeys() {
+	s3Client := NewTestS3Client(&MockClient{}, &MockPresignClient{}, "hike-log")
+
+	key1 := s3Client.CreatePhotoObjectKey(1)
+	key2 := s3Client.CreatePhotoObjectKey(1)
+
+	suite.NotEqual(key1, key2)
+}
+
 func (suite *s3ClientTestSuite) TestCreatePresignedPutObjectRequest_ReturnsErrorWhenS3Errors() {
 	mockPresignClient := MockPresignClient{
 		PresignPutObjectResult: nil,

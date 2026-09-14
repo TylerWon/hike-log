@@ -13,6 +13,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
+	"github.com/google/uuid"
 )
 
 // S3Client handles interactions with the AWS S3 bucket for the app.
@@ -23,6 +24,7 @@ type S3Client interface {
 		contentType string,
 		contentLength int64,
 	) (*v4.PresignedHTTPRequest, error)
+	CreatePhotoObjectKey(hikeId uint) string
 	DeleteObject(ctx context.Context, objectKey string) (*s3.DeleteObjectOutput, error)
 	DeleteObjects(ctx context.Context, objectKeys []string) (*s3.DeleteObjectsOutput, error)
 	DoesObjectExist(ctx context.Context, objectKey string) (bool, error)
@@ -101,6 +103,11 @@ func NewS3Client() (S3Client, error) {
 // Creates a new S3Client. Allows injection of internal dependencies to allow for mocking.
 func NewTestS3Client(client client, presignClient presignClient, bucketName string) S3Client {
 	return &s3ClientImpl{client, presignClient, bucketName}
+}
+
+// Creates a key for a photo stored in the bucket. Format is "hikes/<hike_id>/photos/<uuid>"
+func (s3Client *s3ClientImpl) CreatePhotoObjectKey(hikeId uint) string {
+	return fmt.Sprintf("hikes/%d/photos/%s", hikeId, uuid.New())
 }
 
 // Creates a presigned request that can be used to put an object in the bucket. The request expires after 900 seconds.

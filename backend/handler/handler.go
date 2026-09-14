@@ -14,7 +14,6 @@ import (
 	"github.com/TylerWon/hike-log/backend/models"
 	"github.com/TylerWon/hike-log/backend/store"
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
@@ -195,7 +194,7 @@ func (h *Handler) CreatePhotoUploadURL(c *gin.Context) {
 		return
 	}
 
-	objectKey := fmt.Sprintf("hikes/%d/photos/%s", params.HikeID, uuid.New())
+	objectKey := h.s3Client.CreatePhotoObjectKey(params.HikeID)
 	presignedReq, err := h.s3Client.CreatePresignedPutObjectRequest(c, objectKey, req.ContentType, int64(req.ContentLength))
 
 	if err != nil {

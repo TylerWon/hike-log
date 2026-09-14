@@ -402,7 +402,7 @@ func (suite *handlerTestSuite) TestCreatePhotoUploadURL_ReturnsUploadURL() {
 
 func (suite *handlerTestSuite) TestCreatePhoto_ReturnsErrorWhenHikeIDIsInvalid() {
 	body := map[string]any{
-		"objectKey":    "hikes/1/photos/acde070d-8c4c-4f0d-9d8a-162843c10333",
+		"objectKey":    suite.s3Client.CreatePhotoObjectKey(1),
 		"caption":      "Caption",
 		"displayOrder": 1,
 	}
@@ -414,7 +414,7 @@ func (suite *handlerTestSuite) TestCreatePhoto_ReturnsErrorWhenHikeIDIsInvalid()
 
 func (suite *handlerTestSuite) TestCreatePhoto_ReturnsErrorWhenHikeDoesNotExist() {
 	body := map[string]any{
-		"objectKey":    "hikes/1/photos/acde070d-8c4c-4f0d-9d8a-162843c10333",
+		"objectKey":    suite.s3Client.CreatePhotoObjectKey(1),
 		"caption":      "Caption",
 		"displayOrder": 1,
 	}
@@ -455,7 +455,7 @@ func (suite *handlerTestSuite) TestCreatePhoto_ReturnsErrorWhenPathAndObjectKeyH
 	hikes := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)
 
 	body := map[string]any{
-		"objectKey":    fmt.Sprintf("hikes/%d/photos/acde070d-8c4c-4f0d-9d8a-162843c10333", hikes[0].ID+1),
+		"objectKey":    suite.s3Client.CreatePhotoObjectKey(hikes[0].ID + 1),
 		"caption":      "Caption",
 		"displayOrder": 1,
 	}
@@ -469,7 +469,7 @@ func (suite *handlerTestSuite) TestCreatePhoto_ReturnsErrorWhenPhotoDoesNotExist
 	hikes := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)
 
 	body := map[string]any{
-		"objectKey":    fmt.Sprintf("hikes/%d/photos/acde070d-8c4c-4f0d-9d8a-162843c10333", hikes[0].ID),
+		"objectKey":    suite.s3Client.CreatePhotoObjectKey(hikes[0].ID),
 		"caption":      "Caption",
 		"displayOrder": 1,
 	}
@@ -490,7 +490,7 @@ func (suite *handlerTestSuite) TestCreatePhoto_ReturnsErrorWhenS3Errors() {
 	hikes := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)
 
 	body := map[string]any{
-		"objectKey":    fmt.Sprintf("hikes/%d/photos/acde070d-8c4c-4f0d-9d8a-162843c10333", hikes[0].ID),
+		"objectKey":    suite.s3Client.CreatePhotoObjectKey(hikes[0].ID),
 		"caption":      "Caption",
 		"displayOrder": 1,
 	}
@@ -511,7 +511,7 @@ func (suite *handlerTestSuite) TestCreatePhoto_ReturnsErrorWhenDBErrors() {
 	hikes := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)
 
 	body := map[string]any{
-		"objectKey":    fmt.Sprintf("hikes/%d/photos/acde070d-8c4c-4f0d-9d8a-162843c10333", hikes[0].ID),
+		"objectKey":    suite.s3Client.CreatePhotoObjectKey(hikes[0].ID),
 		"caption":      "Caption",
 		"displayOrder": 1,
 	}
@@ -524,7 +524,7 @@ func (suite *handlerTestSuite) TestCreatePhoto_ReturnsErrorWhenDBErrors() {
 func (suite *handlerTestSuite) TestCreatePhoto_CreatesPhoto() {
 	hikes := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)
 
-	objectKey := fmt.Sprintf("hikes/%d/photos/acde070d-8c4c-4f0d-9d8a-162843c10333", hikes[0].ID)
+	objectKey := suite.s3Client.CreatePhotoObjectKey(hikes[0].ID)
 	_, err := suite.s3Client.PutObject(context.TODO(), objectKey, strings.NewReader("content"), "image/png")
 	suite.NoError(err)
 
