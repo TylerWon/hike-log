@@ -9,12 +9,12 @@ import (
 // Store handles all interactions with the database for the app.
 type Store interface {
 	CloseConnection() error
-	CreateModel(model interface{}) error
-	DeleteModel(model interface{}) error
+	CreateRecord(record interface{}) error
+	DeleteRecord(record interface{}) error
 	GetHikeByID(id uint) (*models.Hike, error)
 	GetPhotoByID(id uint) (*models.Photo, error)
 	ListHikes() ([]models.Hike, error)
-	UpdateModel(model interface{}) error
+	UpdateRecord(record interface{}) error
 }
 
 // storeImpl is an implementation of the Store interface.
@@ -57,9 +57,9 @@ func (store *storeImpl) CloseConnection() error {
 	return nil
 }
 
-// Creates the provided model/models.
-func (store *storeImpl) CreateModel(model interface{}) error {
-	result := store.db.Create(model)
+// Creates the provided record/records.
+func (store *storeImpl) CreateRecord(record interface{}) error {
+	result := store.db.Create(record)
 
 	if result.Error != nil {
 		return result.Error
@@ -68,10 +68,10 @@ func (store *storeImpl) CreateModel(model interface{}) error {
 	return nil
 }
 
-// Deletes the provided model/models. The model(s) should have their ID set. Deleting a non-existent model does not
+// Deletes the provided record/records. The record(s) should have their ID set. Deleting a non-existent record does not
 // result in error.
-func (store *storeImpl) DeleteModel(model interface{}) error {
-	result := store.db.Delete(model)
+func (store *storeImpl) DeleteRecord(record interface{}) error {
+	result := store.db.Delete(record)
 
 	if result.Error != nil {
 		return result.Error
@@ -118,9 +118,9 @@ func (store *storeImpl) ListHikes() ([]models.Hike, error) {
 	return hikes, nil
 }
 
-// Updates the provided model. Updating a non-existent model does not result in error.
-func (store *storeImpl) UpdateModel(model interface{}) error {
-	result := store.db.Update(model)
+// Updates the provided record. Updating a non-existent record does not result in error.
+func (store *storeImpl) UpdateRecord(record interface{}) error {
+	result := store.db.Update(record)
 
 	if result.Error != nil {
 		return result.Error

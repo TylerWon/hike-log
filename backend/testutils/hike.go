@@ -42,7 +42,7 @@ func ConstructHikes(t *testing.T, n int, store store.Store, photos bool, save bo
 	}
 
 	if save {
-		err := store.CreateModel(hikes)
+		err := store.CreateRecord(hikes)
 		if err != nil {
 			t.Fatal("Failed to save hikes: ", err)
 		}

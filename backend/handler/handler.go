@@ -88,7 +88,7 @@ func (h *Handler) CreateHike(c *gin.Context) {
 		Duration:      req.Duration,
 		AllTrailsUrl:  req.AllTrailsUrl,
 	}
-	err := h.store.CreateModel(&hike)
+	err := h.store.CreateRecord(&hike)
 	if err != nil {
 		log.Println("Failed to create Hike: ", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": http.StatusText(http.StatusInternalServerError)})
@@ -127,7 +127,7 @@ func (h *Handler) DeleteHike(c *gin.Context) {
 	// Note 1: Delete cascades to Photos
 	// Note 2: Deletion order matters here. Delete DB models first then S3 objects. This avoids a dangling pointer
 	// when S3 objects are deleted first but models fail to delete.
-	err = h.store.DeleteModel(&models.Hike{ID: params.HikeID})
+	err = h.store.DeleteRecord(&models.Hike{ID: params.HikeID})
 	if err != nil {
 		log.Printf("Failed to delete Hike (id=%d): %v", params.HikeID, err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": http.StatusText(http.StatusInternalServerError)})
@@ -205,7 +205,7 @@ func (h *Handler) UpdateHike(c *gin.Context) {
 		Duration:      req.Duration,
 		AllTrailsUrl:  req.AllTrailsUrl,
 	}
-	err = h.store.UpdateModel(&hike)
+	err = h.store.UpdateRecord(&hike)
 	if err != nil {
 		log.Println("Failed to update Hike: ", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": http.StatusText(http.StatusInternalServerError)})
@@ -322,7 +322,7 @@ func (h *Handler) CreatePhoto(c *gin.Context) {
 		DisplayOrder: req.DisplayOrder,
 		HikeID:       params.HikeID,
 	}
-	err = h.store.CreateModel(&photo)
+	err = h.store.CreateRecord(&photo)
 	if err != nil {
 		log.Println("Failed to create Photo: ", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": http.StatusText(http.StatusInternalServerError)})
@@ -357,7 +357,7 @@ func (h *Handler) DeletePhoto(c *gin.Context) {
 		return
 	}
 
-	err = h.store.DeleteModel(&models.Photo{ID: params.PhotoID})
+	err = h.store.DeleteRecord(&models.Photo{ID: params.PhotoID})
 	if err != nil {
 		log.Printf("Failed to delete Photo (id=%d): %v", params.PhotoID, err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": http.StatusText(http.StatusInternalServerError)})

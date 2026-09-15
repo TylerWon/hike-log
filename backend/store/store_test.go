@@ -32,21 +32,21 @@ func (suite *storeTestSuite) SetupTest() {
 	suite.suiteDB.Reset(suite.T())
 }
 
-func (suite *storeTestSuite) TestCreateModel_ReturnsErrorWhenDBErrors() {
+func (suite *storeTestSuite) TestCreateRecord_ReturnsErrorWhenDBErrors() {
 	mockDatabase := database.MockDatabase{
 		CreateResult: &gorm.DB{Error: errors.New("Something went wrong")},
 	}
 	store := store.NewTestStore(&mockDatabase)
 
 	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, false, false)[0]
-	err := store.CreateModel(&hike)
+	err := store.CreateRecord(&hike)
 
 	suite.Error(err)
 }
 
-func (suite *storeTestSuite) TestCreateModel_CreatesModel() {
+func (suite *storeTestSuite) TestCreateRecord_CreatesModel() {
 	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, false, false)[0]
-	err := suite.store.CreateModel(&hike)
+	err := suite.store.CreateRecord(&hike)
 
 	suite.NoError(err)
 
@@ -55,9 +55,9 @@ func (suite *storeTestSuite) TestCreateModel_CreatesModel() {
 	suite.Equal(hike, *result)
 }
 
-func (suite *storeTestSuite) TestCreateModel_CreatesModels() {
+func (suite *storeTestSuite) TestCreateRecord_CreatesModels() {
 	hikes := testutils.ConstructHikes(suite.T(), 2, suite.store, false, false)
-	err := suite.store.CreateModel(hikes)
+	err := suite.store.CreateRecord(hikes)
 
 	suite.NoError(err)
 
@@ -70,34 +70,34 @@ func (suite *storeTestSuite) TestCreateModel_CreatesModels() {
 	suite.Equal(hikes[1], *result)
 }
 
-func (suite *storeTestSuite) TestDeleteModel_ReturnsErrorWhenDBErrors() {
+func (suite *storeTestSuite) TestDeleteRecord_ReturnsErrorWhenDBErrors() {
 	mockDatabase := database.MockDatabase{
 		DeleteResult: &gorm.DB{Error: errors.New("Something went wrong")},
 	}
 	store := store.NewTestStore(&mockDatabase)
 
 	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)[0]
-	err := store.DeleteModel(&hike)
+	err := store.DeleteRecord(&hike)
 	suite.Error(err)
 }
 
-func (suite *storeTestSuite) TestDeleteModel_NoErrorWhenHikeDoesNotExist() {
-	err := suite.store.DeleteModel(&models.Hike{ID: 1})
+func (suite *storeTestSuite) TestDeleteRecord_NoErrorWhenHikeDoesNotExist() {
+	err := suite.store.DeleteRecord(&models.Hike{ID: 1})
 	suite.NoError(err)
 }
 
-func (suite *storeTestSuite) TestDeleteModel_DeletesModel() {
+func (suite *storeTestSuite) TestDeleteRecord_DeletesModel() {
 	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)[0]
-	err := suite.store.DeleteModel(&hike)
+	err := suite.store.DeleteRecord(&hike)
 	suite.NoError(err)
 
 	_, err = suite.store.GetHikeByID(hike.ID)
 	suite.Error(err)
 }
 
-func (suite *storeTestSuite) TestDeleteModel_DeletesModels() {
+func (suite *storeTestSuite) TestDeleteRecord_DeletesModels() {
 	hikes := testutils.ConstructHikes(suite.T(), 2, suite.store, false, true)
-	err := suite.store.DeleteModel(&hikes)
+	err := suite.store.DeleteRecord(&hikes)
 	suite.NoError(err)
 
 	_, err = suite.store.GetHikeByID(hikes[0].ID)
@@ -179,7 +179,7 @@ func (suite *storeTestSuite) TestListHikes_ReturnsHikes() {
 	suite.Equal(hikes[0], result[1])
 }
 
-func (suite *storeTestSuite) TestUpdateModel_ReturnsErrorWhenDBErrors() {
+func (suite *storeTestSuite) TestUpdateRecord_ReturnsErrorWhenDBErrors() {
 	mockDatabase := database.MockDatabase{
 		UpdatesResult: &gorm.DB{Error: errors.New("Something went wrong")},
 	}
@@ -189,21 +189,21 @@ func (suite *storeTestSuite) TestUpdateModel_ReturnsErrorWhenDBErrors() {
 
 	hike.Difficulty = 5
 	hike.TrailName = "Other trail name"
-	err := store.UpdateModel(&hike)
+	err := store.UpdateRecord(&hike)
 	suite.Error(err)
 }
 
-func (suite *storeTestSuite) TestUpdateModel_NoErrorWhenHikeDoesNotExist() {
-	err := suite.store.UpdateModel(&models.Hike{ID: 1})
+func (suite *storeTestSuite) TestUpdateRecord_NoErrorWhenHikeDoesNotExist() {
+	err := suite.store.UpdateRecord(&models.Hike{ID: 1})
 	suite.NoError(err)
 }
 
-func (suite *storeTestSuite) TestUpdateModel_UpdatesModel() {
+func (suite *storeTestSuite) TestUpdateRecord_UpdatesModel() {
 	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)[0]
 
 	hike.Difficulty = 5
 	hike.TrailName = "Other trail name"
-	err := suite.store.UpdateModel(&hike)
+	err := suite.store.UpdateRecord(&hike)
 	suite.NoError(err)
 
 	updated, err := suite.store.GetHikeByID(hike.ID)

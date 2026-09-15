@@ -128,7 +128,7 @@ func (suite *handlerTestSuite) TestCreateHike_ReturnsErrorWhenRequestBodyIsMissi
 }
 
 func (suite *handlerTestSuite) TestCreateHike_ReturnsErrorWhenDBErrors() {
-	mockStore := store.MockStore{CreateModelError: errors.New("Something went wrong")}
+	mockStore := store.MockStore{CreateRecordError: errors.New("Something went wrong")}
 	handler := handler.New(&mockStore, suite.s3Client)
 	router := testutils.NewRouter(suite.T(), handler)
 
@@ -198,7 +198,7 @@ func (suite *handlerTestSuite) TestDeleteHike_ReturnsErrorWhenHikeDoesNotExist()
 func (suite *handlerTestSuite) TestDeleteHike_ReturnsErrorWhenDBErrors() {
 	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, true, true)[0]
 
-	mockStore := store.MockStore{DeleteModelError: errors.New("Something went wrong")}
+	mockStore := store.MockStore{DeleteRecordError: errors.New("Something went wrong")}
 	handler := handler.New(&mockStore, suite.s3Client)
 	router := testutils.NewRouter(suite.T(), handler)
 
@@ -325,7 +325,7 @@ func (suite *handlerTestSuite) TestUpdateHike_ReturnsErrorWhenDBErrors() {
 
 	mockStore := store.MockStore{
 		GetHikeByIDResult: &hike,
-		UpdateModelError:  errors.New("Something went wrong"),
+		UpdateRecordError:  errors.New("Something went wrong"),
 	}
 	handler := handler.New(&mockStore, suite.s3Client)
 	router := testutils.NewRouter(suite.T(), handler)
