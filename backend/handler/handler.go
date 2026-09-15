@@ -101,7 +101,7 @@ func (h *Handler) CreateHike(c *gin.Context) {
 /*
 Deletes a Hike.
 
-Also deletes any Photos associated with the Hike, and the photo objects stored in the S3 bucket. S3 clean-up is best-
+Also deletes any Photos associated with the Hike and the photo objects stored in the S3 bucket. S3 clean-up is best-
 effort and does not result in an error on failure.
 
 Path parameters: [hikeIDPathParam]
@@ -120,7 +120,7 @@ func (h *Handler) DeleteHike(c *gin.Context) {
 
 	_, err := h.store.GetHikeByID(params.HikeID)
 	if err != nil {
-		handleHikeDoesNotExistError(c, err, params.HikeID)
+		handleModelDoesNotExistError(c, err, params.HikeID)
 		return
 	}
 
@@ -138,7 +138,7 @@ func (h *Handler) DeleteHike(c *gin.Context) {
 	result, err := h.s3Client.ListObjects(c, objectKeyPrefix)
 	if err != nil {
 		log.Printf("Failed to list S3 Photo objects for Hike (id=%d): %v", params.HikeID, err)
-		c.JSON(http.StatusOK, gin.H{"message": "ok"}) // return OK since Hike technically deleted, only orphan S3 objects
+		c.JSON(http.StatusOK, gin.H{"message": "ok"}) // return OK since Hike deleted, only orphan S3 objects
 		return
 	}
 
@@ -151,7 +151,7 @@ func (h *Handler) DeleteHike(c *gin.Context) {
 		_, err := h.s3Client.DeleteObjects(c, objectKeys)
 		if err != nil {
 			log.Printf("Failed to delete S3 Photo objects for Hike (id=%d): %v", params.HikeID, err)
-			c.JSON(http.StatusOK, gin.H{"message": "ok"}) // return OK since Hike technically deleted, only orphan S3 objects
+			c.JSON(http.StatusOK, gin.H{"message": "ok"}) // return OK since Hike deleted, only orphan S3 objects
 			return
 		}
 	}
@@ -180,7 +180,7 @@ func (h *Handler) UpdateHike(c *gin.Context) {
 
 	_, err := h.store.GetHikeByID(params.HikeID)
 	if err != nil {
-		handleHikeDoesNotExistError(c, err, params.HikeID)
+		handleModelDoesNotExistError(c, err, params.HikeID)
 		return
 	}
 
@@ -240,7 +240,7 @@ func (h *Handler) CreatePhotoUploadURL(c *gin.Context) {
 
 	_, err := h.store.GetHikeByID(params.HikeID)
 	if err != nil {
-		handleHikeDoesNotExistError(c, err, params.HikeID)
+		handleModelDoesNotExistError(c, err, params.HikeID)
 		return
 	}
 
@@ -266,6 +266,8 @@ func (h *Handler) CreatePhotoUploadURL(c *gin.Context) {
 /*
 Creates a Photo for a Hike.
 
+The photo should already be uploaded to S3. This endpoint is just responsible for creating the Photo model in the DB.
+
 Path parameters: [createPhotoPathParams]
 
 Request body: [createPhotoRequest]
@@ -285,7 +287,7 @@ func (h *Handler) CreatePhoto(c *gin.Context) {
 
 	_, err := h.store.GetHikeByID(params.HikeID)
 	if err != nil {
-		handleHikeDoesNotExistError(c, err, params.HikeID)
+		handleModelDoesNotExistError(c, err, params.HikeID)
 		return
 	}
 
@@ -305,7 +307,7 @@ func (h *Handler) CreatePhoto(c *gin.Context) {
 
 	exists, err := h.s3Client.DoesObjectExist(c, req.ObjectKey)
 	if err != nil {
-		log.Printf("Unable to verify if Photo (key=%s) exists in S3 bucket: %v", req.ObjectKey, err)
+		log.Printf("Unable to verify if photo object (key=%s) exists in S3 bucket: %v", req.ObjectKey, err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": http.StatusText(http.StatusInternalServerError)})
 		return
 	} else if !exists {
@@ -330,12 +332,55 @@ func (h *Handler) CreatePhoto(c *gin.Context) {
 	c.JSON(http.StatusCreated, photo)
 }
 
-// Handles error that occurs when a Hike unexpectedly does not exist.
-func handleHikeDoesNotExistError(c *gin.Context, err error, hikeId uint) {
+/*
+Deletes a Photo.
+
+Also deletes the object stored in the S3 bucket. S3 clean-up is best-effort and does not result in an error on failure.
+
+Path parameters: [photoIDPathParam]
+
+Returns:
+ 1. 200 OK when successful
+ 2. 404 Not Found and an error message when the Photo does not exist
+ 3. 500 Internal Server Error and an error message when there is an unexpected error
+*/
+func (h *Handler) DeletePhoto(c *gin.Context) {
+	var params photoIDPathParam
+	if err := c.ShouldBindUri(&params); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	photo, err := h.store.GetPhotoByID(params.PhotoID)
+	if err != nil {
+		handleModelDoesNotExistError(c, err, params.PhotoID)
+		return
+	}
+
+	err = h.store.DeleteModel(&models.Photo{ID: params.PhotoID})
+	if err != nil {
+		log.Printf("Failed to delete Photo (id=%d): %v", params.PhotoID, err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": http.StatusText(http.StatusInternalServerError)})
+		return
+	}
+
+	objectKey := h.s3Client.GetObjectKey(photo.SrcUrl, os.Getenv("ENV"))
+	_, err = h.s3Client.DeleteObject(c, objectKey)
+	if err != nil {
+		log.Printf("Failed to delete S3 photo object for Photo (id=%d): %v", params.PhotoID, err)
+		c.JSON(http.StatusOK, gin.H{"message": "ok"}) // return OK since Photo deleted, only orphan S3 object
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "ok"})
+}
+
+// Handles error that occurs when a model unexpectedly does not exist.
+func handleModelDoesNotExistError(c *gin.Context, err error, id uint) {
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		c.JSON(http.StatusNotFound, gin.H{"error": http.StatusText(http.StatusNotFound)})
 		return
 	}
-	log.Printf("Failed to get hike (id=%d): %v", hikeId, err)
+	log.Printf("Failed to get model (id=%d): %v", id, err)
 	c.JSON(http.StatusInternalServerError, gin.H{"error": http.StatusText(http.StatusInternalServerError)})
 }

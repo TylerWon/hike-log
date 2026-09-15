@@ -44,6 +44,16 @@ func New(handler *handler.Handler) *gin.Engine {
 					}
 				}
 			}
+
+			// /api/v1/photos
+			photos := v1.Group("/photos")
+			{
+				// /api/v1/photos/:photoId
+				photo := photos.Group("/:photoId")
+				{
+					photo.DELETE("/", handler.DeletePhoto)
+				}
+			}
 		}
 	}
 

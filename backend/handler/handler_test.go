@@ -667,6 +667,80 @@ func (suite *handlerTestSuite) TestCreatePhoto_CreatesPhoto() {
 	suite.NoError(err)
 }
 
+func (suite *handlerTestSuite) TestDeletePhoto_ReturnsErrorWhenPhotoIDIsInvalid() {
+	res := testutils.SendRequest(suite.router, http.MethodDelete, "/api/v1/photos/abc/", nil)
+	suite.Equal(http.StatusBadRequest, res.Code)
+}
+
+func (suite *handlerTestSuite) TestDeletePhoto_ReturnsErrorWhenPhotoDoesNotExist() {
+	res := testutils.SendRequest(suite.router, http.MethodDelete, "/api/v1/photos/1/", nil)
+	suite.Equal(http.StatusNotFound, res.Code)
+}
+
+func (suite *handlerTestSuite) TestDeletePhoto_ReturnsErrorWhenDBErrors() {
+	mockStore := store.MockStore{GetPhotoByIDError: errors.New("Something went wrong")}
+	handler := handler.New(&mockStore, suite.s3Client)
+	router := testutils.NewRouter(suite.T(), handler)
+
+	photo := testutils.ConstructHikes(suite.T(), 1, suite.store, true, true)[0].Photos[0]
+
+	res := testutils.SendRequest(router, http.MethodDelete, fmt.Sprintf("/api/v1/photos/%d/", photo.ID), nil)
+	suite.Equal(http.StatusInternalServerError, res.Code)
+}
+
+func (suite *handlerTestSuite) TestDeletePhoto_DeletesPhotoWhenS3Errors() {
+	mockS3Client := aws.MockS3Client{
+		DeleteObjectResult: nil,
+		DeleteObjectError:  errors.New("Something went wrong"),
+	}
+	handler := handler.New(suite.store, &mockS3Client)
+	router := testutils.NewRouter(suite.T(), handler)
+
+	photo := testutils.ConstructHikes(suite.T(), 1, suite.store, true, true)[0].Photos[0]
+	objectKey := suite.s3Client.GetObjectKey(photo.SrcUrl, "local")
+	_, err := suite.s3Client.PutObject(
+		context.TODO(),
+		objectKey,
+		strings.NewReader("content"),
+		"image/png",
+	)
+	suite.NoError(err)
+
+	res := testutils.SendRequest(router, http.MethodDelete, fmt.Sprintf("/api/v1/photos/%d/", photo.ID), nil)
+	suite.Equal(http.StatusOK, res.Code)
+
+	_, err = suite.store.GetPhotoByID(photo.ID)
+	suite.Error(err)
+
+	exists, err := suite.s3Client.DoesObjectExist(context.TODO(), objectKey)
+	suite.NoError(err)
+	suite.True(exists)
+
+	suite.s3Client.DeleteObject(context.TODO(), objectKey)
+}
+
+func (suite *handlerTestSuite) TestDeletePhoto_DeletesPhotoAndS3Object() {
+	photo := testutils.ConstructHikes(suite.T(), 1, suite.store, true, true)[0].Photos[0]
+	objectKey := suite.s3Client.GetObjectKey(photo.SrcUrl, "local")
+	_, err := suite.s3Client.PutObject(
+		context.TODO(),
+		objectKey,
+		strings.NewReader("content"),
+		"image/png",
+	)
+	suite.NoError(err)
+
+	res := testutils.SendRequest(suite.router, http.MethodDelete, fmt.Sprintf("/api/v1/photos/%d/", photo.ID), nil)
+	suite.Equal(http.StatusOK, res.Code)
+
+	_, err = suite.store.GetPhotoByID(photo.ID)
+	suite.Error(err)
+
+	exists, err := suite.s3Client.DoesObjectExist(context.TODO(), objectKey)
+	suite.NoError(err)
+	suite.False(exists)
+}
+
 func TestHandlerTestSuite(t *testing.T) {
 	suite.Run(t, new(handlerTestSuite))
 }
