@@ -78,6 +78,8 @@ services:
       - ./localstack/init.sh:/etc/localstack/init/ready.d/init.sh
       # Mounts CORS configuration file used in init script
       - ./localstack/cors.json:/etc/localstack/init/ready.d/cors.json
+      # Mounts public read policy file used in init script
+      - ./localstack/public-read-policy.json:/etc/localstack/init/ready.d/public-read-policy.json
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/health"]
       interval: 10s

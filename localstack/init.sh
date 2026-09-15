@@ -5,3 +5,4 @@
 
 awslocal s3 mb s3://hike-log
 awslocal s3api put-bucket-cors --bucket hike-log --cors-configuration file:///etc/localstack/init/ready.d/cors.json
+awslocal s3api put-bucket-policy --bucket hike-log --policy file:///etc/localstack/init/ready.d/public-read-policy.json
