@@ -52,6 +52,7 @@ func New(handler *handler.Handler) *gin.Engine {
 				photo := photos.Group("/:photoId")
 				{
 					photo.DELETE("/", handler.DeletePhoto)
+					photo.PUT("/", handler.UpdatePhoto)
 				}
 			}
 		}

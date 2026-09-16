@@ -325,7 +325,7 @@ func (suite *handlerTestSuite) TestUpdateHike_ReturnsErrorWhenDBErrors() {
 
 	mockStore := store.MockStore{
 		GetHikeByIDResult: &hike,
-		UpdateRecordError:  errors.New("Something went wrong"),
+		UpdateRecordError: errors.New("Something went wrong"),
 	}
 	handler := handler.New(&mockStore, suite.s3Client)
 	router := testutils.NewRouter(suite.T(), handler)
@@ -739,6 +739,115 @@ func (suite *handlerTestSuite) TestDeletePhoto_DeletesPhotoAndS3Object() {
 	exists, err := suite.s3Client.DoesObjectExist(context.TODO(), objectKey)
 	suite.NoError(err)
 	suite.False(exists)
+}
+
+func (suite *handlerTestSuite) TestUpdatePhoto_ReturnsErrorWhenPhotoIDIsInvalid() {
+	res := testutils.SendRequest(suite.router, http.MethodPut, "/api/v1/photos/abc/", nil)
+	suite.Equal(http.StatusBadRequest, res.Code)
+}
+
+func (suite *handlerTestSuite) TestUpdatePhoto_ReturnsErrorWhenPhotoDoesNotExist() {
+	body := map[string]any{
+		"caption":      "Updated caption",
+		"displayOrder": 2,
+	}
+	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
+	res := testutils.SendRequest(suite.router, http.MethodPut, "/api/v1/photos/1/", reqBody)
+	suite.Equal(http.StatusNotFound, res.Code)
+}
+
+func (suite *handlerTestSuite) TestUpdatePhoto_ReturnsErrorWhenRequestBodyHasInvalidFields() {
+	photo := testutils.ConstructHikes(suite.T(), 1, suite.store, true, true)[0].Photos[0]
+
+	body := map[string]any{
+		"caption":      "Updated caption",
+		"displayOrder": 0, // must be > 0
+	}
+	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
+	res := testutils.SendRequest(suite.router, http.MethodPut, fmt.Sprintf("/api/v1/photos/%d/", photo.ID), reqBody)
+
+	suite.Equal(http.StatusBadRequest, res.Code)
+}
+
+func (suite *handlerTestSuite) TestUpdatePhoto_ReturnsErrorWhenRequestBodyIsMissingFields() {
+	photo := testutils.ConstructHikes(suite.T(), 1, suite.store, true, true)[0].Photos[0]
+
+	body := map[string]any{
+		"caption": "Updated caption",
+	}
+	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
+	res := testutils.SendRequest(suite.router, http.MethodPut, fmt.Sprintf("/api/v1/photos/%d/", photo.ID), reqBody)
+
+	suite.Equal(http.StatusBadRequest, res.Code)
+}
+
+func (suite *handlerTestSuite) TestUpdatePhoto_ReturnsErrorWhenDBErrors() {
+	photo := testutils.ConstructHikes(suite.T(), 1, suite.store, true, true)[0].Photos[0]
+
+	mockStore := store.MockStore{
+		GetPhotoByIDResult: &photo,
+		UpdateRecordError:  errors.New("Something went wrong"),
+	}
+	handler := handler.New(&mockStore, suite.s3Client)
+	router := testutils.NewRouter(suite.T(), handler)
+
+	body := map[string]any{
+		"caption":      "Updated caption",
+		"displayOrder": 2,
+	}
+	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
+	res := testutils.SendRequest(router, http.MethodPut, fmt.Sprintf("/api/v1/photos/%d/", photo.ID), reqBody)
+
+	suite.Equal(http.StatusInternalServerError, res.Code)
+}
+
+func (suite *handlerTestSuite) TestUpdatePhoto_UpdatesPhoto() {
+	photo := testutils.ConstructHikes(suite.T(), 1, suite.store, true, true)[0].Photos[0]
+
+	body := map[string]any{
+		"caption":      "Updated caption",
+		"displayOrder": 2,
+	}
+	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
+	res := testutils.SendRequest(suite.router, http.MethodPut, fmt.Sprintf("/api/v1/photos/%d/", photo.ID), reqBody)
+
+	suite.Equal(http.StatusOK, res.Code)
+
+	updated, err := suite.store.GetPhotoByID(photo.ID)
+	suite.NoError(err)
+
+	expected := models.Photo{
+		ID:           photo.ID,
+		SrcUrl:       photo.SrcUrl,
+		Caption:      "Updated caption",
+		DisplayOrder: 2,
+		HikeID:       photo.HikeID,
+	}
+	suite.Equal(expected, *updated)
+}
+
+func (suite *handlerTestSuite) TestUpdatePhoto_UpdatesPhotoWhenOptionalFieldMissing() {
+	photo := testutils.ConstructHikes(suite.T(), 1, suite.store, true, true)[0].Photos[0]
+
+	body := map[string]any{
+		"displayOrder": 2,
+	}
+	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
+	res := testutils.SendRequest(suite.router, http.MethodPut, fmt.Sprintf("/api/v1/photos/%d/", photo.ID), reqBody)
+
+	suite.Equal(http.StatusOK, res.Code)
+
+	updated, err := suite.store.GetPhotoByID(photo.ID)
+	suite.NoError(err)
+
+	expected := models.Photo{
+		ID:           photo.ID,
+		SrcUrl:       photo.SrcUrl,
+		Caption:      photo.Caption,
+		DisplayOrder: 2,
+		HikeID:       photo.HikeID,
+	}
+	suite.Equal(expected, *updated)
 }
 
 func TestHandlerTestSuite(t *testing.T) {

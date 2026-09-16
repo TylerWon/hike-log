@@ -120,7 +120,7 @@ func (h *Handler) DeleteHike(c *gin.Context) {
 
 	_, err := h.store.GetHikeByID(params.HikeID)
 	if err != nil {
-		handleModelDoesNotExistError(c, err, params.HikeID)
+		handleRecordDoesNotExistError(c, err, params.HikeID)
 		return
 	}
 
@@ -180,7 +180,7 @@ func (h *Handler) UpdateHike(c *gin.Context) {
 
 	_, err := h.store.GetHikeByID(params.HikeID)
 	if err != nil {
-		handleModelDoesNotExistError(c, err, params.HikeID)
+		handleRecordDoesNotExistError(c, err, params.HikeID)
 		return
 	}
 
@@ -207,7 +207,7 @@ func (h *Handler) UpdateHike(c *gin.Context) {
 	}
 	err = h.store.UpdateRecord(&hike)
 	if err != nil {
-		log.Println("Failed to update Hike: ", err)
+		log.Printf("Failed to update Hike (id=%d): %v", hike.ID, err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": http.StatusText(http.StatusInternalServerError)})
 		return
 	}
@@ -240,7 +240,7 @@ func (h *Handler) CreatePhotoUploadURL(c *gin.Context) {
 
 	_, err := h.store.GetHikeByID(params.HikeID)
 	if err != nil {
-		handleModelDoesNotExistError(c, err, params.HikeID)
+		handleRecordDoesNotExistError(c, err, params.HikeID)
 		return
 	}
 
@@ -287,7 +287,7 @@ func (h *Handler) CreatePhoto(c *gin.Context) {
 
 	_, err := h.store.GetHikeByID(params.HikeID)
 	if err != nil {
-		handleModelDoesNotExistError(c, err, params.HikeID)
+		handleRecordDoesNotExistError(c, err, params.HikeID)
 		return
 	}
 
@@ -353,7 +353,7 @@ func (h *Handler) DeletePhoto(c *gin.Context) {
 
 	photo, err := h.store.GetPhotoByID(params.PhotoID)
 	if err != nil {
-		handleModelDoesNotExistError(c, err, params.PhotoID)
+		handleRecordDoesNotExistError(c, err, params.PhotoID)
 		return
 	}
 
@@ -375,12 +375,58 @@ func (h *Handler) DeletePhoto(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "ok"})
 }
 
-// Handles error that occurs when a model unexpectedly does not exist.
-func handleModelDoesNotExistError(c *gin.Context, err error, id uint) {
+/*
+Updates a Photo.
+
+Path parameters: [photoIDPathParam]
+
+Request body: [updatePhotoRequest]
+
+Returns:
+ 1. 200 OK when successful
+ 2. 404 Not Found and an error message when the Photo does not exist
+ 3. 500 Internal Server Error and an error message when there is an unexpected error
+*/
+func (h *Handler) UpdatePhoto(c *gin.Context) {
+	var params photoIDPathParam
+	if err := c.ShouldBindUri(&params); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	photo, err := h.store.GetPhotoByID(params.PhotoID)
+	if err != nil {
+		handleRecordDoesNotExistError(c, err, params.PhotoID)
+		return
+	}
+
+	var req updatePhotoRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	photo.DisplayOrder = req.DisplayOrder
+	if req.Caption != "" {
+		photo.Caption = req.Caption
+	}
+
+	err = h.store.UpdateRecord(photo)
+	if err != nil {
+		log.Printf("Failed to update Photo (id=%d): %v", photo.ID, err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": http.StatusText(http.StatusInternalServerError)})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "ok"})
+}
+
+// Handles error that occurs when a record unexpectedly does not exist.
+func handleRecordDoesNotExistError(c *gin.Context, err error, id uint) {
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		c.JSON(http.StatusNotFound, gin.H{"error": http.StatusText(http.StatusNotFound)})
 		return
 	}
-	log.Printf("Failed to get model (id=%d): %v", id, err)
+	log.Printf("Failed to get record (id=%d): %v", id, err)
 	c.JSON(http.StatusInternalServerError, gin.H{"error": http.StatusText(http.StatusInternalServerError)})
 }

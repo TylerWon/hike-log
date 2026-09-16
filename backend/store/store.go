@@ -118,7 +118,7 @@ func (store *storeImpl) ListHikes() ([]models.Hike, error) {
 	return hikes, nil
 }
 
-// Updates the provided record. Updating a non-existent record does not result in error.
+// Updates all fields of the provided record. Updating a non-existent record does not result in error.
 func (store *storeImpl) UpdateRecord(record interface{}) error {
 	result := store.db.Update(record)
 
