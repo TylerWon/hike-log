@@ -18,18 +18,21 @@ export const HIKE_FIXTURE_1: Hike = {
   photos: [
     {
       caption: "Upper Joffre Lake with the glacier above",
+      displayOrder: BigInt(1),
       hikeId: BigInt(1),
       id: BigInt(1),
       srcUrl: new URL(joffre_lakes_1, import.meta.url).href,
     },
     {
       caption: "Middle lake — flat calm in the morning",
+      displayOrder: BigInt(2),
       hikeId: BigInt(1),
       id: BigInt(2),
       srcUrl: new URL(joffre_lakes_2, import.meta.url).href,
     },
     {
       caption: "Upper lake with the Matier Glacier",
+      displayOrder: BigInt(3),
       hikeId: BigInt(1),
       id: BigInt(3),
       srcUrl: new URL(joffre_lakes_3, import.meta.url).href,
@@ -52,6 +55,7 @@ export const HIKE_FIXTURE_2: Hike = {
   photos: [
     {
       caption: "Dense forest corridor on the Grind",
+      displayOrder: BigInt(1),
       hikeId: BigInt(2),
       id: BigInt(2),
       srcUrl: new URL(grouse_grind_1, import.meta.url).href,
