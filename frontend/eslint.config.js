@@ -23,6 +23,11 @@ export default defineConfig([
     },
   },
   perfectionist.configs["recommended-natural"],
+  {
+    rules: {
+      "perfectionist/sort-modules": "off",
+    },
+  },
   ...pluginQuery.configs["flat/recommended"],
   eslintConfigPrettier, // Should be last config applied
 ]);
