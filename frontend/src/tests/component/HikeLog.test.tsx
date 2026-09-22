@@ -2,7 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { describe, expect, test, vi } from "vitest";
 import { render, type RenderResult } from "vitest-browser-react";
 
-import type { Hike } from "../../schemas/hike";
+import type { Hike } from "../../schemas/models/hike";
 
 import { fetchHikes } from "../../api/hikes";
 import HikeLog from "../../components/HikeLog";

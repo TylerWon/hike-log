@@ -1,4 +1,4 @@
-import type { Photo } from "../../schemas/photo";
+import type { Photo } from "../../schemas/models/photo";
 
 import photo from "../assets/images/grouse_grind_1.avif";
 

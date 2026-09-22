@@ -1,4 +1,4 @@
-import type { Photo } from "../schemas/photo";
+import type { Photo } from "../schemas/models/photo";
 
 interface ThumbnailProps {
   photo: null | Photo;

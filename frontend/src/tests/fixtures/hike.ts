@@ -1,4 +1,4 @@
-import type { Hike } from "../../schemas/hike";
+import type { Hike } from "../../schemas/models/hike";
 
 import grouse_grind_1 from "../assets/images/grouse_grind_1.avif";
 import joffre_lakes_1 from "../assets/images/joffre_lakes_1.avif";

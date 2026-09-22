@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { render, type RenderResult } from "vitest-browser-react";
 
-import type { Hike } from "../../schemas/hike";
+import type { Hike } from "../../schemas/models/hike";
 
 import HikeDetail from "../../components/HikeDetail";
 import { HIKE_FIXTURE_1 } from "../fixtures/hike";

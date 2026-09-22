@@ -1,5 +1,5 @@
 import "../assets/styles/text.css";
-import type { Hike } from "../schemas/hike";
+import type { Hike } from "../schemas/models/hike";
 
 import { classnames } from "../utils/classnames";
 import { formatDate, formatDistance, formatDuration, formatElevation } from "../utils/formatters";

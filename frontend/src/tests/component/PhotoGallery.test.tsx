@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { render, type RenderResult } from "vitest-browser-react";
 
-import type { Photo } from "../../schemas/photo";
+import type { Photo } from "../../schemas/models/photo";
 
 import PhotoGallery from "../../components/PhotoGallery";
 import { HIKE_FIXTURE_1 } from "../fixtures/hike";
