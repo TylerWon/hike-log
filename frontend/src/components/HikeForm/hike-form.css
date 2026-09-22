@@ -1,0 +1,5 @@
+@reference "../../index.css";
+
+.hike-form-field {
+  @apply w-full bg-forest-950 border border-forest-800 rounded px-3 py-2 text-sm text-cream-100 placeholder-forest-700 focus:outline-none focus:border-sage-500 transition-colors;
+}

@@ -1,5 +1,7 @@
+import "../assets/styles/button.css";
 import "../assets/styles/text.css";
-import type { Hike } from "../schemas/hike";
+
+import type { Hike } from "../schemas/models/hike";
 
 import DifficultyBar from "./DifficultyBar";
 import PhotoGallery from "./PhotoGallery";
@@ -24,7 +26,7 @@ export default function HikeDetail({ hike }: HikeDetailProps) {
         </div>
 
         <a
-          className="inline-flex items-center gap-1.5 text-xs font-mono text-sage-500 hover:text-sage-400 transition-colors border border-sage-500 rounded px-2.5 py-1 hover:border-sage-400"
+          className="primary-button inline-flex items-center gap-1.5 px-2.5 py-1"
           href={hike.allTrailsUrl}
           rel="noopener noreferrer"
           target="_blank"
