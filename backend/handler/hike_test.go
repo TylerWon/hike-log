@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 
@@ -353,4 +354,132 @@ func (suite *handlerTestSuite) TestUpdateHike_UpdatesHike() {
 		AllTrailsUrl:  "https://www.alltrails.com/updated",
 	}
 	suite.Equal(expected, *updated)
+}
+
+func (suite *handlerTestSuite) TestCreatePhotoUploadURL_ReturnsErrorWhenHikeIDIsInvalid() {
+	body := map[string]any{
+		"contentType":   "image/jpeg",
+		"contentLength": 100,
+	}
+	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
+	res := testutils.SendRequest(suite.router, http.MethodPost, "/api/v1/hikes/abc/photos/upload-url", reqBody)
+
+	suite.Equal(http.StatusBadRequest, res.Code)
+}
+
+func (suite *handlerTestSuite) TestCreatePhotoUploadURL_ReturnsErrorWhenHikeDoesNotExist() {
+	body := map[string]any{
+		"contentType":   "image/jpeg",
+		"contentLength": 100,
+	}
+	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
+	res := testutils.SendRequest(suite.router, http.MethodPost, "/api/v1/hikes/1/photos/upload-url", reqBody)
+
+	suite.Equal(http.StatusNotFound, res.Code)
+}
+
+func (suite *handlerTestSuite) TestCreatePhotoUploadURL_ReturnsErrorWhenRequestBodyIsMissingFields() {
+	hikes := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)
+
+	body := map[string]any{
+		"contentLength": 100,
+	}
+	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
+	res := testutils.SendRequest(suite.router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos/upload-url", hikes[0].ID), reqBody)
+
+	suite.Equal(http.StatusBadRequest, res.Code)
+}
+
+func (suite *handlerTestSuite) TestCreatePhotoUploadURL_ReturnsErrorWhenContentTypeIsAnInvalidImageType() {
+	hikes := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)
+
+	body := map[string]any{
+		"contentType":   "text/html",
+		"contentLength": 100,
+	}
+	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
+	res := testutils.SendRequest(suite.router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos/upload-url", hikes[0].ID), reqBody)
+
+	suite.Equal(http.StatusBadRequest, res.Code)
+}
+
+func (suite *handlerTestSuite) TestCreatePhotoUploadURL_ReturnsErrorWhenContentLengthIsOutsideBounds() {
+	hikes := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)
+
+	body := map[string]any{
+		"contentType":   "image/jpeg",
+		"contentLength": -1,
+	}
+	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
+	res := testutils.SendRequest(suite.router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos/upload-url", hikes[0].ID), reqBody)
+	suite.Equal(http.StatusBadRequest, res.Code)
+
+	body = map[string]any{
+		"contentType":   "image/jpeg",
+		"contentLength": 10485761,
+	}
+	reqBody = testutils.SerializeJSONRequestBody(suite.T(), body)
+	res = testutils.SendRequest(suite.router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos/upload-url", hikes[0].ID), reqBody)
+	suite.Equal(http.StatusBadRequest, res.Code)
+}
+
+func (suite *handlerTestSuite) TestCreatePhotoUploadURL_ReturnsErrorWhenS3Errors() {
+	mockS3Client := aws.MockS3Client{
+		CreatePresignedPutObjectRequestResult: nil,
+		CreatePresignedPutObjectRequestError:  errors.New("Something went wrong"),
+	}
+	handler := handler.New(suite.store, &mockS3Client)
+	router := testutils.NewRouter(suite.T(), handler)
+
+	hikes := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)
+
+	body := map[string]any{
+		"contentType":   "image/jpeg",
+		"contentLength": 100,
+	}
+	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
+	res := testutils.SendRequest(router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos/upload-url", hikes[0].ID), reqBody)
+	suite.Equal(http.StatusInternalServerError, res.Code)
+}
+
+func (suite *handlerTestSuite) TestCreatePhotoUploadURL_ReturnsErrorWhenDBErrors() {
+	mockStore := store.MockStore{
+		GetHikeByIDResult: nil,
+		GetHikeByIDError:  errors.New("Something went wrong"),
+	}
+	handler := handler.New(&mockStore, suite.s3Client)
+	router := testutils.NewRouter(suite.T(), handler)
+
+	hikes := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)
+
+	body := map[string]any{
+		"contentType":   "image/jpeg",
+		"contentLength": 100,
+	}
+	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
+	res := testutils.SendRequest(router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos/upload-url", hikes[0].ID), reqBody)
+	suite.Equal(http.StatusInternalServerError, res.Code)
+}
+
+func (suite *handlerTestSuite) TestCreatePhotoUploadURL_ReturnsUploadURL() {
+	hikes := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)
+
+	body := map[string]any{
+		"contentType":   "image/jpeg",
+		"contentLength": 100,
+	}
+	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
+	res := testutils.SendRequest(suite.router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos/upload-url", hikes[0].ID), reqBody)
+
+	suite.Equal(http.StatusOK, res.Code)
+
+	var response handler.CreatePhotoUploadURLResponse
+	err := json.Unmarshal(res.Body.Bytes(), &response)
+	suite.NoError(err)
+
+	suite.Regexp(fmt.Sprintf("^hikes/%d/photos/[0-9a-f-]{36}$", hikes[0].ID), response.ObjectKey)
+
+	parsedUploadURL, err := url.Parse(response.UploadURL)
+	suite.NoError(err)
+	suite.Contains(parsedUploadURL.Path, response.ObjectKey)
 }
