@@ -7,7 +7,6 @@ export const PhotoSchema = z.object({
   id: z.coerce.bigint<bigint>(),
   srcUrl: z.url(),
 });
+export type Photo = z.infer<typeof PhotoSchema>;
 
 export const PhotoListSchema = z.array(PhotoSchema);
-
-export type Photo = z.infer<typeof PhotoSchema>;

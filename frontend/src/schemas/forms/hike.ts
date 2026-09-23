@@ -26,5 +26,4 @@ export const HikeFormDataSchema = HikeSchema.omit({ id: true }).extend({
   rating: z.string().min(1, "Required").transform(Number).pipe(RatingSchema),
   trailName: TrailNameSchema.min(1, "Required"),
 });
-
 export type HikeFormData = z.infer<typeof HikeFormDataSchema>;

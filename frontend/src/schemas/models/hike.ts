@@ -26,7 +26,6 @@ export const HikeSchema = z.object({
   rating: z.coerce.number().pipe(RatingSchema),
   trailName: TrailNameSchema,
 });
+export type Hike = z.infer<typeof HikeSchema>;
 
 export const HikeListSchema = z.array(HikeSchema);
-
-export type Hike = z.infer<typeof HikeSchema>;
