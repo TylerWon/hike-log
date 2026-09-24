@@ -18,7 +18,7 @@ import StatValueSkeleton from "./StatValueSkeleton";
 const HIKES_QUERY_KEY = "hikes";
 
 export default function HikeLog() {
-  const [expandedCardId, setExpandedCardId] = useState<bigint | null>(null);
+  const [expandedCardId, setExpandedCardId] = useState<null | number>(null);
   const [showHikeForm, setShowHikeForm] = useState<boolean>(false);
 
   const hikes = useQuery({
@@ -27,7 +27,7 @@ export default function HikeLog() {
     refetchOnWindowFocus: false,
   });
 
-  const handleCardClick = (id: bigint) => {
+  const handleCardClick = (id: number) => {
     setExpandedCardId((prev) => (prev === id ? null : id));
   };
 
@@ -61,8 +61,8 @@ export default function HikeLog() {
   }
 
   const totalDistance = hikes.data.reduce<number>((sum, h) => sum + h.distance, 0);
-  const totalElevation = hikes.data.reduce<bigint>((sum, h) => sum + h.elevationGain, BigInt(0));
-  const totalMinutes = hikes.data.reduce<bigint>((sum, h) => sum + h.duration, BigInt(0));
+  const totalElevation = hikes.data.reduce<number>((sum, h) => sum + h.elevationGain, 0);
+  const totalMinutes = hikes.data.reduce<number>((sum, h) => sum + h.duration, 0);
 
   const overallStats = [
     { label: "Hikes", value: hikes.data.length },

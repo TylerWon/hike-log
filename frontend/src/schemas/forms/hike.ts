@@ -12,10 +12,8 @@ import {
 } from "../models/hike";
 import { PhotoFormDataListSchema } from "./photo";
 
-const IntegerStringSchema = z.string().min(1, "Required").regex(/^\d+$/, "Must be a whole number").transform(BigInt);
+const IntegerStringSchema = z.string().min(1, "Required").regex(/^\d+$/, "Must be a whole number").transform(Number);
 
-// HikeFormDataSchema Has the same fields as HikeSchema (excluding id) but with extra validation (empty values not
-// allowed)
 export const HikeFormDataSchema = HikeSchema.omit({ id: true }).extend({
   difficulty: z.string().min(1, "Required").transform(Number).pipe(DifficultySchema),
   distance: z.string().min(1, "Required").transform(Number).pipe(DistanceSchema),

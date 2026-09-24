@@ -22,7 +22,7 @@ export function formatDistance(distanceKm: number): string {
  * Takes a duration (in minutes) and outputs it as "[hours]h [minutes]m" (ex. "5h 20m") or just "[minutes]m" (ex. "58m")
  * if the duration is less than an hour.
  */
-export function formatDuration(durationMins: bigint): string {
+export function formatDuration(durationMins: number): string {
   const duration = Number(durationMins);
   const h = Math.floor(duration / 60);
   const m = duration % 60;
@@ -35,6 +35,6 @@ export function formatDuration(durationMins: bigint): string {
  * Takes an elevation (in meters) and outputs it as "[elevation] m" (ex. "6,809 m"). Every thousandth place will be
  * separated with a comma.
  */
-export function formatElevation(elevationM: bigint): string {
+export function formatElevation(elevationM: number): string {
   return `${elevationM.toLocaleString("en-CA")} m`;
 }
