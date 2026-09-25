@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/TylerWon/hike-log/backend/models"
+	"github.com/TylerWon/hike-log/backend/models/types"
 	"github.com/TylerWon/hike-log/backend/store"
-	"gorm.io/datatypes"
 )
 
 // Constructs n Hikes and returns them. Optionally can add Photos to the Hikes and save the Hikes to the database.
@@ -18,7 +18,7 @@ func ConstructHikes(t *testing.T, n int, store store.Store, photos bool, save bo
 	for i := range n {
 		hike := models.Hike{
 			TrailName:     fmt.Sprintf("Trail %d", i),
-			Date:          datatypes.Date(time.Date(2026, 1, i, 0, 0, 0, 0, time.UTC)),
+			Date:          types.Date(time.Date(2026, 1, i+1, 0, 0, 0, 0, time.UTC).Format("2006-01-02")),
 			Notes:         "Hike notes",
 			Rating:        3,
 			Difficulty:    9,

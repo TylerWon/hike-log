@@ -10,7 +10,6 @@ require (
 )
 
 require (
-	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/aws/aws-sdk-go-v2 v1.43.8
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.7.19 // indirect
 	github.com/aws/aws-sdk-go-v2/config v1.32.39
@@ -30,11 +29,9 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sts v1.45.8 // indirect
 	github.com/aws/smithy-go v1.27.10 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/go-sql-driver/mysql v1.8.1 // indirect
 	github.com/google/uuid v1.6.0
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	gorm.io/driver/mysql v1.5.6 // indirect
 )
 
 require (
@@ -75,5 +72,4 @@ require (
 	golang.org/x/sys v0.41.0 // indirect
 	golang.org/x/text v0.35.0 // indirect
 	google.golang.org/protobuf v1.36.10 // indirect
-	gorm.io/datatypes v1.2.7
 )

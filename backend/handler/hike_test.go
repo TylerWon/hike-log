@@ -8,17 +8,16 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
-	"time"
 
 	"github.com/TylerWon/hike-log/backend/aws"
 	"github.com/TylerWon/hike-log/backend/handler"
 	"github.com/TylerWon/hike-log/backend/models"
+	"github.com/TylerWon/hike-log/backend/models/types"
 	"github.com/TylerWon/hike-log/backend/store"
 	"github.com/TylerWon/hike-log/backend/testutils"
-	aws_sdk "github.com/aws/aws-sdk-go-v2/aws"
+	awsSdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/aws/aws-sdk-go-v2/service/s3/types"
-	"gorm.io/datatypes"
+	s3types "github.com/aws/aws-sdk-go-v2/service/s3/types"
 )
 
 func (suite *handlerTestSuite) TestCreateHike_ReturnsErrorWhenRequestBodyHasInvalidFields() {
@@ -101,7 +100,7 @@ func (suite *handlerTestSuite) TestCreateHike_CreatesAndReturnsHike() {
 	expected := models.Hike{
 		ID:            response.ID,
 		TrailName:     "Trail 1",
-		Date:          datatypes.Date(time.Date(2026, 2, 5, 0, 0, 0, 0, time.UTC)),
+		Date:          types.Date("2026-02-05"),
 		Notes:         "Easy hike",
 		Rating:        4.5,
 		Difficulty:    3,
@@ -109,6 +108,7 @@ func (suite *handlerTestSuite) TestCreateHike_CreatesAndReturnsHike() {
 		ElevationGain: 1200,
 		Duration:      60,
 		AllTrailsUrl:  "https://www.alltrails.com/",
+		Photos:        []models.Photo{},
 	}
 	suite.Equal(expected, response)
 }
@@ -419,7 +419,7 @@ func (suite *handlerTestSuite) TestDeleteHike_ReturnsErrorWhenDBErrors() {
 
 func (suite *handlerTestSuite) TestDeleteHike_DeletesHikeAndPhotosWhenS3Errors() {
 	mockS3Client := aws.MockS3Client{
-		ListObjectsResult:   &s3.ListObjectsV2Output{Contents: []types.Object{{Key: aws_sdk.String("test")}}},
+		ListObjectsResult:   &s3.ListObjectsV2Output{Contents: []s3types.Object{{Key: awsSdk.String("test")}}},
 		DeleteObjectsResult: nil,
 		DeleteObjectsError:  errors.New("Something went wrong"),
 	}
@@ -627,7 +627,7 @@ func (suite *handlerTestSuite) TestUpdateHike_UpdatesHike() {
 	expected := models.Hike{
 		ID:            hike.ID,
 		TrailName:     "Updated Trail",
-		Date:          datatypes.Date(time.Date(2026, 3, 15, 0, 0, 0, 0, time.UTC)),
+		Date:          types.Date("2026-03-15"),
 		Notes:         "Updated notes",
 		Rating:        4.5,
 		Difficulty:    3,

@@ -7,11 +7,10 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/TylerWon/hike-log/backend/models"
+	"github.com/TylerWon/hike-log/backend/models/types"
 	"github.com/gin-gonic/gin"
-	"gorm.io/datatypes"
 )
 
 /*
@@ -31,12 +30,9 @@ func (h *Handler) CreateHike(c *gin.Context) {
 		return
 	}
 
-	// Skip validation here since Date is validated when request body gets binded to [createHikeRequest]
-	parsed, _ := time.Parse("2006-01-02", req.Date) // convert date string to time.Time
-
 	hike := models.Hike{
 		TrailName:     req.TrailName,
-		Date:          datatypes.Date(parsed),
+		Date:          types.Date(req.Date),
 		Notes:         req.Notes,
 		Rating:        req.Rating,
 		Difficulty:    req.Difficulty,
@@ -44,6 +40,7 @@ func (h *Handler) CreateHike(c *gin.Context) {
 		ElevationGain: req.ElevationGain,
 		Duration:      req.Duration,
 		AllTrailsUrl:  req.AllTrailsUrl,
+		Photos:        []models.Photo{},
 	}
 	err := h.store.CreateRecord(&hike)
 	if err != nil {
@@ -137,7 +134,7 @@ func (h *Handler) CreatePhoto(c *gin.Context) {
 		return
 	}
 
-	// Skip validation here since ObjectKey is validated when request body gets binded to [createPhotoRequest]
+	// Skip validation here since ObjectKey was validated when the request body got binded to [createPhotoRequest]
 	keyParts := strings.Split(req.ObjectKey, "/")
 	hikeId, _ := strconv.ParseUint(keyParts[1], 10, 64)
 	if hikeId != uint64(params.HikeID) {
@@ -282,13 +279,10 @@ func (h *Handler) UpdateHike(c *gin.Context) {
 		return
 	}
 
-	// Skip validation here since Date is validated when request body gets binded to [updateHikeRequest]
-	parsed, _ := time.Parse("2006-01-02", req.Date) // convert date string to time.Time
-
 	hike := models.Hike{
 		ID:            params.HikeID,
 		TrailName:     req.TrailName,
-		Date:          datatypes.Date(parsed),
+		Date:          types.Date(req.Date),
 		Notes:         req.Notes,
 		Rating:        req.Rating,
 		Difficulty:    req.Difficulty,
