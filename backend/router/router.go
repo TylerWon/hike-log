@@ -33,13 +33,13 @@ func New(handler *handler.Handler) *gin.Engine {
 				// /api/v1/hikes/:hikeId
 				hike := hikes.Group("/:hikeId")
 				{
-					hike.DELETE("/", handler.DeleteHike)
-					hike.PUT("/", handler.UpdateHike)
+					hike.DELETE("", handler.DeleteHike)
+					hike.PUT("", handler.UpdateHike)
 
 					// /api/v1/hikes/:hikeId/photos
 					photos := hike.Group("/photos")
 					{
-						photos.POST("/", handler.CreatePhoto)
+						photos.POST("", handler.CreatePhoto)
 						photos.POST("/upload-url", handler.CreatePhotoUploadURL)
 					}
 				}
@@ -51,8 +51,8 @@ func New(handler *handler.Handler) *gin.Engine {
 				// /api/v1/photos/:photoId
 				photo := photos.Group("/:photoId")
 				{
-					photo.DELETE("/", handler.DeletePhoto)
-					photo.PUT("/", handler.UpdatePhoto)
+					photo.DELETE("", handler.DeletePhoto)
+					photo.PUT("", handler.UpdatePhoto)
 				}
 			}
 		}

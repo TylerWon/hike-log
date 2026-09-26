@@ -15,12 +15,12 @@ import (
 )
 
 func (suite *handlerTestSuite) TestDeletePhoto_ReturnsErrorWhenPhotoIDIsInvalid() {
-	res := testutils.SendRequest(suite.router, http.MethodDelete, "/api/v1/photos/abc/", nil)
+	res := testutils.SendRequest(suite.router, http.MethodDelete, "/api/v1/photos/abc", nil)
 	suite.Equal(http.StatusBadRequest, res.Code)
 }
 
 func (suite *handlerTestSuite) TestDeletePhoto_ReturnsErrorWhenPhotoDoesNotExist() {
-	res := testutils.SendRequest(suite.router, http.MethodDelete, "/api/v1/photos/1/", nil)
+	res := testutils.SendRequest(suite.router, http.MethodDelete, "/api/v1/photos/1", nil)
 	suite.Equal(http.StatusNotFound, res.Code)
 }
 
@@ -31,7 +31,7 @@ func (suite *handlerTestSuite) TestDeletePhoto_ReturnsErrorWhenDBErrors() {
 
 	photo := testutils.ConstructHikes(suite.T(), 1, suite.store, true, true)[0].Photos[0]
 
-	res := testutils.SendRequest(router, http.MethodDelete, fmt.Sprintf("/api/v1/photos/%d/", photo.ID), nil)
+	res := testutils.SendRequest(router, http.MethodDelete, fmt.Sprintf("/api/v1/photos/%d", photo.ID), nil)
 	suite.Equal(http.StatusInternalServerError, res.Code)
 }
 
@@ -53,7 +53,7 @@ func (suite *handlerTestSuite) TestDeletePhoto_DeletesPhotoWhenS3Errors() {
 	)
 	suite.NoError(err)
 
-	res := testutils.SendRequest(router, http.MethodDelete, fmt.Sprintf("/api/v1/photos/%d/", photo.ID), nil)
+	res := testutils.SendRequest(router, http.MethodDelete, fmt.Sprintf("/api/v1/photos/%d", photo.ID), nil)
 	suite.Equal(http.StatusOK, res.Code)
 
 	_, err = suite.store.GetPhotoByID(photo.ID)
@@ -77,7 +77,7 @@ func (suite *handlerTestSuite) TestDeletePhoto_DeletesPhotoAndS3Object() {
 	)
 	suite.NoError(err)
 
-	res := testutils.SendRequest(suite.router, http.MethodDelete, fmt.Sprintf("/api/v1/photos/%d/", photo.ID), nil)
+	res := testutils.SendRequest(suite.router, http.MethodDelete, fmt.Sprintf("/api/v1/photos/%d", photo.ID), nil)
 	suite.Equal(http.StatusOK, res.Code)
 
 	_, err = suite.store.GetPhotoByID(photo.ID)
@@ -89,7 +89,7 @@ func (suite *handlerTestSuite) TestDeletePhoto_DeletesPhotoAndS3Object() {
 }
 
 func (suite *handlerTestSuite) TestUpdatePhoto_ReturnsErrorWhenPhotoIDIsInvalid() {
-	res := testutils.SendRequest(suite.router, http.MethodPut, "/api/v1/photos/abc/", nil)
+	res := testutils.SendRequest(suite.router, http.MethodPut, "/api/v1/photos/abc", nil)
 	suite.Equal(http.StatusBadRequest, res.Code)
 }
 
@@ -99,7 +99,7 @@ func (suite *handlerTestSuite) TestUpdatePhoto_ReturnsErrorWhenPhotoDoesNotExist
 		"displayOrder": 2,
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(suite.router, http.MethodPut, "/api/v1/photos/1/", reqBody)
+	res := testutils.SendRequest(suite.router, http.MethodPut, "/api/v1/photos/1", reqBody)
 	suite.Equal(http.StatusNotFound, res.Code)
 }
 
@@ -111,7 +111,7 @@ func (suite *handlerTestSuite) TestUpdatePhoto_ReturnsErrorWhenRequestBodyHasInv
 		"displayOrder": 0, // must be > 0
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(suite.router, http.MethodPut, fmt.Sprintf("/api/v1/photos/%d/", photo.ID), reqBody)
+	res := testutils.SendRequest(suite.router, http.MethodPut, fmt.Sprintf("/api/v1/photos/%d", photo.ID), reqBody)
 
 	suite.Equal(http.StatusBadRequest, res.Code)
 }
@@ -123,7 +123,7 @@ func (suite *handlerTestSuite) TestUpdatePhoto_ReturnsErrorWhenRequestBodyIsMiss
 		"caption": "Updated caption",
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(suite.router, http.MethodPut, fmt.Sprintf("/api/v1/photos/%d/", photo.ID), reqBody)
+	res := testutils.SendRequest(suite.router, http.MethodPut, fmt.Sprintf("/api/v1/photos/%d", photo.ID), reqBody)
 
 	suite.Equal(http.StatusBadRequest, res.Code)
 }
@@ -143,7 +143,7 @@ func (suite *handlerTestSuite) TestUpdatePhoto_ReturnsErrorWhenDBErrors() {
 		"displayOrder": 2,
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(router, http.MethodPut, fmt.Sprintf("/api/v1/photos/%d/", photo.ID), reqBody)
+	res := testutils.SendRequest(router, http.MethodPut, fmt.Sprintf("/api/v1/photos/%d", photo.ID), reqBody)
 
 	suite.Equal(http.StatusInternalServerError, res.Code)
 }
@@ -156,7 +156,7 @@ func (suite *handlerTestSuite) TestUpdatePhoto_UpdatesPhoto() {
 		"displayOrder": 2,
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(suite.router, http.MethodPut, fmt.Sprintf("/api/v1/photos/%d/", photo.ID), reqBody)
+	res := testutils.SendRequest(suite.router, http.MethodPut, fmt.Sprintf("/api/v1/photos/%d", photo.ID), reqBody)
 
 	suite.Equal(http.StatusOK, res.Code)
 
@@ -180,7 +180,7 @@ func (suite *handlerTestSuite) TestUpdatePhoto_UpdatesPhotoWhenOptionalFieldMiss
 		"displayOrder": 2,
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(suite.router, http.MethodPut, fmt.Sprintf("/api/v1/photos/%d/", photo.ID), reqBody)
+	res := testutils.SendRequest(suite.router, http.MethodPut, fmt.Sprintf("/api/v1/photos/%d", photo.ID), reqBody)
 
 	suite.Equal(http.StatusOK, res.Code)
 

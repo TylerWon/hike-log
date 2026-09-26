@@ -120,7 +120,7 @@ func (suite *handlerTestSuite) TestCreatePhoto_ReturnsErrorWhenHikeIDIsInvalid()
 		"displayOrder": 1,
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(suite.router, http.MethodPost, "/api/v1/hikes/abc/photos/", reqBody)
+	res := testutils.SendRequest(suite.router, http.MethodPost, "/api/v1/hikes/abc/photos", reqBody)
 
 	suite.Equal(http.StatusBadRequest, res.Code)
 }
@@ -132,7 +132,7 @@ func (suite *handlerTestSuite) TestCreatePhoto_ReturnsErrorWhenHikeDoesNotExist(
 		"displayOrder": 1,
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(suite.router, http.MethodPost, "/api/v1/hikes/1/photos/", reqBody)
+	res := testutils.SendRequest(suite.router, http.MethodPost, "/api/v1/hikes/1/photos", reqBody)
 
 	suite.Equal(http.StatusNotFound, res.Code)
 }
@@ -145,7 +145,7 @@ func (suite *handlerTestSuite) TestCreatePhoto_ReturnsErrorWhenRequestBodyIsMiss
 		"displayOrder": 1,
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(suite.router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos/", hikes[0].ID), reqBody)
+	res := testutils.SendRequest(suite.router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos", hikes[0].ID), reqBody)
 
 	suite.Equal(http.StatusBadRequest, res.Code)
 }
@@ -159,7 +159,7 @@ func (suite *handlerTestSuite) TestCreatePhoto_ReturnsErrorWhenObjectKeyIsInvali
 		"displayOrder": 1,
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(suite.router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos/", hikes[0].ID), reqBody)
+	res := testutils.SendRequest(suite.router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos", hikes[0].ID), reqBody)
 
 	suite.Equal(http.StatusBadRequest, res.Code)
 }
@@ -173,7 +173,7 @@ func (suite *handlerTestSuite) TestCreatePhoto_ReturnsErrorWhenPathAndObjectKeyH
 		"displayOrder": 1,
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(suite.router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos/", hikes[0].ID), reqBody)
+	res := testutils.SendRequest(suite.router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos", hikes[0].ID), reqBody)
 
 	suite.Equal(http.StatusBadRequest, res.Code)
 }
@@ -187,7 +187,7 @@ func (suite *handlerTestSuite) TestCreatePhoto_ReturnsErrorWhenPhotoDoesNotExist
 		"displayOrder": 1,
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(suite.router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos/", hikes[0].ID), reqBody)
+	res := testutils.SendRequest(suite.router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos", hikes[0].ID), reqBody)
 
 	suite.Equal(http.StatusBadRequest, res.Code)
 }
@@ -208,7 +208,7 @@ func (suite *handlerTestSuite) TestCreatePhoto_ReturnsErrorWhenS3Errors() {
 		"displayOrder": 1,
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos/", hikes[0].ID), reqBody)
+	res := testutils.SendRequest(router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos", hikes[0].ID), reqBody)
 
 	suite.Equal(http.StatusInternalServerError, res.Code)
 }
@@ -229,7 +229,7 @@ func (suite *handlerTestSuite) TestCreatePhoto_ReturnsErrorWhenDBErrors() {
 		"displayOrder": 1,
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos/", hikes[0].ID), reqBody)
+	res := testutils.SendRequest(router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos", hikes[0].ID), reqBody)
 
 	suite.Equal(http.StatusInternalServerError, res.Code)
 }
@@ -247,7 +247,7 @@ func (suite *handlerTestSuite) TestCreatePhoto_CreatesPhoto() {
 		"displayOrder": 1,
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(suite.router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos/", hikes[0].ID), reqBody)
+	res := testutils.SendRequest(suite.router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos", hikes[0].ID), reqBody)
 
 	suite.Equal(http.StatusCreated, res.Code)
 
@@ -397,12 +397,12 @@ func (suite *handlerTestSuite) TestCreatePhotoUploadURL_ReturnsUploadURL() {
 }
 
 func (suite *handlerTestSuite) TestDeleteHike_ReturnsErrorWhenHikeIDIsInvalid() {
-	res := testutils.SendRequest(suite.router, http.MethodDelete, "/api/v1/hikes/abc/", nil)
+	res := testutils.SendRequest(suite.router, http.MethodDelete, "/api/v1/hikes/abc", nil)
 	suite.Equal(http.StatusBadRequest, res.Code)
 }
 
 func (suite *handlerTestSuite) TestDeleteHike_ReturnsErrorWhenHikeDoesNotExist() {
-	res := testutils.SendRequest(suite.router, http.MethodDelete, "/api/v1/hikes/1/", nil)
+	res := testutils.SendRequest(suite.router, http.MethodDelete, "/api/v1/hikes/1", nil)
 	suite.Equal(http.StatusNotFound, res.Code)
 }
 
@@ -413,7 +413,7 @@ func (suite *handlerTestSuite) TestDeleteHike_ReturnsErrorWhenDBErrors() {
 	handler := handler.New(&mockStore, suite.s3Client)
 	router := testutils.NewRouter(suite.T(), handler)
 
-	res := testutils.SendRequest(router, http.MethodDelete, fmt.Sprintf("/api/v1/hikes/%d/", hike.ID), nil)
+	res := testutils.SendRequest(router, http.MethodDelete, fmt.Sprintf("/api/v1/hikes/%d", hike.ID), nil)
 	suite.Equal(http.StatusInternalServerError, res.Code)
 }
 
@@ -438,7 +438,7 @@ func (suite *handlerTestSuite) TestDeleteHike_DeletesHikeAndPhotosWhenS3Errors()
 	)
 	suite.NoError(err)
 
-	res := testutils.SendRequest(router, http.MethodDelete, fmt.Sprintf("/api/v1/hikes/%d/", hike.ID), nil)
+	res := testutils.SendRequest(router, http.MethodDelete, fmt.Sprintf("/api/v1/hikes/%d", hike.ID), nil)
 	suite.Equal(http.StatusOK, res.Code)
 
 	_, err = suite.store.GetHikeByID(hike.ID)
@@ -467,7 +467,7 @@ func (suite *handlerTestSuite) TestDeleteHike_DeletesHikeAndPhotosAndS3Objects()
 	)
 	suite.NoError(err)
 
-	res := testutils.SendRequest(suite.router, http.MethodDelete, fmt.Sprintf("/api/v1/hikes/%d/", hike.ID), nil)
+	res := testutils.SendRequest(suite.router, http.MethodDelete, fmt.Sprintf("/api/v1/hikes/%d", hike.ID), nil)
 	suite.Equal(http.StatusOK, res.Code)
 
 	_, err = suite.store.GetHikeByID(hike.ID)
@@ -528,12 +528,12 @@ func (suite *handlerTestSuite) TestListHike_ReturnsHikes() {
 }
 
 func (suite *handlerTestSuite) TestUpdateHike_ReturnsErrorWhenHikeIDIsInvalid() {
-	res := testutils.SendRequest(suite.router, http.MethodPut, "/api/v1/hikes/abc/", nil)
+	res := testutils.SendRequest(suite.router, http.MethodPut, "/api/v1/hikes/abc", nil)
 	suite.Equal(http.StatusBadRequest, res.Code)
 }
 
 func (suite *handlerTestSuite) TestUpdateHike_ReturnsErrorWhenHikeDoesNotExist() {
-	res := testutils.SendRequest(suite.router, http.MethodPut, "/api/v1/hikes/1/", nil)
+	res := testutils.SendRequest(suite.router, http.MethodPut, "/api/v1/hikes/1", nil)
 	suite.Equal(http.StatusNotFound, res.Code)
 }
 
@@ -552,7 +552,7 @@ func (suite *handlerTestSuite) TestUpdateHike_ReturnsErrorWhenRequestBodyHasInva
 		"allTrailsUrl":  "https://www.alltrails.com/",
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(suite.router, http.MethodPut, fmt.Sprintf("/api/v1/hikes/%d/", hike.ID), reqBody)
+	res := testutils.SendRequest(suite.router, http.MethodPut, fmt.Sprintf("/api/v1/hikes/%d", hike.ID), reqBody)
 
 	suite.Equal(http.StatusBadRequest, res.Code)
 }
@@ -570,7 +570,7 @@ func (suite *handlerTestSuite) TestUpdateHike_ReturnsErrorWhenRequestBodyIsMissi
 		"allTrailsUrl":  "https://www.alltrails.com/",
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(suite.router, http.MethodPut, fmt.Sprintf("/api/v1/hikes/%d/", hike.ID), reqBody)
+	res := testutils.SendRequest(suite.router, http.MethodPut, fmt.Sprintf("/api/v1/hikes/%d", hike.ID), reqBody)
 
 	suite.Equal(http.StatusBadRequest, res.Code)
 }
@@ -597,7 +597,7 @@ func (suite *handlerTestSuite) TestUpdateHike_ReturnsErrorWhenDBErrors() {
 		"allTrailsUrl":  "https://www.alltrails.com/",
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(router, http.MethodPut, fmt.Sprintf("/api/v1/hikes/%d/", hike.ID), reqBody)
+	res := testutils.SendRequest(router, http.MethodPut, fmt.Sprintf("/api/v1/hikes/%d", hike.ID), reqBody)
 
 	suite.Equal(http.StatusInternalServerError, res.Code)
 }
@@ -617,7 +617,7 @@ func (suite *handlerTestSuite) TestUpdateHike_UpdatesHike() {
 		"allTrailsUrl":  "https://www.alltrails.com/updated",
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(suite.router, http.MethodPut, fmt.Sprintf("/api/v1/hikes/%d/", hike.ID), reqBody)
+	res := testutils.SendRequest(suite.router, http.MethodPut, fmt.Sprintf("/api/v1/hikes/%d", hike.ID), reqBody)
 
 	suite.Equal(http.StatusOK, res.Code)
 
