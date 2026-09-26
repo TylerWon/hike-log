@@ -10,6 +10,7 @@ import (
 
 	"github.com/TylerWon/hike-log/backend/models"
 	"github.com/TylerWon/hike-log/backend/models/types"
+	"github.com/TylerWon/hike-log/backend/s3"
 	"github.com/gin-gonic/gin"
 )
 
@@ -87,9 +88,8 @@ func (h *Handler) CreatePhotoUploadURL(c *gin.Context) {
 		return
 	}
 
-	objectKey := h.s3Client.CreatePhotoObjectKey(params.HikeID)
+	objectKey := s3.CreatePhotoObjectKey(params.HikeID)
 	presignedReq, err := h.s3Client.CreatePresignedPutObjectRequest(c, objectKey, req.ContentType, int64(req.ContentLength))
-
 	if err != nil {
 		log.Println("Failed to create presigned PutObject request: ", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": http.StatusText(http.StatusInternalServerError)})
@@ -152,7 +152,7 @@ func (h *Handler) CreatePhoto(c *gin.Context) {
 		return
 	}
 
-	srcURL := h.s3Client.GetObjectURL(req.ObjectKey, os.Getenv("ENV"))
+	srcURL := s3.CreatePhotoObjectURL(req.ObjectKey, os.Getenv("ENV"))
 	photo := models.Photo{
 		SrcUrl:       srcURL,
 		Caption:      req.Caption,

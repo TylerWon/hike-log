@@ -7,9 +7,9 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/TylerWon/hike-log/backend/aws"
 	"github.com/TylerWon/hike-log/backend/handler"
 	"github.com/TylerWon/hike-log/backend/models"
+	"github.com/TylerWon/hike-log/backend/s3"
 	"github.com/TylerWon/hike-log/backend/store"
 	"github.com/TylerWon/hike-log/backend/testutils"
 )
@@ -36,7 +36,7 @@ func (suite *handlerTestSuite) TestDeletePhoto_ReturnsErrorWhenDBErrors() {
 }
 
 func (suite *handlerTestSuite) TestDeletePhoto_DeletesPhotoWhenS3Errors() {
-	mockS3Client := aws.MockS3Client{
+	mockS3Client := s3.MockS3Client{
 		DeleteObjectResult: nil,
 		DeleteObjectError:  errors.New("Something went wrong"),
 	}
@@ -44,7 +44,7 @@ func (suite *handlerTestSuite) TestDeletePhoto_DeletesPhotoWhenS3Errors() {
 	router := testutils.NewRouter(suite.T(), handler)
 
 	photo := testutils.ConstructHikes(suite.T(), 1, suite.store, true, true)[0].Photos[0]
-	objectKey := suite.s3Client.GetObjectKey(photo.SrcUrl, "local")
+	objectKey := s3.GetPhotoObjectKey(photo.SrcUrl, "local")
 	_, err := suite.s3Client.PutObject(
 		context.TODO(),
 		objectKey,
@@ -68,7 +68,7 @@ func (suite *handlerTestSuite) TestDeletePhoto_DeletesPhotoWhenS3Errors() {
 
 func (suite *handlerTestSuite) TestDeletePhoto_DeletesPhotoAndS3Object() {
 	photo := testutils.ConstructHikes(suite.T(), 1, suite.store, true, true)[0].Photos[0]
-	objectKey := suite.s3Client.GetObjectKey(photo.SrcUrl, "local")
+	objectKey := s3.GetPhotoObjectKey(photo.SrcUrl, "local")
 	_, err := suite.s3Client.PutObject(
 		context.TODO(),
 		objectKey,

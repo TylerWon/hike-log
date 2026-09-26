@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/TylerWon/hike-log/backend/models"
+	"github.com/TylerWon/hike-log/backend/s3"
 	"github.com/gin-gonic/gin"
 )
 
@@ -41,7 +42,7 @@ func (h *Handler) DeletePhoto(c *gin.Context) {
 		return
 	}
 
-	objectKey := h.s3Client.GetObjectKey(photo.SrcUrl, os.Getenv("ENV"))
+	objectKey := s3.GetPhotoObjectKey(photo.SrcUrl, os.Getenv("ENV"))
 	_, err = h.s3Client.DeleteObject(c, objectKey)
 	if err != nil {
 		log.Printf("Failed to delete S3 photo object for Photo (id=%d): %v", params.PhotoID, err)

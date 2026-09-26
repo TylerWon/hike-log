@@ -3,8 +3,8 @@ package handler_test
 import (
 	"testing"
 
-	"github.com/TylerWon/hike-log/backend/aws"
 	"github.com/TylerWon/hike-log/backend/handler"
+	"github.com/TylerWon/hike-log/backend/s3"
 	"github.com/TylerWon/hike-log/backend/store"
 	"github.com/TylerWon/hike-log/backend/testutils"
 	"github.com/gin-gonic/gin"
@@ -16,7 +16,7 @@ type handlerTestSuite struct {
 	router   *gin.Engine
 	suiteDB  *testutils.TestSuiteDB
 	store    store.Store
-	s3Client aws.S3Client
+	s3Client s3.S3Client
 }
 
 func (suite *handlerTestSuite) SetupSuite() {

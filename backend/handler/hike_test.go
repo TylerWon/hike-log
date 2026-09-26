@@ -9,14 +9,14 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/TylerWon/hike-log/backend/aws"
 	"github.com/TylerWon/hike-log/backend/handler"
 	"github.com/TylerWon/hike-log/backend/models"
 	"github.com/TylerWon/hike-log/backend/models/types"
+	"github.com/TylerWon/hike-log/backend/s3"
 	"github.com/TylerWon/hike-log/backend/store"
 	"github.com/TylerWon/hike-log/backend/testutils"
 	awsSdk "github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/service/s3"
+	s3Sdk "github.com/aws/aws-sdk-go-v2/service/s3"
 	s3types "github.com/aws/aws-sdk-go-v2/service/s3/types"
 )
 
@@ -115,7 +115,7 @@ func (suite *handlerTestSuite) TestCreateHike_CreatesAndReturnsHike() {
 
 func (suite *handlerTestSuite) TestCreatePhoto_ReturnsErrorWhenHikeIDIsInvalid() {
 	body := map[string]any{
-		"objectKey":    suite.s3Client.CreatePhotoObjectKey(1),
+		"objectKey":    s3.CreatePhotoObjectKey(1),
 		"caption":      "Caption",
 		"displayOrder": 1,
 	}
@@ -127,7 +127,7 @@ func (suite *handlerTestSuite) TestCreatePhoto_ReturnsErrorWhenHikeIDIsInvalid()
 
 func (suite *handlerTestSuite) TestCreatePhoto_ReturnsErrorWhenHikeDoesNotExist() {
 	body := map[string]any{
-		"objectKey":    suite.s3Client.CreatePhotoObjectKey(1),
+		"objectKey":    s3.CreatePhotoObjectKey(1),
 		"caption":      "Caption",
 		"displayOrder": 1,
 	}
@@ -168,7 +168,7 @@ func (suite *handlerTestSuite) TestCreatePhoto_ReturnsErrorWhenPathAndObjectKeyH
 	hikes := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)
 
 	body := map[string]any{
-		"objectKey":    suite.s3Client.CreatePhotoObjectKey(hikes[0].ID + 1),
+		"objectKey":    s3.CreatePhotoObjectKey(hikes[0].ID + 1),
 		"caption":      "Caption",
 		"displayOrder": 1,
 	}
@@ -182,7 +182,7 @@ func (suite *handlerTestSuite) TestCreatePhoto_ReturnsErrorWhenPhotoDoesNotExist
 	hikes := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)
 
 	body := map[string]any{
-		"objectKey":    suite.s3Client.CreatePhotoObjectKey(hikes[0].ID),
+		"objectKey":    s3.CreatePhotoObjectKey(hikes[0].ID),
 		"caption":      "Caption",
 		"displayOrder": 1,
 	}
@@ -193,7 +193,7 @@ func (suite *handlerTestSuite) TestCreatePhoto_ReturnsErrorWhenPhotoDoesNotExist
 }
 
 func (suite *handlerTestSuite) TestCreatePhoto_ReturnsErrorWhenS3Errors() {
-	mockS3Client := aws.MockS3Client{
+	mockS3Client := s3.MockS3Client{
 		DoesObjectExistResult: false,
 		DoesObjectExistError:  errors.New("Something went wrong"),
 	}
@@ -203,7 +203,7 @@ func (suite *handlerTestSuite) TestCreatePhoto_ReturnsErrorWhenS3Errors() {
 	hikes := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)
 
 	body := map[string]any{
-		"objectKey":    suite.s3Client.CreatePhotoObjectKey(hikes[0].ID),
+		"objectKey":    s3.CreatePhotoObjectKey(hikes[0].ID),
 		"caption":      "Caption",
 		"displayOrder": 1,
 	}
@@ -224,7 +224,7 @@ func (suite *handlerTestSuite) TestCreatePhoto_ReturnsErrorWhenDBErrors() {
 	hikes := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)
 
 	body := map[string]any{
-		"objectKey":    suite.s3Client.CreatePhotoObjectKey(hikes[0].ID),
+		"objectKey":    s3.CreatePhotoObjectKey(hikes[0].ID),
 		"caption":      "Caption",
 		"displayOrder": 1,
 	}
@@ -237,7 +237,7 @@ func (suite *handlerTestSuite) TestCreatePhoto_ReturnsErrorWhenDBErrors() {
 func (suite *handlerTestSuite) TestCreatePhoto_CreatesPhoto() {
 	hikes := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)
 
-	objectKey := suite.s3Client.CreatePhotoObjectKey(hikes[0].ID)
+	objectKey := s3.CreatePhotoObjectKey(hikes[0].ID)
 	_, err := suite.s3Client.PutObject(context.TODO(), objectKey, strings.NewReader("content"), "image/png")
 	suite.NoError(err)
 
@@ -257,7 +257,7 @@ func (suite *handlerTestSuite) TestCreatePhoto_CreatesPhoto() {
 
 	expected := models.Photo{
 		ID:           response.ID,
-		SrcUrl:       fmt.Sprintf("http://localstack:4566/hike-log/%s", objectKey),
+		SrcUrl:       s3.CreatePhotoObjectURL(objectKey, "local"),
 		Caption:      "Caption",
 		DisplayOrder: 1,
 		HikeID:       hikes[0].ID,
@@ -336,7 +336,7 @@ func (suite *handlerTestSuite) TestCreatePhotoUploadURL_ReturnsErrorWhenContentL
 }
 
 func (suite *handlerTestSuite) TestCreatePhotoUploadURL_ReturnsErrorWhenS3Errors() {
-	mockS3Client := aws.MockS3Client{
+	mockS3Client := s3.MockS3Client{
 		CreatePresignedPutObjectRequestResult: nil,
 		CreatePresignedPutObjectRequestError:  errors.New("Something went wrong"),
 	}
@@ -418,8 +418,8 @@ func (suite *handlerTestSuite) TestDeleteHike_ReturnsErrorWhenDBErrors() {
 }
 
 func (suite *handlerTestSuite) TestDeleteHike_DeletesHikeAndPhotosWhenS3Errors() {
-	mockS3Client := aws.MockS3Client{
-		ListObjectsResult:   &s3.ListObjectsV2Output{Contents: []s3types.Object{{Key: awsSdk.String("test")}}},
+	mockS3Client := s3.MockS3Client{
+		ListObjectsResult:   &s3Sdk.ListObjectsV2Output{Contents: []s3types.Object{{Key: awsSdk.String("test")}}},
 		DeleteObjectsResult: nil,
 		DeleteObjectsError:  errors.New("Something went wrong"),
 	}
@@ -429,7 +429,7 @@ func (suite *handlerTestSuite) TestDeleteHike_DeletesHikeAndPhotosWhenS3Errors()
 	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, true, true)[0]
 
 	photo := hike.Photos[0]
-	objectKey := suite.s3Client.GetObjectKey(photo.SrcUrl, "local")
+	objectKey := s3.GetPhotoObjectKey(photo.SrcUrl, "local")
 	_, err := suite.s3Client.PutObject(
 		context.TODO(),
 		objectKey,
@@ -458,7 +458,7 @@ func (suite *handlerTestSuite) TestDeleteHike_DeletesHikeAndPhotosAndS3Objects()
 	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, true, true)[0]
 
 	photo := hike.Photos[0]
-	objectKey := suite.s3Client.GetObjectKey(photo.SrcUrl, "local")
+	objectKey := s3.GetPhotoObjectKey(photo.SrcUrl, "local")
 	_, err := suite.s3Client.PutObject(
 		context.TODO(),
 		objectKey,

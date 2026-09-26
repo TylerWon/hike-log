@@ -7,6 +7,7 @@ import (
 
 	"github.com/TylerWon/hike-log/backend/models"
 	"github.com/TylerWon/hike-log/backend/models/types"
+	"github.com/TylerWon/hike-log/backend/s3"
 	"github.com/TylerWon/hike-log/backend/store"
 )
 
@@ -29,9 +30,10 @@ func ConstructHikes(t *testing.T, n int, store store.Store, photos bool, save bo
 		}
 
 		if photos {
+			objectKey := s3.CreatePhotoObjectKey(uint(i))
 			hike.Photos = []models.Photo{
 				{
-					SrcUrl:       fmt.Sprintf("http://localstack:4566/hike-log/hikes/%d/photos/acde070d-8c4c-4f0d-9d8a-162843c10333", i),
+					SrcUrl:       s3.CreatePhotoObjectURL(objectKey, "local"),
 					Caption:      "Caption",
 					DisplayOrder: 1,
 				},
