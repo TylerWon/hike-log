@@ -2,7 +2,8 @@
   "CORSRules": [
     {
       "AllowedOrigins": ["http://localhost:5173"],
-      "AllowedMethods": ["PUT"]
+      "AllowedMethods": ["PUT"],
+      "AllowedHeaders": ["Content-Type", "Content-Length"]
     }
   ]
 }
