@@ -13,9 +13,11 @@ import PhotoField from "./PhotoField";
 interface HikeFormProps {
   onCancel: () => void;
   onSubmit: (hike: HikeFormData) => void;
+  submitError: boolean;
+  submitPending: boolean;
 }
 
-export default function HikeForm({ onCancel, onSubmit }: HikeFormProps) {
+export default function HikeForm({ onCancel, onSubmit, submitError, submitPending }: HikeFormProps) {
   const [trailName, setTrailName] = useState<string>("");
   const [date, setDate] = useState<string>("");
   const [rating, setRating] = useState<string>("");
@@ -231,17 +233,62 @@ export default function HikeForm({ onCancel, onSubmit }: HikeFormProps) {
           </div>
 
           {/* Footer */}
-          <div className="flex items-center justify-end gap-3 px-5 py-4 border-t border-forest-800 sticky bottom-0 bg-forest-900">
-            <button
-              className="font-mono px-4 py-2 text-xs text-forest-600 hover:text-cream-100 transition-colors focus:outline-none"
-              onClick={onCancel}
-              type="button"
-            >
-              Cancel
-            </button>
-            <button className="primary-button px-5 py-2" type="submit">
-              Submit
-            </button>
+          <div className="border-t border-forest-800 sticky bottom-0 bg-forest-900">
+            {submitError && (
+              <div className="flex items-center gap-2 px-5 py-3 bg-coral-950">
+                <svg
+                  className="shrink-0"
+                  fill="none"
+                  height="14"
+                  stroke="#c0604a"
+                  strokeLinecap="round"
+                  strokeWidth="1.5"
+                  viewBox="0 0 14 14"
+                  width="14"
+                >
+                  <circle cx="7" cy="7" r="5.5" />
+                  <path d="M7 4.5v3M7 9.5v.5" />
+                </svg>
+                <p className="font-mono flex-1 text-xs text-coral-500">Something went wrong. Please try again.</p>
+              </div>
+            )}
+
+            <div className="flex items-center justify-end gap-3 px-5 py-4 ">
+              <button
+                className="font-mono px-4 py-2 text-xs text-forest-600 hover:text-cream-100 transition-colors focus:outline-none"
+                disabled={submitPending}
+                onClick={onCancel}
+                type="button"
+              >
+                Cancel
+              </button>
+
+              <button
+                className="primary-button px-5 py-2 inline-flex items-center gap-2"
+                disabled={submitPending}
+                type="submit"
+              >
+                {submitPending ? (
+                  <>
+                    <svg
+                      className="animate-spin"
+                      fill="none"
+                      height="12"
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeWidth="1.5"
+                      viewBox="0 0 12 12"
+                      width="12"
+                    >
+                      <path d="M6 1v2M6 9v2M1 6h2M9 6h2M2.5 2.5l1.4 1.4M8.1 8.1l1.4 1.4M9.5 2.5L8.1 3.9M3.9 8.1L2.5 9.5" />
+                    </svg>
+                    Adding...
+                  </>
+                ) : (
+                  "Submit"
+                )}
+              </button>
+            </div>
           </div>
         </form>
       </div>

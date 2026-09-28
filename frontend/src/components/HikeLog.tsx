@@ -93,10 +93,21 @@ export default function HikeLog() {
     setShowHikeForm(false);
   };
 
+  const handleHikeFormCancel = () => {
+    setShowHikeForm(false);
+
+    // Clear any errors
+    addHikeMutation.reset();
+  };
+
   const addHikeMutation = useMutation({
     mutationFn: addHike, // called when mutate() is invoked for this mutation
     onSuccess: refetchHikes,
   });
+
+  if (addHikeMutation.isError) {
+    console.error("Failed to create hike: ", addHikeMutation.error);
+  }
 
   if (hikes.isError) {
     console.error("Failed to fetch hikes: ", hikes.error);
@@ -167,7 +178,12 @@ export default function HikeLog() {
         </li>
       </HikeLogContent>
       {showHikeForm && (
-        <HikeForm onCancel={() => setShowHikeForm(false)} onSubmit={(hike) => addHikeMutation.mutate(hike)} />
+        <HikeForm
+          onCancel={handleHikeFormCancel}
+          onSubmit={(formData) => addHikeMutation.mutate(formData)}
+          submitError={addHikeMutation.isError}
+          submitPending={addHikeMutation.isPending}
+        />
       )}
     </>
   );
