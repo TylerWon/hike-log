@@ -1,23 +1,27 @@
 import type { $ZodErrorTree } from "zod/v4/core";
 
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import * as z from "zod";
 
 import "./hike-form.css";
+import * as z from "zod";
+
 import type { PhotoData } from "./types";
 
+import { createHike, createPhoto, createPresignedUrl } from "../../api/hikes";
+import { uploadFile } from "../../api/s3";
 import { type HikeFormData, HikeFormDataSchema } from "../../schemas/forms/hike";
+import { HIKES_QUERY_KEY } from "../HikeLog";
 import Field from "./Field";
 import PhotoField from "./PhotoField";
 
 interface HikeFormProps {
-  onCancel: () => void;
-  onSubmit: (hike: HikeFormData) => void;
-  submitError: boolean;
-  submitPending: boolean;
+  onClose: () => void;
 }
 
-export default function HikeForm({ onCancel, onSubmit, submitError, submitPending }: HikeFormProps) {
+export default function HikeForm({ onClose }: HikeFormProps) {
+  const queryClient = useQueryClient();
+
   const [trailName, setTrailName] = useState<string>("");
   const [date, setDate] = useState<string>("");
   const [rating, setRating] = useState<string>("");
@@ -34,7 +38,7 @@ export default function HikeForm({ onCancel, onSubmit, submitError, submitPendin
     // target = element that was actually clicked
     // currentTarget = element with the handler (i.e. backdrop)
     if (e.target === e.currentTarget) {
-      onCancel();
+      onClose();
     }
   };
 
@@ -75,8 +79,83 @@ export default function HikeForm({ onCancel, onSubmit, submitError, submitPendin
       return;
     }
 
-    onSubmit(formData);
+    addHikeMutation.mutate(formData);
   };
+
+  const handleCancel = () => {
+    // Clears any errors for the mutation
+    addHikeMutation.reset();
+    onClose();
+  };
+
+  const refetchHikes = async () => {
+    // Invalidates the "hikes" query so all Hikes get refetched
+    await queryClient.invalidateQueries({ queryKey: [HIKES_QUERY_KEY] });
+  };
+
+  const addHike = async (formData: HikeFormData) => {
+    const { photos, ...hikeData } = formData;
+
+    // Hike must be created so fail-close
+    let hike;
+    try {
+      hike = await createHike(hikeData);
+    } catch (e) {
+      throw new Error(`Failed to create hike: ${e}`, { cause: e });
+    }
+
+    // Photo upload is best effort so fail-open
+    let promises = [];
+    let presignedUrls;
+    try {
+      for (const photo of photos) {
+        const reqBody = {
+          contentLength: photo.file.size,
+          contentType: photo.file.type,
+        };
+        promises.push(createPresignedUrl(hike.id, reqBody));
+      }
+      presignedUrls = await Promise.all(promises);
+    } catch (e) {
+      console.warn("Failed to create presigned URL for photo: ", e);
+      return;
+    }
+
+    try {
+      promises = [];
+      for (let i = 0; i < photos.length; i++) {
+        promises.push(uploadFile(presignedUrls[i].uploadUrl, photos[i].file));
+      }
+      await Promise.all(promises);
+    } catch (e) {
+      console.warn("Failed to upload photo to S3: ", e);
+      return;
+    }
+
+    try {
+      promises = [];
+      for (let i = 0; i < photos.length; i++) {
+        const reqBody = {
+          caption: photos[i].caption,
+          displayOrder: photos[i].displayOrder,
+          objectKey: presignedUrls[i].objectKey,
+        };
+        promises.push(createPhoto(hike.id, reqBody));
+      }
+      await Promise.all(promises);
+    } catch (e) {
+      console.warn("Failed to create photo: ", e);
+      return;
+    }
+
+    onClose();
+  };
+
+  const addHikeMutation = useMutation({
+    mutationFn: addHike, // called when mutate() is invoked for this mutation
+    onError: (error) => console.error("Failed to create hike: ", error),
+    onSuccess: refetchHikes,
+  });
 
   return (
     <div
@@ -95,7 +174,7 @@ export default function HikeForm({ onCancel, onSubmit, submitError, submitPendin
           <button
             aria-label="Cancel"
             className="text-forest-700 hover:text-forest-600 transition-colors p-1 focus:outline-none"
-            onClick={onCancel}
+            onClick={handleCancel}
           >
             <svg
               fill="none"
@@ -234,7 +313,7 @@ export default function HikeForm({ onCancel, onSubmit, submitError, submitPendin
 
           {/* Footer */}
           <div className="border-t border-forest-800 sticky bottom-0 bg-forest-900">
-            {submitError && (
+            {addHikeMutation.isError && (
               <div className="flex items-center gap-2 px-5 py-3 bg-coral-950">
                 <svg
                   className="shrink-0"
@@ -256,8 +335,8 @@ export default function HikeForm({ onCancel, onSubmit, submitError, submitPendin
             <div className="flex items-center justify-end gap-3 px-5 py-4 ">
               <button
                 className="font-mono px-4 py-2 text-xs text-forest-600 hover:text-cream-100 transition-colors focus:outline-none"
-                disabled={submitPending}
-                onClick={onCancel}
+                disabled={addHikeMutation.isPending}
+                onClick={handleCancel}
                 type="button"
               >
                 Cancel
@@ -265,10 +344,10 @@ export default function HikeForm({ onCancel, onSubmit, submitError, submitPendin
 
               <button
                 className="primary-button px-5 py-2 inline-flex items-center gap-2"
-                disabled={submitPending}
+                disabled={addHikeMutation.isPending}
                 type="submit"
               >
-                {submitPending ? (
+                {addHikeMutation.isPending ? (
                   <>
                     <svg
                       className="animate-spin"
