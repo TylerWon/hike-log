@@ -1,7 +1,20 @@
 import * as z from "zod";
 
-export const CreatePresignedUrlResponseSchema = z.object({
+const CreatePresignedUrlsResponseItemResultSchema = z.object({
   objectKey: z.string(),
-  uploadUrl: z.url(),
+  presignedUrl: z.url(),
 });
-export type CreatePresignedUrlResponse = z.infer<typeof CreatePresignedUrlResponseSchema>;
+const CreatePresignedUrlsResponseItemSchema = z.discriminatedUnion("success", [
+  // Schema when Success is true
+  z.object({
+    result: CreatePresignedUrlsResponseItemResultSchema,
+    success: z.literal(true),
+  }),
+  // Schema when Success is false
+  z.object({
+    error: z.string(),
+    success: z.literal(false),
+  }),
+]);
+export const CreatePresignedUrlsResponseSchema = z.array(CreatePresignedUrlsResponseItemSchema);
+export type CreatePresignedUrlsResponse = z.infer<typeof CreatePresignedUrlsResponseSchema>;

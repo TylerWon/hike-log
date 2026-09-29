@@ -31,13 +31,15 @@ type createHikeRequest struct {
 
 type updateHikeRequest = createHikeRequest
 
-type createPhotoUploadURLRequest struct {
+type createPresignedURLsRequestItem struct {
 	// MIME type of the image. Must be a valid image type.
 	ContentType string `json:"contentType" binding:"required,validImageType"`
 
 	// Size of the image in bytes. Must be between 0 to 10 MB.
 	ContentLength uint `json:"contentLength" binding:"required,gte=0,lte=10485760"`
 }
+
+type createPresignedURLsRequest []createPresignedURLsRequestItem
 
 type createPhotoRequest struct {
 	// The key that is assigned to the photo in the S3 bucket. Must be in the format "hikes/<hike_id>/photos/<uuid>".

@@ -1,8 +1,8 @@
-import type { CreateHikeRequest, CreatePhotoRequest, CreatePresignedUrlRequest } from "../schemas/requests/hikes";
+import type { CreateHikeRequest, CreatePhotoRequest, CreatePresignedUrlsRequest } from "../schemas/requests/hikes";
 
 import { type Hike, HikeListSchema, HikeSchema } from "../schemas/models/hike";
 import { type Photo, PhotoSchema } from "../schemas/models/photo";
-import { type CreatePresignedUrlResponse, CreatePresignedUrlResponseSchema } from "../schemas/responses/hikes";
+import { type CreatePresignedUrlsResponse, CreatePresignedUrlsResponseSchema } from "../schemas/responses/hikes";
 
 const API_URL = `${import.meta.env.VITE_API_URL}/hikes`;
 
@@ -54,13 +54,13 @@ export async function createPhoto(hikeId: number, reqBody: CreatePhotoRequest): 
   return result.data;
 }
 
-// Creates a S3 presigned URL to upload a photo for a Hike.
+// Creates S3 presigned URLs to upload a photos for a Hike.
 // Throws an error if the response is not 200 or cannot be parsed.
-export async function createPresignedUrl(
+export async function createPresignedUrls(
   hikeId: number,
-  reqBody: CreatePresignedUrlRequest,
-): Promise<CreatePresignedUrlResponse> {
-  const response = await fetch(`${API_URL}/${hikeId}/photos/upload-url`, {
+  reqBody: CreatePresignedUrlsRequest,
+): Promise<CreatePresignedUrlsResponse> {
+  const response = await fetch(`${API_URL}/${hikeId}/photos/presigned-urls`, {
     body: JSON.stringify(reqBody),
     headers: {
       "Content-Type": "application/json",
@@ -69,11 +69,11 @@ export async function createPresignedUrl(
   });
 
   if (response.status !== 200) {
-    throw new Error(`Failed to create presigned URL: ${response.status} - ${response.statusText}`);
+    throw new Error(`Failed to create presigned URLs: ${response.status} - ${response.statusText}`);
   }
 
   const responseJson = await response.json();
-  const result = CreatePresignedUrlResponseSchema.safeParse(responseJson);
+  const result = CreatePresignedUrlsResponseSchema.safeParse(responseJson);
   if (!result.success) {
     throw new Error(`Failed to parse presigned URL response: ${result.error}`);
   }

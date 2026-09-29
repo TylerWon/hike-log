@@ -13,7 +13,8 @@ const CreatePhotoRequestSchema = PhotoSchema.omit({ hikeId: true, id: true, srcU
 });
 export type CreatePhotoRequest = z.infer<typeof CreatePhotoRequestSchema>;
 
-export interface CreatePresignedUrlRequest {
+interface CreatePresignedUrlsRequestItem {
   contentLength: number;
   contentType: string;
 }
+export type CreatePresignedUrlsRequest = CreatePresignedUrlsRequestItem[];

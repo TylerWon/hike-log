@@ -8,7 +8,7 @@ import * as z from "zod";
 
 import type { PhotoData } from "./types";
 
-import { createHike, createPhoto, createPresignedUrl } from "../../api/hikes";
+import { createHike, createPhoto, createPresignedUrls } from "../../api/hikes";
 import { uploadFile } from "../../api/s3";
 import { type HikeFormData, HikeFormDataSchema } from "../../schemas/forms/hike";
 import { HIKES_QUERY_KEY } from "../HikeLog";
@@ -105,46 +105,59 @@ export default function HikeForm({ onClose }: HikeFormProps) {
     }
 
     // Photo upload is best effort so fail-open
-    let promises = [];
-    let presignedUrls;
+    let createPresignedUrlsResponse;
     try {
+      const reqBody = [];
       for (const photo of photos) {
-        const reqBody = {
+        const reqItem = {
           contentLength: photo.file.size,
           contentType: photo.file.type,
         };
-        promises.push(createPresignedUrl(hike.id, reqBody));
+        reqBody.push(reqItem);
       }
-      presignedUrls = await Promise.all(promises);
+      createPresignedUrlsResponse = await createPresignedUrls(hike.id, reqBody);
     } catch (e) {
-      console.warn("Failed to create presigned URL for photo: ", e);
+      console.error("Failed to create presigned URLs: ", e);
+      return;
+    }
+
+    let promises = [];
+    let s3UploadResponses;
+    try {
+      for (let i = 0; i < photos.length; i++) {
+        const createPresignedUrlResponse = createPresignedUrlsResponse[i];
+        if (createPresignedUrlResponse.success) {
+          promises.push(uploadFile(createPresignedUrlResponse.result.presignedUrl, photos[i].file));
+        } else {
+          console.warn(`Failed to create presigned URL for photo ${i}`);
+          promises.push(Promise.reject());
+        }
+      }
+      s3UploadResponses = await Promise.allSettled(promises);
+    } catch (e) {
+      console.error("Failed to upload photos to S3: ", e);
       return;
     }
 
     try {
       promises = [];
       for (let i = 0; i < photos.length; i++) {
-        promises.push(uploadFile(presignedUrls[i].uploadUrl, photos[i].file));
+        const createPresignedUrlResponse = createPresignedUrlsResponse[i];
+        const s3UploadResponse = s3UploadResponses[i];
+        if (createPresignedUrlResponse.success && s3UploadResponse.status == "fulfilled") {
+          const reqBody = {
+            caption: photos[i].caption,
+            displayOrder: photos[i].displayOrder,
+            objectKey: createPresignedUrlResponse.result.objectKey,
+          };
+          promises.push(createPhoto(hike.id, reqBody));
+        } else {
+          console.warn(`Failed to upload photo ${i} to S3`);
+        }
       }
       await Promise.all(promises);
     } catch (e) {
-      console.warn("Failed to upload photo to S3: ", e);
-      return;
-    }
-
-    try {
-      promises = [];
-      for (let i = 0; i < photos.length; i++) {
-        const reqBody = {
-          caption: photos[i].caption,
-          displayOrder: photos[i].displayOrder,
-          objectKey: presignedUrls[i].objectKey,
-        };
-        promises.push(createPhoto(hike.id, reqBody));
-      }
-      await Promise.all(promises);
-    } catch (e) {
-      console.warn("Failed to create photo: ", e);
+      console.error("Failed to create photos: ", e);
       return;
     }
 

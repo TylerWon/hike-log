@@ -54,53 +54,6 @@ func (h *Handler) CreateHike(c *gin.Context) {
 }
 
 /*
-Creates a presigned URL that can be used to upload a Photo for a Hike to the S3 bucket.
-
-The request that uses the presigned URL must include the same headers that were provided to generate the URL (i.e.
-Content-Type and Content-Length).
-
-Path parameters: [hikeIDPathParam]
-
-Request body: [createPhotoUploadURLRequest]
-
-Returns:
- 1. 200 OK and [createPhotoUploadURLResponse] when successful
- 2. 400 Bad Request and an error message when input is bad
- 3. 404 Not Found and an error message when the Photo does not exist
- 4. 500 Internal Server Error and an error message when there is an unexpected error
-*/
-func (h *Handler) CreatePhotoUploadURL(c *gin.Context) {
-	var params hikeIDPathParam
-	if err := c.ShouldBindUri(&params); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	_, err := h.store.GetHikeByID(params.HikeID)
-	if err != nil {
-		handleRecordDoesNotExistError(c, err, params.HikeID)
-		return
-	}
-
-	var req createPhotoUploadURLRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	objectKey := s3.CreatePhotoObjectKey(params.HikeID)
-	presignedReq, err := h.s3Client.CreatePresignedPutObjectRequest(c, objectKey, req.ContentType, int64(req.ContentLength))
-	if err != nil {
-		log.Println("Failed to create presigned PutObject request: ", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": http.StatusText(http.StatusInternalServerError)})
-		return
-	}
-
-	res := CreatePhotoUploadURLResponse{presignedReq.URL, objectKey}
-	c.JSON(http.StatusOK, res)
-}
-
-/*
 Creates a Photo for a Hike.
 
 The photo should already be uploaded to S3. This endpoint is just responsible for creating the Photo model in the DB.
@@ -167,6 +120,73 @@ func (h *Handler) CreatePhoto(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, photo)
+}
+
+/*
+Creates presigned URLs that can be used to upload Photos for a Hike to the S3 bucket.
+
+The request that uses the presigned URL must include the same headers that were provided to generate the URL (i.e.
+Content-Type and Content-Length).
+
+Path parameters: [hikeIDPathParam]
+
+Request body: [createPresignedURLsRequest]
+
+Returns:
+ 1. 200 OK and [CreatePresignedURLsResponse] when successful
+ 2. 400 Bad Request and an error message when input is bad
+ 3. 404 Not Found and an error message when the Photo does not exist
+ 4. 500 Internal Server Error and an error message when there is an unexpected error
+*/
+func (h *Handler) CreatePresignedURLs(c *gin.Context) {
+	var params hikeIDPathParam
+	if err := c.ShouldBindUri(&params); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	_, err := h.store.GetHikeByID(params.HikeID)
+	if err != nil {
+		handleRecordDoesNotExistError(c, err, params.HikeID)
+		return
+	}
+
+	var req createPresignedURLsRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		// Note: ShouldBindJSON unmarshals and validates the entire request array in one shot so the handler returns early
+		// if ANY of the items in the array are invalid
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	var res CreatePresignedURLsResponse
+	for idx, item := range req {
+		objectKey := s3.CreatePhotoObjectKey(params.HikeID)
+
+		presignedReq, err := h.s3Client.CreatePresignedPutObjectRequest(
+			c,
+			objectKey,
+			item.ContentType,
+			int64(item.ContentLength),
+		)
+		if err != nil {
+			log.Printf("Failed to create presigned URL for item %d: %v", idx, err)
+			item := createPresignedURLsResponseItem{Success: false, Error: "Failed to create presigned URL"}
+			res = append(res, item)
+			continue
+		}
+
+		item := createPresignedURLsResponseItem{
+			Success: true,
+			Result: &createPresignedURLsResponseItemResult{
+				PresignedURL: presignedReq.URL,
+				ObjectKey:    objectKey,
+			},
+		}
+		res = append(res, item)
+	}
+
+	c.JSON(http.StatusOK, res)
 }
 
 /*
