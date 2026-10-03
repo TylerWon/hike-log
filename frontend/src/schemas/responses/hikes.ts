@@ -4,12 +4,14 @@ import { PhotoSchema } from "../models/photo";
 const CreatePhotosResponseItemSchema = z.discriminatedUnion("success", [
   // Schema when Success is true
   z.object({
+    index: z.int().gte(0),
     result: PhotoSchema,
     success: z.literal(true),
   }),
   // Schema when Success is false
   z.object({
     error: z.string(),
+    index: z.int().gte(0),
     success: z.literal(false),
   }),
 ]);
@@ -23,12 +25,14 @@ const CreatePresignedUrlsResponseItemResultSchema = z.object({
 const CreatePresignedUrlsResponseItemSchema = z.discriminatedUnion("success", [
   // Schema when Success is true
   z.object({
+    index: z.int().gte(0),
     result: CreatePresignedUrlsResponseItemResultSchema,
     success: z.literal(true),
   }),
   // Schema when Success is false
   z.object({
     error: z.string(),
+    index: z.int().gte(0),
     success: z.literal(false),
   }),
 ]);

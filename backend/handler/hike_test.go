@@ -116,6 +116,7 @@ func (suite *handlerTestSuite) TestCreateHike_CreatesAndReturnsHike() {
 func (suite *handlerTestSuite) TestCreatePhotos_ReturnsErrorWhenHikeIDIsInvalid() {
 	body := [](map[string]any){
 		{
+			"index":        0,
 			"objectKey":    s3.CreatePhotoObjectKey(1),
 			"caption":      "Caption",
 			"displayOrder": 1,
@@ -130,6 +131,7 @@ func (suite *handlerTestSuite) TestCreatePhotos_ReturnsErrorWhenHikeIDIsInvalid(
 func (suite *handlerTestSuite) TestCreatePhotos_ReturnsErrorWhenHikeDoesNotExist() {
 	body := [](map[string]any){
 		{
+			"index":        0,
 			"objectKey":    s3.CreatePhotoObjectKey(1),
 			"caption":      "Caption",
 			"displayOrder": 1,
@@ -146,10 +148,12 @@ func (suite *handlerTestSuite) TestCreatePhotos_ReturnsErrorWhenRequestItemIsMis
 
 	body := [](map[string]any){
 		{
+			"index":        0,
 			"caption":      "Caption",
 			"displayOrder": 1,
 		},
 		{
+			"index":        1,
 			"objectKey":    s3.CreatePhotoObjectKey(2),
 			"caption":      "Caption",
 			"displayOrder": 2,
@@ -166,6 +170,7 @@ func (suite *handlerTestSuite) TestCreatePhotos_ReturnsErrorWhenObjectKeyIsInval
 
 	body := [](map[string]any){
 		{
+			"index":        0,
 			"objectKey":    "acde070d-8c4c-4f0d-9d8a-162843c10333",
 			"caption":      "Caption",
 			"displayOrder": 1,
@@ -182,6 +187,7 @@ func (suite *handlerTestSuite) TestCreatePhotos_ReturnsErrorWhenPathAndObjectKey
 
 	body := [](map[string]any){
 		{
+			"index":        0,
 			"objectKey":    s3.CreatePhotoObjectKey(hikes[0].ID + 1),
 			"caption":      "Caption",
 			"displayOrder": 1,
@@ -198,6 +204,7 @@ func (suite *handlerTestSuite) TestCreatePhotos_ReturnsPartialErrorWhenPhotoDoes
 
 	body := [](map[string]any){
 		{
+			"index":        0,
 			"objectKey":    s3.CreatePhotoObjectKey(hikes[0].ID),
 			"caption":      "Caption",
 			"displayOrder": 1,
@@ -213,6 +220,7 @@ func (suite *handlerTestSuite) TestCreatePhotos_ReturnsPartialErrorWhenPhotoDoes
 	suite.NoError(err)
 
 	suite.Len(response, 1)
+	suite.Equal(uint(0), response[0].Index)
 	suite.False(response[0].Success)
 }
 
@@ -228,6 +236,7 @@ func (suite *handlerTestSuite) TestCreatePhotos_ReturnsPartialErrorWhenS3Errors(
 
 	body := [](map[string]any){
 		{
+			"index":        2,
 			"objectKey":    s3.CreatePhotoObjectKey(hikes[0].ID),
 			"caption":      "Caption",
 			"displayOrder": 1,
@@ -243,6 +252,7 @@ func (suite *handlerTestSuite) TestCreatePhotos_ReturnsPartialErrorWhenS3Errors(
 	suite.NoError(err)
 
 	suite.Len(response, 1)
+	suite.Equal(uint(2), response[0].Index)
 	suite.False(response[0].Success)
 }
 
@@ -259,6 +269,7 @@ func (suite *handlerTestSuite) TestCreatePhotos_ReturnsPartialErrorWhenDBErrors(
 
 	body := [](map[string]any){
 		{
+			"index":        4,
 			"objectKey":    s3.CreatePhotoObjectKey(hikes[0].ID),
 			"caption":      "Caption",
 			"displayOrder": 1,
@@ -274,6 +285,7 @@ func (suite *handlerTestSuite) TestCreatePhotos_ReturnsPartialErrorWhenDBErrors(
 	suite.NoError(err)
 
 	suite.Len(response, 1)
+	suite.Equal(uint(4), response[0].Index)
 	suite.False(response[0].Success)
 }
 
@@ -290,11 +302,13 @@ func (suite *handlerTestSuite) TestCreatePhotos_CreatesPhotos() {
 
 	body := [](map[string]any){
 		{
+			"index":        0,
 			"objectKey":    objectKey1,
 			"caption":      "Caption 1",
 			"displayOrder": 1,
 		},
 		{
+			"index":        1,
 			"objectKey":    objectKey2,
 			"caption":      "Caption 2",
 			"displayOrder": 2,
@@ -312,6 +326,7 @@ func (suite *handlerTestSuite) TestCreatePhotos_CreatesPhotos() {
 	suite.Len(response, 2)
 	objectKeys := []string{objectKey1, objectKey2}
 	for idx, item := range response {
+		suite.Equal(uint(idx), item.Index)
 		suite.True(item.Success)
 		suite.Empty(item.Error)
 		suite.NotEmpty(item.Result)
@@ -337,6 +352,7 @@ func (suite *handlerTestSuite) TestCreatePhotos_CreatesPhotos() {
 func (suite *handlerTestSuite) TestCreatePresignedURLs_ReturnsErrorWhenHikeIDIsInvalid() {
 	body := [](map[string]any){
 		{
+			"index":         0,
 			"contentType":   "image/jpeg",
 			"contentLength": 100,
 		},
@@ -349,6 +365,7 @@ func (suite *handlerTestSuite) TestCreatePresignedURLs_ReturnsErrorWhenHikeIDIsI
 func (suite *handlerTestSuite) TestCreatePresignedURLs_ReturnsErrorWhenHikeDoesNotExist() {
 	body := [](map[string]any){
 		{
+			"index":         0,
 			"contentType":   "image/jpeg",
 			"contentLength": 100,
 		},
@@ -363,6 +380,7 @@ func (suite *handlerTestSuite) TestCreatePresignedURLs_ReturnsErrorWhenRequestIt
 
 	body := [](map[string]any){
 		{
+			"index":         0,
 			"contentLength": 100,
 		},
 	}
@@ -376,6 +394,7 @@ func (suite *handlerTestSuite) TestCreatePresignedURLs_ReturnsErrorWhenRequestIt
 
 	body := [](map[string]any){
 		{
+			"index":         0,
 			"contentType":   "text/html",
 			"contentLength": 100,
 		},
@@ -390,6 +409,7 @@ func (suite *handlerTestSuite) TestCreatePresignedURLs_ReturnsErrorWhenContentLe
 
 	body := [](map[string]any){
 		{
+			"index":         0,
 			"contentType":   "image/jpeg",
 			"contentLength": -1,
 		},
@@ -400,6 +420,7 @@ func (suite *handlerTestSuite) TestCreatePresignedURLs_ReturnsErrorWhenContentLe
 
 	body = [](map[string]any){
 		{
+			"index":         0,
 			"contentType":   "image/jpeg",
 			"contentLength": 10485761,
 		},
@@ -421,6 +442,7 @@ func (suite *handlerTestSuite) TestCreatePresignedURLs_ReturnsErrorWhenDBErrors(
 
 	body := [](map[string]any){
 		{
+			"index":         0,
 			"contentType":   "image/jpeg",
 			"contentLength": 100,
 		},
@@ -442,6 +464,7 @@ func (suite *handlerTestSuite) TestCreatePresignedURLs_ReturnsPartialErrorWhenS3
 
 	body := [](map[string]any){
 		{
+			"index":         2,
 			"contentType":   "image/jpeg",
 			"contentLength": 100,
 		},
@@ -458,6 +481,7 @@ func (suite *handlerTestSuite) TestCreatePresignedURLs_ReturnsPartialErrorWhenS3
 	suite.Equal(1, len(response))
 
 	item := response[0]
+	suite.Equal(uint(2), item.Index)
 	suite.False(item.Success)
 	suite.Empty(item.Result)
 	suite.NotEmpty(item.Error)
@@ -468,10 +492,12 @@ func (suite *handlerTestSuite) TestCreatePresignedURLs_ReturnsPresignedURLs() {
 
 	body := [](map[string]any){
 		{
+			"index":         0,
 			"contentType":   "image/jpeg",
 			"contentLength": 100,
 		},
 		{
+			"index":         1,
 			"contentType":   "image/png",
 			"contentLength": 200,
 		},
@@ -486,7 +512,8 @@ func (suite *handlerTestSuite) TestCreatePresignedURLs_ReturnsPresignedURLs() {
 	suite.NoError(err)
 
 	suite.Equal(2, len(response))
-	for _, item := range response {
+	for idx, item := range response {
+		suite.Equal(uint(idx), item.Index)
 		suite.True(item.Success)
 		suite.Empty(item.Error)
 		suite.NotEmpty(item.Result)

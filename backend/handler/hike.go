@@ -105,6 +105,7 @@ func (h *Handler) CreatePhotos(c *gin.Context) {
 		if err != nil {
 			log.Printf("Unable to verify if photo %d (ObjectKey=%s) exists in the S3 bucket: %v", idx, item.ObjectKey, err)
 			item := createPhotosResponseItem{
+				Index:   *item.Index,
 				Success: false,
 				Error:   fmt.Sprintf("Unable to verify if a photo with the ObjectKey exists in the S3 bucket: %v", err),
 			}
@@ -112,6 +113,7 @@ func (h *Handler) CreatePhotos(c *gin.Context) {
 			continue
 		} else if !exists {
 			item := createPhotosResponseItem{
+				Index:   *item.Index,
 				Success: false,
 				Error:   "Photo with the ObjectKey does not exist in the S3 bucket",
 			}
@@ -129,12 +131,12 @@ func (h *Handler) CreatePhotos(c *gin.Context) {
 		err = h.store.CreateRecord(&photo)
 		if err != nil {
 			log.Printf("Failed to create Photo %d: %v", idx, err)
-			item := createPhotosResponseItem{Success: false, Error: "Failed to create photo"}
+			item := createPhotosResponseItem{Index: *item.Index, Success: false, Error: "Failed to create photo"}
 			res = append(res, item)
 			continue
 		}
 
-		res = append(res, createPhotosResponseItem{Success: true, Result: &photo})
+		res = append(res, createPhotosResponseItem{Index: *item.Index, Success: true, Result: &photo})
 	}
 
 	c.JSON(http.StatusCreated, res)
@@ -189,12 +191,13 @@ func (h *Handler) CreatePresignedURLs(c *gin.Context) {
 		)
 		if err != nil {
 			log.Printf("Failed to create presigned URL for item %d: %v", idx, err)
-			item := createPresignedURLsResponseItem{Success: false, Error: "Failed to create presigned URL"}
+			item := createPresignedURLsResponseItem{Index: *item.Index, Success: false, Error: "Failed to create presigned URL"}
 			res = append(res, item)
 			continue
 		}
 
 		item := createPresignedURLsResponseItem{
+			Index:   *item.Index,
 			Success: true,
 			Result: &createPresignedURLsResponseItemResult{
 				PresignedURL: presignedReq.URL,

@@ -115,13 +115,16 @@ export default function HikeForm({ onClose, setToastMessage }: HikeFormProps) {
       return;
     }
 
+    const photoErrors = [];
     let createPresignedUrlsResponse;
     try {
       const reqBody = [];
-      for (const photo of photos) {
+      for (let i = 0; i < photos.length; i++) {
+        const photo = photos[i];
         const reqItem = {
           contentLength: photo.file.size,
           contentType: photo.file.type,
+          index: i,
         };
         reqBody.push(reqItem);
       }
@@ -140,6 +143,7 @@ export default function HikeForm({ onClose, setToastMessage }: HikeFormProps) {
         if (createPresignedUrlResponse.success) {
           promises.push(uploadFile(createPresignedUrlResponse.result.presignedUrl, photos[i].file));
         } else {
+          photoErrors.push(`Failed to create presigned URL for photo ${i}`);
           promises.push(Promise.reject());
         }
       }
@@ -155,14 +159,21 @@ export default function HikeForm({ onClose, setToastMessage }: HikeFormProps) {
       const reqBody = [];
       for (let i = 0; i < photos.length; i++) {
         const createPresignedUrlResponse = createPresignedUrlsResponse[i];
+        if (!createPresignedUrlResponse.success) {
+          continue
+        }
+        
         const s3UploadResponse = s3UploadResponses[i];
-        if (createPresignedUrlResponse.success && s3UploadResponse.status == "fulfilled") {
+        if (s3UploadResponse.status == "fulfilled") {
           const reqItem = {
             caption: photos[i].caption,
             displayOrder: photos[i].displayOrder,
+            index: i,
             objectKey: createPresignedUrlResponse.result.objectKey,
           };
           reqBody.push(reqItem);
+        } else {
+          photoErrors.push(`Failed to upload photo ${i} to S3`);
         }
       }
       createPhotosResponse = await createPhotos(hike.id, reqBody);
@@ -172,17 +183,9 @@ export default function HikeForm({ onClose, setToastMessage }: HikeFormProps) {
       return;
     }
 
-    const photoErrors = [];
-    for (let i = 0; i < photos.length; i++) {
-      const createPresignedUrlResponse = createPresignedUrlsResponse[i];
-      const s3UploadResponse = s3UploadResponses[i];
-      const createPhotoResponse = createPhotosResponse[i]
-      if (!createPresignedUrlResponse.success) {
-        photoErrors.push(`Failed to create presigned URL for photo ${i}`);
-      } else if (s3UploadResponse.status !== "fulfilled") {
-        photoErrors.push(`Failed to upload photo ${i} to S3`);
-      } else if (!createPhotoResponse.success) {
-        photoErrors.push(`Failed to create Photo model for photo ${i}`);
+    for (const createPhotoResponse of createPhotosResponse) {
+      if (!createPhotoResponse.success) {
+        photoErrors.push(`Failed to create Photo model for photo ${createPhotoResponse.index}`);
       }
     }
 

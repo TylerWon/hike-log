@@ -32,6 +32,10 @@ type createHikeRequest struct {
 type updateHikeRequest = createHikeRequest
 
 type createPresignedURLsRequestItem struct {
+	// Position of this photo in the caller's list. Starts at 0. A pointer so Gin's "required" accepts 0 instead of
+	// treating it as missing.
+	Index *uint `json:"index" binding:"required"`
+
 	// MIME type of the image. Must be a valid image type.
 	ContentType string `json:"contentType" binding:"required,validImageType"`
 
@@ -42,6 +46,10 @@ type createPresignedURLsRequestItem struct {
 type createPresignedURLsRequest []createPresignedURLsRequestItem
 
 type createPhotosRequestItem struct {
+	// Position of this photo in the caller's list. Starts at 0. A pointer so Gin's "required" accepts 0 instead of
+	// treating it as missing.
+	Index *uint `json:"index" binding:"required"`
+
 	// The key that is assigned to the photo in the S3 bucket. Must be in the format "hikes/<hike_id>/photos/<uuid>".
 	ObjectKey string `json:"objectKey" binding:"required,validObjectKey"`
 

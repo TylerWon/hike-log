@@ -3,6 +3,9 @@ package handler
 import "github.com/TylerWon/hike-log/backend/models"
 
 type createPhotosResponseItem struct {
+	// Position of this photo in the caller's list. Echoed from the request. Starts at 0.
+	Index uint `json:"index"`
+
 	// Outcome for this item.
 	Success bool `json:"success"`
 
@@ -24,6 +27,9 @@ type createPresignedURLsResponseItemResult struct {
 }
 
 type createPresignedURLsResponseItem struct {
+	// Position of this photo in the caller's list. Echoed from the request. Starts at 0.
+	Index uint `json:"index"`
+
 	// Outcome for this item.
 	Success bool `json:"success"`
 

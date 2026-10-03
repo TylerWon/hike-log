@@ -8,6 +8,7 @@ const CreateHikeRequestSchema = HikeSchema.omit({ id: true, photos: true });
 export type CreateHikeRequest = z.infer<typeof CreateHikeRequestSchema>;
 
 const CreatePhotosRequestItemSchema = PhotoSchema.omit({ hikeId: true, id: true, srcUrl: true }).extend({
+  index: z.int().gte(0),
   objectKey: z.string(),
 });
 const CreatePhotosRequestSchema = z.array(CreatePhotosRequestItemSchema);
@@ -16,5 +17,6 @@ export type CreatePhotosRequest = z.infer<typeof CreatePhotosRequestSchema>;
 interface CreatePresignedUrlsRequestItem {
   contentLength: number;
   contentType: string;
+  index: number;
 }
 export type CreatePresignedUrlsRequest = CreatePresignedUrlsRequestItem[];
