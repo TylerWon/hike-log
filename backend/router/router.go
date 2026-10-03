@@ -39,7 +39,7 @@ func New(handler *handler.Handler) *gin.Engine {
 					// /api/v1/hikes/:hikeId/photos
 					photos := hike.Group("/photos")
 					{
-						photos.POST("", handler.CreatePhoto)
+						photos.POST("", handler.CreatePhotos)
 						photos.POST("/presigned-urls", handler.CreatePresignedURLs)
 					}
 				}

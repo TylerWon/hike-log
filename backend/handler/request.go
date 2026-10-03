@@ -41,7 +41,7 @@ type createPresignedURLsRequestItem struct {
 
 type createPresignedURLsRequest []createPresignedURLsRequestItem
 
-type createPhotoRequest struct {
+type createPhotosRequestItem struct {
 	// The key that is assigned to the photo in the S3 bucket. Must be in the format "hikes/<hike_id>/photos/<uuid>".
 	ObjectKey string `json:"objectKey" binding:"required,validObjectKey"`
 
@@ -52,6 +52,8 @@ type createPhotoRequest struct {
 	// missing so 0 fails validation.
 	DisplayOrder uint `json:"displayOrder" binding:"required,gt=0"`
 }
+
+type createPhotosRequest []createPhotosRequestItem
 
 type updatePhotoRequest struct {
 	// Caption for the photo.

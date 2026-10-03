@@ -1,5 +1,20 @@
 package handler
 
+import "github.com/TylerWon/hike-log/backend/models"
+
+type createPhotosResponseItem struct {
+	// Outcome for this item.
+	Success bool `json:"success"`
+
+	// The newly created Photo when "Success" is true.
+	Result *models.Photo `json:"result,omitempty"`
+
+	// Error message when "Success" is false.
+	Error string `json:"error,omitempty"`
+}
+
+type CreatePhotosResponse []createPhotosResponseItem
+
 type createPresignedURLsResponseItemResult struct {
 	// The presigned URL that can be used to upload a photo to the S3 bucket.
 	PresignedURL string `json:"presignedUrl"`

@@ -8,7 +8,7 @@ import * as z from "zod";
 
 import type { PhotoData } from "./types";
 
-import { createHike, createPhoto, createPresignedUrls } from "../../api/hikes";
+import { createHike, createPhotos, createPresignedUrls } from "../../api/hikes";
 import { uploadFile } from "../../api/s3";
 import { type HikeFormData, HikeFormDataSchema } from "../../schemas/forms/hike";
 import { HIKES_QUERY_KEY } from "../HikeLog";
@@ -17,9 +17,10 @@ import PhotoField from "./PhotoField";
 
 interface HikeFormProps {
   onClose: () => void;
+  setToastMessage: (message: string) => void;
 }
 
-export default function HikeForm({ onClose }: HikeFormProps) {
+export default function HikeForm({ onClose, setToastMessage }: HikeFormProps) {
   const queryClient = useQueryClient();
 
   const [trailName, setTrailName] = useState<string>("");
@@ -32,7 +33,7 @@ export default function HikeForm({ onClose }: HikeFormProps) {
   const [allTrailsUrl, setAllTrailsUrl] = useState<string>("");
   const [notes, setNotes] = useState<string>("");
   const [photos, setPhotos] = useState<PhotoData[]>([]);
-  const [errors, setErrors] = useState<$ZodErrorTree<HikeFormData>>();
+  const [fieldErrors, setFieldErrors] = useState<$ZodErrorTree<HikeFormData>>();
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     // target = element that was actually clicked
@@ -64,7 +65,7 @@ export default function HikeForm({ onClose }: HikeFormProps) {
 
     const result = HikeFormDataSchema.safeParse(hike);
     if (!result.success) {
-      setErrors(z.treeifyError(result.error));
+      setFieldErrors(z.treeifyError(result.error));
       return null;
     }
 
@@ -88,6 +89,11 @@ export default function HikeForm({ onClose }: HikeFormProps) {
     onClose();
   };
 
+  const handlePhotoError = (message: string) => {
+    setToastMessage(message);
+    onClose();
+  }
+
   const refetchHikes = async () => {
     // Invalidates the "hikes" query so all Hikes get refetched
     await queryClient.invalidateQueries({ queryKey: [HIKES_QUERY_KEY] });
@@ -96,15 +102,19 @@ export default function HikeForm({ onClose }: HikeFormProps) {
   const addHike = async (formData: HikeFormData) => {
     const { photos, ...hikeData } = formData;
 
-    // Hike must be created so fail-close
     let hike;
     try {
       hike = await createHike(hikeData);
     } catch (e) {
+      // Hike must be created so fail-close
       throw new Error(`Failed to create hike: ${e}`, { cause: e });
     }
 
-    // Photo upload is best effort so fail-open
+    if (photos.length < 1) {
+      onClose();
+      return;
+    }
+
     let createPresignedUrlsResponse;
     try {
       const reqBody = [];
@@ -117,47 +127,68 @@ export default function HikeForm({ onClose }: HikeFormProps) {
       }
       createPresignedUrlsResponse = await createPresignedUrls(hike.id, reqBody);
     } catch (e) {
-      console.error("Failed to create presigned URLs: ", e);
+      console.warn("Failed to create presigned URLs: ", e);
+      handlePhotoError("Photos could not be uploaded. Please try again.")
       return;
     }
 
-    let promises = [];
     let s3UploadResponses;
     try {
+      const promises = [];
       for (let i = 0; i < photos.length; i++) {
         const createPresignedUrlResponse = createPresignedUrlsResponse[i];
         if (createPresignedUrlResponse.success) {
           promises.push(uploadFile(createPresignedUrlResponse.result.presignedUrl, photos[i].file));
         } else {
-          console.warn(`Failed to create presigned URL for photo ${i}`);
           promises.push(Promise.reject());
         }
       }
       s3UploadResponses = await Promise.allSettled(promises);
     } catch (e) {
-      console.error("Failed to upload photos to S3: ", e);
+      console.warn("Failed to upload photos to S3: ", e);
+      handlePhotoError("Photos could not be uploaded. Please try again.")
       return;
     }
 
+    let createPhotosResponse;
     try {
-      promises = [];
+      const reqBody = [];
       for (let i = 0; i < photos.length; i++) {
         const createPresignedUrlResponse = createPresignedUrlsResponse[i];
         const s3UploadResponse = s3UploadResponses[i];
         if (createPresignedUrlResponse.success && s3UploadResponse.status == "fulfilled") {
-          const reqBody = {
+          const reqItem = {
             caption: photos[i].caption,
             displayOrder: photos[i].displayOrder,
             objectKey: createPresignedUrlResponse.result.objectKey,
           };
-          promises.push(createPhoto(hike.id, reqBody));
-        } else {
-          console.warn(`Failed to upload photo ${i} to S3`);
+          reqBody.push(reqItem);
         }
       }
-      await Promise.all(promises);
+      createPhotosResponse = await createPhotos(hike.id, reqBody);
     } catch (e) {
-      console.error("Failed to create photos: ", e);
+      console.warn("Failed to create photos: ", e);
+      handlePhotoError("Photos could not be uploaded. Please try again.")
+      return;
+    }
+
+    const photoErrors = [];
+    for (let i = 0; i < photos.length; i++) {
+      const createPresignedUrlResponse = createPresignedUrlsResponse[i];
+      const s3UploadResponse = s3UploadResponses[i];
+      const createPhotoResponse = createPhotosResponse[i]
+      if (!createPresignedUrlResponse.success) {
+        photoErrors.push(`Failed to create presigned URL for photo ${i}`);
+      } else if (s3UploadResponse.status !== "fulfilled") {
+        photoErrors.push(`Failed to upload photo ${i} to S3`);
+      } else if (!createPhotoResponse.success) {
+        photoErrors.push(`Failed to create Photo model for photo ${i}`);
+      }
+    }
+
+    if (photoErrors.length > 0) {
+      console.warn(photoErrors);
+      handlePhotoError("Some photos could not be uploaded. Please try again.")
       return;
     }
 
@@ -166,9 +197,12 @@ export default function HikeForm({ onClose }: HikeFormProps) {
 
   const addHikeMutation = useMutation({
     mutationFn: addHike, // called when mutate() is invoked for this mutation
-    onError: (error) => console.error("Failed to create hike: ", error),
+    onError: (error) => console.error("addHikeMutation failed: ", error),
     onSuccess: refetchHikes,
   });
+
+  const submissionPending = addHikeMutation.isPending;
+  const submissionError = addHikeMutation.isError;
 
   return (
     <div
@@ -206,7 +240,7 @@ export default function HikeForm({ onClose }: HikeFormProps) {
         {/* Hike fields */}
         <form noValidate onSubmit={handleSubmit}>
           <div className="flex flex-col gap-4 px-5 py-5">
-            <Field error={errors?.properties?.trailName?.errors?.[0]} label="Trail Name" required>
+            <Field error={fieldErrors?.properties?.trailName?.errors?.[0]} label="Trail Name" required>
               <input
                 autoFocus
                 className="hike-form-field"
@@ -219,7 +253,7 @@ export default function HikeForm({ onClose }: HikeFormProps) {
             </Field>
 
             <div className="grid grid-cols-2 gap-3">
-              <Field error={errors?.properties?.date?.errors?.[0]} label="Date" required>
+              <Field error={fieldErrors?.properties?.date?.errors?.[0]} label="Date" required>
                 <input
                   className="hike-form-field scheme-dark"
                   name="Date"
@@ -228,7 +262,7 @@ export default function HikeForm({ onClose }: HikeFormProps) {
                   value={date}
                 />
               </Field>
-              <Field error={errors?.properties?.duration?.errors?.[0]} label="Duration (minutes)" required>
+              <Field error={fieldErrors?.properties?.duration?.errors?.[0]} label="Duration (minutes)" required>
                 <input
                   className="hike-form-field"
                   min={1}
@@ -243,7 +277,7 @@ export default function HikeForm({ onClose }: HikeFormProps) {
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              <Field error={errors?.properties?.rating?.errors?.[0]} label="Rating (0-5)" required>
+              <Field error={fieldErrors?.properties?.rating?.errors?.[0]} label="Rating (0-5)" required>
                 <input
                   className="hike-form-field"
                   max={5}
@@ -256,7 +290,7 @@ export default function HikeForm({ onClose }: HikeFormProps) {
                   value={rating}
                 />
               </Field>
-              <Field error={errors?.properties?.difficulty?.errors?.[0]} label="Difficulty (0-10)" required>
+              <Field error={fieldErrors?.properties?.difficulty?.errors?.[0]} label="Difficulty (0-10)" required>
                 <input
                   className="hike-form-field"
                   max={10}
@@ -272,7 +306,7 @@ export default function HikeForm({ onClose }: HikeFormProps) {
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              <Field error={errors?.properties?.distance?.errors?.[0]} label="Distance (km)" required>
+              <Field error={fieldErrors?.properties?.distance?.errors?.[0]} label="Distance (km)" required>
                 <input
                   className="hike-form-field"
                   min={0}
@@ -284,7 +318,7 @@ export default function HikeForm({ onClose }: HikeFormProps) {
                   value={distance}
                 />
               </Field>
-              <Field error={errors?.properties?.elevationGain?.errors?.[0]} label="Elevation gain (m)" required>
+              <Field error={fieldErrors?.properties?.elevationGain?.errors?.[0]} label="Elevation gain (m)" required>
                 <input
                   className="hike-form-field"
                   min={0}
@@ -298,7 +332,7 @@ export default function HikeForm({ onClose }: HikeFormProps) {
               </Field>
             </div>
 
-            <Field error={errors?.properties?.allTrailsUrl?.errors?.[0]} label="AllTrails URL" required>
+            <Field error={fieldErrors?.properties?.allTrailsUrl?.errors?.[0]} label="AllTrails URL" required>
               <input
                 className="hike-form-field"
                 name="AllTrails URL"
@@ -309,7 +343,7 @@ export default function HikeForm({ onClose }: HikeFormProps) {
               />
             </Field>
 
-            <Field error={errors?.properties?.notes?.errors?.[0]} label="Notes" required>
+            <Field error={fieldErrors?.properties?.notes?.errors?.[0]} label="Notes" required>
               <textarea
                 className="hike-form-field"
                 name="Notes"
@@ -321,12 +355,12 @@ export default function HikeForm({ onClose }: HikeFormProps) {
             </Field>
 
             {/* Photo field */}
-            <PhotoField errors={errors?.properties?.photos} photos={photos} setPhotos={setPhotos} />
+            <PhotoField errors={fieldErrors?.properties?.photos} photos={photos} setPhotos={setPhotos} />
           </div>
 
           {/* Footer */}
           <div className="border-t border-forest-800 sticky bottom-0 bg-forest-900">
-            {addHikeMutation.isError && (
+            {submissionError && (
               <div className="flex items-center gap-2 px-5 py-3 bg-coral-950">
                 <svg
                   className="shrink-0"
@@ -348,7 +382,7 @@ export default function HikeForm({ onClose }: HikeFormProps) {
             <div className="flex items-center justify-end gap-3 px-5 py-4 ">
               <button
                 className="font-mono px-4 py-2 text-xs text-forest-600 hover:text-cream-100 transition-colors focus:outline-none"
-                disabled={addHikeMutation.isPending}
+                disabled={submissionPending}
                 onClick={handleCancel}
                 type="button"
               >
@@ -357,10 +391,10 @@ export default function HikeForm({ onClose }: HikeFormProps) {
 
               <button
                 className="primary-button px-5 py-2 inline-flex items-center gap-2"
-                disabled={addHikeMutation.isPending}
+                disabled={submissionPending}
                 type="submit"
               >
-                {addHikeMutation.isPending ? (
+                {submissionPending ? (
                   <>
                     <svg
                       className="animate-spin"

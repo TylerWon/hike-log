@@ -1,4 +1,20 @@
 import * as z from "zod";
+import { PhotoSchema } from "../models/photo";
+
+const CreatePhotosResponseItemSchema = z.discriminatedUnion("success", [
+  // Schema when Success is true
+  z.object({
+    result: PhotoSchema,
+    success: z.literal(true),
+  }),
+  // Schema when Success is false
+  z.object({
+    error: z.string(),
+    success: z.literal(false),
+  }),
+]);
+export const CreatePhotosResponseSchema = z.array(CreatePhotosResponseItemSchema);
+export type CreatePhotosResponse = z.infer<typeof CreatePhotosResponseSchema>;
 
 const CreatePresignedUrlsResponseItemResultSchema = z.object({
   objectKey: z.string(),

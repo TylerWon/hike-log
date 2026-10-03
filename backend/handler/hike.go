@@ -54,21 +54,21 @@ func (h *Handler) CreateHike(c *gin.Context) {
 }
 
 /*
-Creates a Photo for a Hike.
+Creates Photos for a Hike.
 
-The photo should already be uploaded to S3. This endpoint is just responsible for creating the Photo model in the DB.
+The photos should already be uploaded to S3. This endpoint is just responsible for creating the Photo model in the DB.
 
 Path parameters: [hikeIDPathParam]
 
-Request body: [createPhotoRequest]
+Request body: [createPhotosRequest]
 
 Returns:
- 1. 201 Created and the [models.Photo] when successful
+ 1. 201 Created and [CreatePhotosResponse] when successful
  2. 400 Bad Request and an error message when input is bad
- 3. 404 Not Found and an error message when the Photo does not exist
+ 3. 404 Not Found and an error message when the Hike does not exist
  4. 500 Internal Server Error and an error message when there is an unexpected error
 */
-func (h *Handler) CreatePhoto(c *gin.Context) {
+func (h *Handler) CreatePhotos(c *gin.Context) {
 	var params hikeIDPathParam
 	if err := c.ShouldBindUri(&params); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -81,45 +81,63 @@ func (h *Handler) CreatePhoto(c *gin.Context) {
 		return
 	}
 
-	var req createPhotoRequest
+	var req createPhotosRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
+		// Note: ShouldBindJSON unmarshals and validates the entire request array in one shot so the handler returns early
+		// if ANY of the items in the array are invalid
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	// Skip validation here since ObjectKey was validated when the request body got binded to [createPhotoRequest]
-	keyParts := strings.Split(req.ObjectKey, "/")
-	hikeId, _ := strconv.ParseUint(keyParts[1], 10, 64)
-	if hikeId != uint64(params.HikeID) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Hike ID in path and ObjectKey do not match"})
-		return
+	var res CreatePhotosResponse
+	for idx, item := range req {
+		keyParts := strings.Split(item.ObjectKey, "/")
+		hikeId, _ := strconv.ParseUint(keyParts[1], 10, 64)
+		if hikeId != uint64(params.HikeID) {
+			c.JSON(
+				http.StatusBadRequest,
+				gin.H{"error": fmt.Sprintf("Hike ID in path does not match with the ObjectKey of item %d", idx)},
+			)
+			return
+		}
+
+		exists, err := h.s3Client.DoesObjectExist(c, item.ObjectKey)
+		if err != nil {
+			log.Printf("Unable to verify if photo %d (ObjectKey=%s) exists in the S3 bucket: %v", idx, item.ObjectKey, err)
+			item := createPhotosResponseItem{
+				Success: false,
+				Error:   fmt.Sprintf("Unable to verify if a photo with the ObjectKey exists in the S3 bucket: %v", err),
+			}
+			res = append(res, item)
+			continue
+		} else if !exists {
+			item := createPhotosResponseItem{
+				Success: false,
+				Error:   "Photo with the ObjectKey does not exist in the S3 bucket",
+			}
+			res = append(res, item)
+			continue
+		}
+
+		srcURL := s3.CreatePhotoObjectURL(item.ObjectKey, os.Getenv("ENV"))
+		photo := models.Photo{
+			SrcUrl:       srcURL,
+			Caption:      item.Caption,
+			DisplayOrder: item.DisplayOrder,
+			HikeID:       params.HikeID,
+		}
+		err = h.store.CreateRecord(&photo)
+		if err != nil {
+			log.Printf("Failed to create Photo %d: %v", idx, err)
+			item := createPhotosResponseItem{Success: false, Error: "Failed to create photo"}
+			res = append(res, item)
+			continue
+		}
+
+		res = append(res, createPhotosResponseItem{Success: true, Result: &photo})
 	}
 
-	exists, err := h.s3Client.DoesObjectExist(c, req.ObjectKey)
-	if err != nil {
-		log.Printf("Unable to verify if photo object (key=%s) exists in S3 bucket: %v", req.ObjectKey, err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": http.StatusText(http.StatusInternalServerError)})
-		return
-	} else if !exists {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Photo with provided ObjectKey does not exist in S3 bucket"})
-		return
-	}
-
-	srcURL := s3.CreatePhotoObjectURL(req.ObjectKey, os.Getenv("ENV"))
-	photo := models.Photo{
-		SrcUrl:       srcURL,
-		Caption:      req.Caption,
-		DisplayOrder: req.DisplayOrder,
-		HikeID:       params.HikeID,
-	}
-	err = h.store.CreateRecord(&photo)
-	if err != nil {
-		log.Println("Failed to create Photo: ", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": http.StatusText(http.StatusInternalServerError)})
-		return
-	}
-
-	c.JSON(http.StatusCreated, photo)
+	c.JSON(http.StatusCreated, res)
 }
 
 /*
@@ -135,7 +153,7 @@ Request body: [createPresignedURLsRequest]
 Returns:
  1. 200 OK and [CreatePresignedURLsResponse] when successful
  2. 400 Bad Request and an error message when input is bad
- 3. 404 Not Found and an error message when the Photo does not exist
+ 3. 404 Not Found and an error message when the Hike does not exist
  4. 500 Internal Server Error and an error message when there is an unexpected error
 */
 func (h *Handler) CreatePresignedURLs(c *gin.Context) {

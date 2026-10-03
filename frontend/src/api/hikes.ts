@@ -1,8 +1,7 @@
-import type { CreateHikeRequest, CreatePhotoRequest, CreatePresignedUrlsRequest } from "../schemas/requests/hikes";
+import type { CreateHikeRequest, CreatePhotosRequest as CreatePhotosRequest, CreatePresignedUrlsRequest } from "../schemas/requests/hikes";
 
 import { type Hike, HikeListSchema, HikeSchema } from "../schemas/models/hike";
-import { type Photo, PhotoSchema } from "../schemas/models/photo";
-import { type CreatePresignedUrlsResponse, CreatePresignedUrlsResponseSchema } from "../schemas/responses/hikes";
+import { type CreatePhotosResponse, CreatePhotosResponseSchema, type CreatePresignedUrlsResponse, CreatePresignedUrlsResponseSchema } from "../schemas/responses/hikes";
 
 const API_URL = `${import.meta.env.VITE_API_URL}/hikes`;
 
@@ -30,9 +29,9 @@ export async function createHike(reqBody: CreateHikeRequest): Promise<Hike> {
   return result.data;
 }
 
-// Creates a Photo for a Hike.
+// Creates Photos for a Hike.
 // Throws an error if the response is not 201 or cannot be parsed.
-export async function createPhoto(hikeId: number, reqBody: CreatePhotoRequest): Promise<Photo> {
+export async function createPhotos(hikeId: number, reqBody: CreatePhotosRequest): Promise<CreatePhotosResponse> {
   const response = await fetch(`${API_URL}/${hikeId}/photos`, {
     body: JSON.stringify(reqBody),
     headers: {
@@ -42,13 +41,13 @@ export async function createPhoto(hikeId: number, reqBody: CreatePhotoRequest): 
   });
 
   if (response.status !== 201) {
-    throw new Error(`Failed to create photo: ${response.status} - ${response.statusText}`);
+    throw new Error(`Failed to create photos: ${response.status} - ${response.statusText}`);
   }
 
   const responseJson = await response.json();
-  const result = PhotoSchema.safeParse(responseJson);
+  const result = CreatePhotosResponseSchema.safeParse(responseJson);
   if (!result.success) {
-    throw new Error(`Failed to parse photo: ${result.error}`);
+    throw new Error(`Failed to parse photo response: ${result.error}`);
   }
 
   return result.data;

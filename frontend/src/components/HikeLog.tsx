@@ -12,12 +12,14 @@ import HikeForm from "./HikeForm/HikeForm";
 import HikeLogContent from "./HikeLogContent";
 import HikeLogError from "./HikeLogError";
 import StatValueSkeleton from "./StatValueSkeleton";
+import Toast from "./Toast";
 
 export const HIKES_QUERY_KEY = "hikes";
 
 export default function HikeLog() {
   const [expandedCardId, setExpandedCardId] = useState<null | number>(null);
   const [showHikeForm, setShowHikeForm] = useState<boolean>(false);
+  const [toastMessage, setToastMessage] = useState<null | string>("");
 
   const hikes = useQuery({
     queryFn: fetchHikes, // called on component load
@@ -93,7 +95,10 @@ export default function HikeLog() {
           </button>
         </li>
       </HikeLogContent>
-      {showHikeForm && <HikeForm onClose={() => setShowHikeForm(false)} />}
+      {showHikeForm && (
+        <HikeForm onClose={() => setShowHikeForm(false)} setToastMessage={setToastMessage} />
+      )}
+      {toastMessage && <Toast message={toastMessage} onDismiss={() => setToastMessage(null)}/>}
     </>
   );
 }

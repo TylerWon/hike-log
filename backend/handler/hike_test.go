@@ -113,11 +113,13 @@ func (suite *handlerTestSuite) TestCreateHike_CreatesAndReturnsHike() {
 	suite.Equal(expected, response)
 }
 
-func (suite *handlerTestSuite) TestCreatePhoto_ReturnsErrorWhenHikeIDIsInvalid() {
-	body := map[string]any{
-		"objectKey":    s3.CreatePhotoObjectKey(1),
-		"caption":      "Caption",
-		"displayOrder": 1,
+func (suite *handlerTestSuite) TestCreatePhotos_ReturnsErrorWhenHikeIDIsInvalid() {
+	body := [](map[string]any){
+		{
+			"objectKey":    s3.CreatePhotoObjectKey(1),
+			"caption":      "Caption",
+			"displayOrder": 1,
+		},
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
 	res := testutils.SendRequest(suite.router, http.MethodPost, "/api/v1/hikes/abc/photos", reqBody)
@@ -125,11 +127,13 @@ func (suite *handlerTestSuite) TestCreatePhoto_ReturnsErrorWhenHikeIDIsInvalid()
 	suite.Equal(http.StatusBadRequest, res.Code)
 }
 
-func (suite *handlerTestSuite) TestCreatePhoto_ReturnsErrorWhenHikeDoesNotExist() {
-	body := map[string]any{
-		"objectKey":    s3.CreatePhotoObjectKey(1),
-		"caption":      "Caption",
-		"displayOrder": 1,
+func (suite *handlerTestSuite) TestCreatePhotos_ReturnsErrorWhenHikeDoesNotExist() {
+	body := [](map[string]any){
+		{
+			"objectKey":    s3.CreatePhotoObjectKey(1),
+			"caption":      "Caption",
+			"displayOrder": 1,
+		},
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
 	res := testutils.SendRequest(suite.router, http.MethodPost, "/api/v1/hikes/1/photos", reqBody)
@@ -137,12 +141,19 @@ func (suite *handlerTestSuite) TestCreatePhoto_ReturnsErrorWhenHikeDoesNotExist(
 	suite.Equal(http.StatusNotFound, res.Code)
 }
 
-func (suite *handlerTestSuite) TestCreatePhoto_ReturnsErrorWhenRequestBodyIsMissingFields() {
+func (suite *handlerTestSuite) TestCreatePhotos_ReturnsErrorWhenRequestItemIsMissingFields() {
 	hikes := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)
 
-	body := map[string]any{
-		"caption":      "Caption",
-		"displayOrder": 1,
+	body := [](map[string]any){
+		{
+			"caption":      "Caption",
+			"displayOrder": 1,
+		},
+		{
+			"objectKey":    s3.CreatePhotoObjectKey(2),
+			"caption":      "Caption",
+			"displayOrder": 2,
+		},
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
 	res := testutils.SendRequest(suite.router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos", hikes[0].ID), reqBody)
@@ -150,13 +161,15 @@ func (suite *handlerTestSuite) TestCreatePhoto_ReturnsErrorWhenRequestBodyIsMiss
 	suite.Equal(http.StatusBadRequest, res.Code)
 }
 
-func (suite *handlerTestSuite) TestCreatePhoto_ReturnsErrorWhenObjectKeyIsInvalid() {
+func (suite *handlerTestSuite) TestCreatePhotos_ReturnsErrorWhenObjectKeyIsInvalid() {
 	hikes := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)
 
-	body := map[string]any{
-		"objectKey":    "acde070d-8c4c-4f0d-9d8a-162843c10333",
-		"caption":      "Caption",
-		"displayOrder": 1,
+	body := [](map[string]any){
+		{
+			"objectKey":    "acde070d-8c4c-4f0d-9d8a-162843c10333",
+			"caption":      "Caption",
+			"displayOrder": 1,
+		},
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
 	res := testutils.SendRequest(suite.router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos", hikes[0].ID), reqBody)
@@ -164,13 +177,15 @@ func (suite *handlerTestSuite) TestCreatePhoto_ReturnsErrorWhenObjectKeyIsInvali
 	suite.Equal(http.StatusBadRequest, res.Code)
 }
 
-func (suite *handlerTestSuite) TestCreatePhoto_ReturnsErrorWhenPathAndObjectKeyHikeIDMismatch() {
+func (suite *handlerTestSuite) TestCreatePhotos_ReturnsErrorWhenPathAndObjectKeyHikeIDMismatch() {
 	hikes := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)
 
-	body := map[string]any{
-		"objectKey":    s3.CreatePhotoObjectKey(hikes[0].ID + 1),
-		"caption":      "Caption",
-		"displayOrder": 1,
+	body := [](map[string]any){
+		{
+			"objectKey":    s3.CreatePhotoObjectKey(hikes[0].ID + 1),
+			"caption":      "Caption",
+			"displayOrder": 1,
+		},
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
 	res := testutils.SendRequest(suite.router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos", hikes[0].ID), reqBody)
@@ -178,93 +193,144 @@ func (suite *handlerTestSuite) TestCreatePhoto_ReturnsErrorWhenPathAndObjectKeyH
 	suite.Equal(http.StatusBadRequest, res.Code)
 }
 
-func (suite *handlerTestSuite) TestCreatePhoto_ReturnsErrorWhenPhotoDoesNotExistInS3() {
+func (suite *handlerTestSuite) TestCreatePhotos_ReturnsPartialErrorWhenPhotoDoesNotExistInS3() {
 	hikes := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)
 
-	body := map[string]any{
-		"objectKey":    s3.CreatePhotoObjectKey(hikes[0].ID),
-		"caption":      "Caption",
-		"displayOrder": 1,
-	}
-	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(suite.router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos", hikes[0].ID), reqBody)
-
-	suite.Equal(http.StatusBadRequest, res.Code)
-}
-
-func (suite *handlerTestSuite) TestCreatePhoto_ReturnsErrorWhenS3Errors() {
-	mockS3Client := s3.MockS3Client{
-		DoesObjectExistResult: false,
-		DoesObjectExistError:  errors.New("Something went wrong"),
-	}
-	handler := handler.New(suite.store, &mockS3Client)
-	router := testutils.NewRouter(suite.T(), handler)
-
-	hikes := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)
-
-	body := map[string]any{
-		"objectKey":    s3.CreatePhotoObjectKey(hikes[0].ID),
-		"caption":      "Caption",
-		"displayOrder": 1,
-	}
-	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos", hikes[0].ID), reqBody)
-
-	suite.Equal(http.StatusInternalServerError, res.Code)
-}
-
-func (suite *handlerTestSuite) TestCreatePhoto_ReturnsErrorWhenDBErrors() {
-	mockStore := store.MockStore{
-		GetHikeByIDResult: nil,
-		GetHikeByIDError:  errors.New("Something went wrong"),
-	}
-	handler := handler.New(&mockStore, suite.s3Client)
-	router := testutils.NewRouter(suite.T(), handler)
-
-	hikes := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)
-
-	body := map[string]any{
-		"objectKey":    s3.CreatePhotoObjectKey(hikes[0].ID),
-		"caption":      "Caption",
-		"displayOrder": 1,
-	}
-	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos", hikes[0].ID), reqBody)
-
-	suite.Equal(http.StatusInternalServerError, res.Code)
-}
-
-func (suite *handlerTestSuite) TestCreatePhoto_CreatesPhoto() {
-	hikes := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)
-
-	objectKey := s3.CreatePhotoObjectKey(hikes[0].ID)
-	_, err := suite.s3Client.PutObject(context.TODO(), objectKey, strings.NewReader("content"), "image/png")
-	suite.NoError(err)
-
-	body := map[string]any{
-		"objectKey":    objectKey,
-		"caption":      "Caption",
-		"displayOrder": 1,
+	body := [](map[string]any){
+		{
+			"objectKey":    s3.CreatePhotoObjectKey(hikes[0].ID),
+			"caption":      "Caption",
+			"displayOrder": 1,
+		},
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
 	res := testutils.SendRequest(suite.router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos", hikes[0].ID), reqBody)
 
 	suite.Equal(http.StatusCreated, res.Code)
 
-	var response models.Photo
+	var response handler.CreatePhotosResponse
+	err := json.Unmarshal(res.Body.Bytes(), &response)
+	suite.NoError(err)
+
+	suite.Len(response, 1)
+	suite.False(response[0].Success)
+}
+
+func (suite *handlerTestSuite) TestCreatePhotos_ReturnsPartialErrorWhenS3Errors() {
+	mockS3Client := s3.MockS3Client{
+		DoesObjectExistResult: false,
+		DoesObjectExistError:  errors.New("Something went wrong"),
+	}
+	h := handler.New(suite.store, &mockS3Client)
+	router := testutils.NewRouter(suite.T(), h)
+
+	hikes := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)
+
+	body := [](map[string]any){
+		{
+			"objectKey":    s3.CreatePhotoObjectKey(hikes[0].ID),
+			"caption":      "Caption",
+			"displayOrder": 1,
+		},
+	}
+	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
+	res := testutils.SendRequest(router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos", hikes[0].ID), reqBody)
+
+	suite.Equal(http.StatusCreated, res.Code)
+
+	var response handler.CreatePhotosResponse
+	err := json.Unmarshal(res.Body.Bytes(), &response)
+	suite.NoError(err)
+
+	suite.Len(response, 1)
+	suite.False(response[0].Success)
+}
+
+func (suite *handlerTestSuite) TestCreatePhotos_ReturnsPartialErrorWhenDBErrors() {
+	hikes := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)
+
+	mockStore := store.MockStore{
+		GetHikeByIDResult: &hikes[0],
+		CreateRecordError: errors.New("Something went wrong"),
+	}
+	mockS3Client := s3.MockS3Client{DoesObjectExistResult: true}
+	h := handler.New(&mockStore, &mockS3Client)
+	router := testutils.NewRouter(suite.T(), h)
+
+	body := [](map[string]any){
+		{
+			"objectKey":    s3.CreatePhotoObjectKey(hikes[0].ID),
+			"caption":      "Caption",
+			"displayOrder": 1,
+		},
+	}
+	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
+	res := testutils.SendRequest(router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos", hikes[0].ID), reqBody)
+
+	suite.Equal(http.StatusCreated, res.Code)
+
+	var response handler.CreatePhotosResponse
+	err := json.Unmarshal(res.Body.Bytes(), &response)
+	suite.NoError(err)
+
+	suite.Len(response, 1)
+	suite.False(response[0].Success)
+}
+
+func (suite *handlerTestSuite) TestCreatePhotos_CreatesPhotos() {
+	hikes := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)
+
+	objectKey1 := s3.CreatePhotoObjectKey(hikes[0].ID)
+	_, err := suite.s3Client.PutObject(context.TODO(), objectKey1, strings.NewReader("content"), "image/png")
+	suite.NoError(err)
+
+	objectKey2 := s3.CreatePhotoObjectKey(hikes[0].ID)
+	_, err = suite.s3Client.PutObject(context.TODO(), objectKey2, strings.NewReader("content"), "image/jpeg")
+	suite.NoError(err)
+
+	body := [](map[string]any){
+		{
+			"objectKey":    objectKey1,
+			"caption":      "Caption 1",
+			"displayOrder": 1,
+		},
+		{
+			"objectKey":    objectKey2,
+			"caption":      "Caption 2",
+			"displayOrder": 2,
+		},
+	}
+	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
+	res := testutils.SendRequest(suite.router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos", hikes[0].ID), reqBody)
+
+	suite.Equal(http.StatusCreated, res.Code)
+
+	var response handler.CreatePhotosResponse
 	err = json.Unmarshal(res.Body.Bytes(), &response)
 	suite.NoError(err)
 
-	expected := models.Photo{
-		ID:           response.ID,
-		SrcUrl:       s3.CreatePhotoObjectURL(objectKey, "local"),
-		Caption:      "Caption",
-		DisplayOrder: 1,
-		HikeID:       hikes[0].ID,
-	}
-	suite.Equal(expected, response)
+	suite.Len(response, 2)
+	objectKeys := []string{objectKey1, objectKey2}
+	for idx, item := range response {
+		suite.True(item.Success)
+		suite.Empty(item.Error)
+		suite.NotEmpty(item.Result)
 
-	_, err = suite.s3Client.DeleteObject(context.TODO(), objectKey)
+		actual := item.Result
+		expected := models.Photo{
+			ID:           actual.ID,
+			SrcUrl:       s3.CreatePhotoObjectURL(objectKeys[idx], "local"),
+			Caption:      fmt.Sprintf("Caption %d", idx+1),
+			DisplayOrder: uint(idx + 1),
+			HikeID:       hikes[0].ID,
+		}
+		suite.Equal(expected, *actual)
+	}
+
+	_, err = suite.s3Client.DeleteObject(context.TODO(), objectKey1)
+	suite.NoError(err)
+
+	_, err = suite.s3Client.DeleteObject(context.TODO(), objectKey2)
 	suite.NoError(err)
 }
 
