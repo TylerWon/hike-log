@@ -2,7 +2,7 @@ import { describe, expect, test } from "vitest";
 import { render } from "vitest-browser-react";
 
 import HikeDetail from "../../components/HikeDetail";
-import { HIKE_FIXTURE_1 } from "../fixtures/hike";
+import { HIKE_FIXTURE_1 } from "../data/fixtures/hike";
 
 describe("HikeDetail", () => {
   test("displays hike details without photos when hike has no photos", async () => {

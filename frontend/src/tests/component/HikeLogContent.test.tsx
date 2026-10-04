@@ -4,7 +4,7 @@ import { render } from "vitest-browser-react";
 import HikeCard from "../../components/HikeCard";
 import HikeLogContent from "../../components/HikeLogContent";
 import { formatDistance, formatDuration, formatElevation } from "../../utils/formatters";
-import { HIKE_FIXTURE_1, HIKE_FIXTURE_2 } from "../fixtures/hike";
+import { HIKE_FIXTURE_1, HIKE_FIXTURE_2 } from "../data/fixtures/hike";
 
 describe("HikeLogContent", () => {
   test("displays title, stats overview, and body", async () => {

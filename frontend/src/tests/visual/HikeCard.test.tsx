@@ -2,7 +2,7 @@ import { describe, expect, test } from "vitest";
 import { render } from "vitest-browser-react";
 
 import HikeCard from "../../components/HikeCard";
-import { HIKE_FIXTURE_1 } from "../fixtures/hike";
+import { HIKE_FIXTURE_1 } from "../data/fixtures/hike";
 
 describe("HikeCard", () => {
   test("displays collapsed card", async () => {

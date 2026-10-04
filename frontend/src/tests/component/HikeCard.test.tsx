@@ -3,7 +3,7 @@ import { describe, expect, test } from "vitest";
 import { render, type RenderResult } from "vitest-browser-react";
 
 import HikeCard from "../../components/HikeCard";
-import { HIKE_FIXTURE_1 } from "../fixtures/hike";
+import { HIKE_FIXTURE_1 } from "../data/fixtures/hike";
 
 /**
  * Checks that the card displays an overview of the hike. If the card is expanded, also verifies that more details about

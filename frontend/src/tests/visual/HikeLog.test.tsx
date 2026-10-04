@@ -4,7 +4,7 @@ import { render } from "vitest-browser-react";
 
 import { fetchHikes } from "../../api/hikes";
 import HikeLog from "../../components/HikeLog";
-import { HIKE_FIXTURE_1, HIKE_FIXTURE_2 } from "../fixtures/hike";
+import { HIKE_FIXTURE_1, HIKE_FIXTURE_2 } from "../data/fixtures/hike";
 
 vi.mock(import("../../api/hikes"), async (importOriginal) => {
   const actual = await importOriginal();

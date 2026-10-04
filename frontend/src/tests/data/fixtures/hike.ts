@@ -1,4 +1,4 @@
-import type { Hike } from "../../schemas/models/hike";
+import type { Hike } from "../../../schemas/models/hike";
 
 import grouse_grind_1 from "../assets/images/grouse_grind_1.avif";
 import joffre_lakes_1 from "../assets/images/joffre_lakes_1.avif";
@@ -49,7 +49,7 @@ export const HIKE_FIXTURE_2: Hike = {
   distance: 5.6,
   duration: 58,
   elevationGain: 853,
-  id: 24,
+  id: 2,
   notes:
     "Finished in 58 minutes — a new PR. The trail itself is relentlessly steep with no real views until the top, but it's an excellent fitness benchmark. Busy on a Saturday afternoon. Took the gondola down.",
   photos: [

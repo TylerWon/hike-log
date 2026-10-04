@@ -3,7 +3,7 @@ import { render } from "vitest-browser-react";
 
 import HikeOverview from "../../components/HikeOverview";
 import { formatDate, formatDuration } from "../../utils/formatters";
-import { HIKE_FIXTURE_1 } from "../fixtures/hike";
+import { HIKE_FIXTURE_1 } from "../data/fixtures/hike";
 
 describe("HikeOverview", () => {
   test("displays hike information", async () => {

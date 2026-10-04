@@ -4,7 +4,7 @@ import { render, type RenderResult } from "vitest-browser-react";
 import type { Photo } from "../../schemas/models/photo";
 
 import PhotoGallery from "../../components/PhotoGallery";
-import { HIKE_FIXTURE_1 } from "../fixtures/hike";
+import { HIKE_FIXTURE_1 } from "../data/fixtures/hike";
 
 async function clickFirstPhotoInGallery(screen: RenderResult) {
   const firstPhotoButton = screen.getByRole("button", { name: "Photo 1 button" });
