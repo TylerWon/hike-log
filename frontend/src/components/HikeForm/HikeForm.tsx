@@ -92,7 +92,7 @@ export default function HikeForm({ onClose, setToastMessage }: HikeFormProps) {
   const handlePhotoError = (message: string) => {
     setToastMessage(message);
     onClose();
-  }
+  };
 
   const refetchHikes = async () => {
     // Invalidates the "hikes" query so all Hikes get refetched
@@ -131,7 +131,7 @@ export default function HikeForm({ onClose, setToastMessage }: HikeFormProps) {
       createPresignedUrlsResponse = await createPresignedUrls(hike.id, reqBody);
     } catch (e) {
       console.warn("Failed to create presigned URLs: ", e);
-      handlePhotoError("Photos could not be uploaded. Please try again.")
+      handlePhotoError("Photos could not be uploaded. Please try again.");
       return;
     }
 
@@ -150,7 +150,7 @@ export default function HikeForm({ onClose, setToastMessage }: HikeFormProps) {
       s3UploadResponses = await Promise.allSettled(promises);
     } catch (e) {
       console.warn("Failed to upload photos to S3: ", e);
-      handlePhotoError("Photos could not be uploaded. Please try again.")
+      handlePhotoError("Photos could not be uploaded. Please try again.");
       return;
     }
 
@@ -160,9 +160,9 @@ export default function HikeForm({ onClose, setToastMessage }: HikeFormProps) {
       for (let i = 0; i < photos.length; i++) {
         const createPresignedUrlResponse = createPresignedUrlsResponse[i];
         if (!createPresignedUrlResponse.success) {
-          continue
+          continue;
         }
-        
+
         const s3UploadResponse = s3UploadResponses[i];
         if (s3UploadResponse.status == "fulfilled") {
           const reqItem = {
@@ -179,7 +179,7 @@ export default function HikeForm({ onClose, setToastMessage }: HikeFormProps) {
       createPhotosResponse = await createPhotos(hike.id, reqBody);
     } catch (e) {
       console.warn("Failed to create photos: ", e);
-      handlePhotoError("Photos could not be uploaded. Please try again.")
+      handlePhotoError("Photos could not be uploaded. Please try again.");
       return;
     }
 
@@ -191,7 +191,7 @@ export default function HikeForm({ onClose, setToastMessage }: HikeFormProps) {
 
     if (photoErrors.length > 0) {
       console.warn(photoErrors);
-      handlePhotoError("Some photos could not be uploaded. Please try again.")
+      handlePhotoError("Some photos could not be uploaded. Please try again.");
       return;
     }
 

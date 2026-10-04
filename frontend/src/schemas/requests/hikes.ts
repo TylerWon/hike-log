@@ -11,6 +11,7 @@ const CreatePhotosRequestItemSchema = PhotoSchema.omit({ hikeId: true, id: true,
   index: z.int().gte(0),
   objectKey: z.string(),
 });
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const CreatePhotosRequestSchema = z.array(CreatePhotosRequestItemSchema);
 export type CreatePhotosRequest = z.infer<typeof CreatePhotosRequestSchema>;
 

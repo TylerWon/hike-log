@@ -1,4 +1,5 @@
 import * as z from "zod";
+
 import { PhotoSchema } from "../models/photo";
 
 const CreatePhotosResponseItemSchema = z.discriminatedUnion("success", [

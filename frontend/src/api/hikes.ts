@@ -1,7 +1,16 @@
-import type { CreateHikeRequest, CreatePhotosRequest as CreatePhotosRequest, CreatePresignedUrlsRequest } from "../schemas/requests/hikes";
+import type {
+  CreateHikeRequest,
+  CreatePhotosRequest as CreatePhotosRequest,
+  CreatePresignedUrlsRequest,
+} from "../schemas/requests/hikes";
 
 import { type Hike, HikeListSchema, HikeSchema } from "../schemas/models/hike";
-import { type CreatePhotosResponse, CreatePhotosResponseSchema, type CreatePresignedUrlsResponse, CreatePresignedUrlsResponseSchema } from "../schemas/responses/hikes";
+import {
+  type CreatePhotosResponse,
+  CreatePhotosResponseSchema,
+  type CreatePresignedUrlsResponse,
+  CreatePresignedUrlsResponseSchema,
+} from "../schemas/responses/hikes";
 
 const API_URL = `${import.meta.env.VITE_API_URL}/hikes`;
 

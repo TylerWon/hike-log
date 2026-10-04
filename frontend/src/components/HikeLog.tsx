@@ -95,10 +95,8 @@ export default function HikeLog() {
           </button>
         </li>
       </HikeLogContent>
-      {showHikeForm && (
-        <HikeForm onClose={() => setShowHikeForm(false)} setToastMessage={setToastMessage} />
-      )}
-      {toastMessage && <Toast message={toastMessage} onDismiss={() => setToastMessage(null)}/>}
+      {showHikeForm && <HikeForm onClose={() => setShowHikeForm(false)} setToastMessage={setToastMessage} />}
+      {toastMessage && <Toast message={toastMessage} onDismiss={() => setToastMessage(null)} />}
     </>
   );
 }
