@@ -6,9 +6,13 @@ import { fetchHikes } from "../../api/hikes";
 import HikeLog from "../../components/HikeLog";
 import { HIKE_FIXTURE_1, HIKE_FIXTURE_2 } from "../fixtures/hike";
 
-vi.mock(import("../../api/hikes"), () => ({
-  fetchHikes: vi.fn(),
-}));
+vi.mock(import("../../api/hikes"), async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    fetchHikes: vi.fn(),
+  };
+});
 
 /**
  * Wraps HikeLog with TanStack Query client for testing.
