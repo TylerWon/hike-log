@@ -90,13 +90,13 @@ describe("hikes", () => {
         caption: "",
         displayOrder: 1,
         index: 0,
-        objectKey: "1", // invalid objectKey but OK for testing
+        objectKey: "hikes/1/photos/dbcf4c30-b23b-4fa4-b350-2620a50f0736",
       },
       {
         caption: "Viewpoint photo",
         displayOrder: 2,
         index: 1,
-        objectKey: "2", // invalid objectKey but OK for testing
+        objectKey: "hikes/1/photos/e78f95c0-0bac-4071-afce-c0305ed2a7e1",
       },
     ];
 

@@ -25,18 +25,16 @@ export const CREATE_PRESIGNED_URLS_API_RESPONSE: CreatePresignedUrlsResponse = [
   {
     index: 0,
     result: {
-      // invalid values but OK for testing
-      objectKey: "1",
-      presignedUrl: "https://www.test-url.com/1",
+      objectKey: "hikes/1/photos/dbcf4c30-b23b-4fa4-b350-2620a50f0736",
+      presignedUrl: "https://hike-log.s3.us-east-1.amazonaws.com/hikes/1/photos/dbcf4c30-b23b-4fa4-b350-2620a50f0736?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIOSFODNN7EXAMPLE%2F20261005%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20261005T042400Z&X-Amz-Expires=900&X-Amz-SignedHeaders=content-length%3Bcontent-type%3Bhost&x-id=PutObject&X-Amz-Signature=<64-char-hex>",
     },
     success: true,
   },
   {
     index: 1,
     result: {
-      // invalid values but OK for testing
-      objectKey: "2",
-      presignedUrl: "https://www.test-url.com/2",
+      objectKey: "hikes/1/photos/e78f95c0-0bac-4071-afce-c0305ed2a7e1",
+      presignedUrl: "https://hike-log.s3.us-east-1.amazonaws.com/hikes/1/photos/e78f95c0-0bac-4071-afce-c0305ed2a7e1?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIOSFODNN7EXAMPLE%2F20261005%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20261005T042400Z&X-Amz-Expires=900&X-Amz-SignedHeaders=content-length%3Bcontent-type%3Bhost&x-id=PutObject&X-Amz-Signature=<64-char-hex>",
     },
     success: true,
   },
