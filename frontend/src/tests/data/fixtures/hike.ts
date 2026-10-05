@@ -1,9 +1,9 @@
 import type { Hike } from "../../../schemas/models/hike";
 
-import grouse_grind_1 from "../assets/images/grouse_grind_1.avif";
-import joffre_lakes_1 from "../assets/images/joffre_lakes_1.avif";
-import joffre_lakes_2 from "../assets/images/joffre_lakes_2.avif";
-import joffre_lakes_3 from "../assets/images/joffre_lakes_3.avif";
+import grouse_grind_1 from "../../assets/images/grouse_grind_1.avif";
+import joffre_lakes_1 from "../../assets/images/joffre_lakes_1.avif";
+import joffre_lakes_2 from "../../assets/images/joffre_lakes_2.avif";
+import joffre_lakes_3 from "../../assets/images/joffre_lakes_3.avif";
 
 export const HIKE_FIXTURE_1: Hike = {
   allTrailsUrl: "https://www.alltrails.com/trail/canada/british-columbia/joffre-lakes",

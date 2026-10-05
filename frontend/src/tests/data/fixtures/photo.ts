@@ -1,7 +1,7 @@
 import type { Photo } from "../../../schemas/models/photo";
 
-import photo1 from "../assets/images/joffre_lakes_1.avif";
-import photo2 from "../assets/images/joffre_lakes_2.avif";
+import photo1 from "../../assets/images/joffre_lakes_1.avif";
+import photo2 from "../../assets/images/joffre_lakes_2.avif";
 
 export const PHOTO_FIXTURE_1: Photo = {
   caption: "Joffre Lakes 1",
