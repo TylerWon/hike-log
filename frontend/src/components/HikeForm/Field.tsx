@@ -7,7 +7,7 @@ interface FieldProps {
 
 export default function Field({ children, error, label, required }: FieldProps) {
   return (
-    <div className="w-full">
+    <div aria-label={label ? `${label} field` : "Unnamed field"} className="w-full" role="group">
       {label && (
         <label className="font-mono block text-[10px] uppercase tracking-widest text-forest-700 mb-1.5">
           {label}
