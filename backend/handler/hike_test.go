@@ -472,7 +472,7 @@ func (suite *handlerTestSuite) TestCreatePresignedURLs_ReturnsPartialErrorWhenS3
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
 	res := testutils.SendRequest(router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos/presigned-urls", hikes[0].ID), reqBody)
 
-	suite.Equal(http.StatusOK, res.Code)
+	suite.Equal(http.StatusCreated, res.Code)
 
 	var response handler.CreatePresignedURLsResponse
 	err := json.Unmarshal(res.Body.Bytes(), &response)
@@ -505,7 +505,7 @@ func (suite *handlerTestSuite) TestCreatePresignedURLs_ReturnsPresignedURLs() {
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
 	res := testutils.SendRequest(suite.router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos/presigned-urls", hikes[0].ID), reqBody)
 
-	suite.Equal(http.StatusOK, res.Code)
+	suite.Equal(http.StatusCreated, res.Code)
 
 	var response handler.CreatePresignedURLsResponse
 	err := json.Unmarshal(res.Body.Bytes(), &response)

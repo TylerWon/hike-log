@@ -63,7 +63,7 @@ export async function createPhotos(hikeId: number, reqBody: CreatePhotosRequest)
 }
 
 // Creates S3 presigned URLs to upload a photos for a Hike.
-// Throws an error if the response is not 200 or cannot be parsed.
+// Throws an error if the response is not 201 or cannot be parsed.
 export async function createPresignedUrls(
   hikeId: number,
   reqBody: CreatePresignedUrlsRequest,
@@ -76,7 +76,7 @@ export async function createPresignedUrls(
     method: "POST",
   });
 
-  if (response.status !== 200) {
+  if (response.status !== 201) {
     throw new Error(`Failed to create presigned URLs: ${response.status} - ${response.statusText}`);
   }
 

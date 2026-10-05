@@ -153,7 +153,7 @@ Path parameters: [hikeIDPathParam]
 Request body: [createPresignedURLsRequest]
 
 Returns:
- 1. 200 OK and [CreatePresignedURLsResponse] when successful
+ 1. 201 Created and [CreatePresignedURLsResponse] when successful
  2. 400 Bad Request and an error message when input is bad
  3. 404 Not Found and an error message when the Hike does not exist
  4. 500 Internal Server Error and an error message when there is an unexpected error
@@ -207,7 +207,7 @@ func (h *Handler) CreatePresignedURLs(c *gin.Context) {
 		res = append(res, item)
 	}
 
-	c.JSON(http.StatusOK, res)
+	c.JSON(http.StatusCreated, res)
 }
 
 /*
