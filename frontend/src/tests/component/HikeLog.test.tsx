@@ -7,7 +7,7 @@ import type { Hike } from "../../schemas/models/hike";
 import { fetchHikes } from "../../api/hikes";
 import HikeLog from "../../components/HikeLog";
 import { formatDistance, formatDuration, formatElevation } from "../../utils/formatters";
-import { HIKE_FIXTURE_1, HIKE_FIXTURE_2 } from "../data/fixtures/hike";
+import { HIKE_MOCK_1, HIKE_MOCK_2 } from "../mocks/models/hike";
 
 vi.mock(import("../../api/hikes"), async (importOriginal) => {
   const actual = await importOriginal();
@@ -80,7 +80,7 @@ describe("HikeLog", () => {
   });
 
   test("displays title, overall stats, and hike cards when hikes are loaded", async () => {
-    const hikes = [HIKE_FIXTURE_1, HIKE_FIXTURE_2];
+    const hikes = [HIKE_MOCK_1, HIKE_MOCK_2];
     vi.mocked(fetchHikes).mockResolvedValue(hikes);
 
     const screen = await renderHikeLog();

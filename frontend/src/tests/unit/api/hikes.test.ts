@@ -10,12 +10,12 @@ import type {
 
 import { createHike, createPhotos, createPresignedUrls, fetchHikes } from "../../../api/hikes";
 import {
-  CREATE_HIKE_API_RESPONSE,
-  CREATE_PHOTOS_API_RESPONSE,
-  CREATE_PRESIGNED_URLS_API_RESPONSE,
-  LIST_HIKES_API_RESPONSE,
-} from "../../data/api-responses/hikes";
-import { HIKE_FIXTURE_1, HIKE_FIXTURE_2 } from "../../data/fixtures/hike";
+  CREATE_HIKE_RESPONSE_MOCK,
+  CREATE_PHOTOS_RESPONSE_MOCK,
+  CREATE_PRESIGNED_URLS_RESPONSE_MOCK,
+  LIST_HIKES_RESPONSE_MOCK,
+} from "../../mocks/api-responses/hikes";
+import { HIKE_MOCK_1, HIKE_MOCK_2 } from "../../mocks/models/hike";
 
 const API_URL = `${import.meta.env.VITE_API_URL}/hikes`;
 
@@ -47,12 +47,12 @@ describe("hikes", () => {
 
     test("returns the newly created hike when successful", async () => {
       const handler = http.post(API_URL, () => {
-        return HttpResponse.json(CREATE_HIKE_API_RESPONSE, { status: 201 });
+        return HttpResponse.json(CREATE_HIKE_RESPONSE_MOCK, { status: 201 });
       });
       server.use(handler);
 
       const hike = await createHike(reqBody);
-      expect(hike).toEqual(CREATE_HIKE_API_RESPONSE);
+      expect(hike).toEqual(CREATE_HIKE_RESPONSE_MOCK);
     });
 
     test("throws an error when the response is not 201", async () => {
@@ -102,12 +102,12 @@ describe("hikes", () => {
 
     test("returns newly created photos when successful", async () => {
       const handler = http.post(`${API_URL}/${hikeId}/photos`, () => {
-        return HttpResponse.json(CREATE_PHOTOS_API_RESPONSE, { status: 201 });
+        return HttpResponse.json(CREATE_PHOTOS_RESPONSE_MOCK, { status: 201 });
       });
       server.use(handler);
 
       const photos = await createPhotos(hikeId, reqBody);
-      expect(photos).toEqual(CREATE_PHOTOS_API_RESPONSE);
+      expect(photos).toEqual(CREATE_PHOTOS_RESPONSE_MOCK);
     });
 
     test("throws an error when the response is not 201", async () => {
@@ -155,12 +155,12 @@ describe("hikes", () => {
 
     test("returns newly created presigned URLs when successful", async () => {
       const handler = http.post(`${API_URL}/${hikeId}/photos/presigned-urls`, () => {
-        return HttpResponse.json(CREATE_PRESIGNED_URLS_API_RESPONSE, { status: 201 });
+        return HttpResponse.json(CREATE_PRESIGNED_URLS_RESPONSE_MOCK, { status: 201 });
       });
       server.use(handler);
 
       const presignedUrls = await createPresignedUrls(hikeId, reqBody);
-      expect(presignedUrls).toEqual(CREATE_PRESIGNED_URLS_API_RESPONSE);
+      expect(presignedUrls).toEqual(CREATE_PRESIGNED_URLS_RESPONSE_MOCK);
     });
 
     test("throws an error when the response is not 201", async () => {
@@ -204,13 +204,13 @@ describe("hikes", () => {
 
     test("returns hikes when there are hikes", async () => {
       const handler = http.get(API_URL, () => {
-        return HttpResponse.json(LIST_HIKES_API_RESPONSE);
+        return HttpResponse.json(LIST_HIKES_RESPONSE_MOCK);
       });
       server.use(handler);
 
       const hikes = await fetchHikes();
       expect(hikes.length).toEqual(2);
-      expect(hikes).toEqual([HIKE_FIXTURE_1, HIKE_FIXTURE_2]);
+      expect(hikes).toEqual([HIKE_MOCK_1, HIKE_MOCK_2]);
     });
 
     test("throws an error when the response is not 200", async () => {

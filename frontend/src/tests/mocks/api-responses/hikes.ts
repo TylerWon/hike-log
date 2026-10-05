@@ -1,27 +1,27 @@
 import type { Hike } from "../../../schemas/models/hike";
 import type { CreatePhotosResponse, CreatePresignedUrlsResponse } from "../../../schemas/responses/hikes";
 
-import { HIKE_FIXTURE_1, HIKE_FIXTURE_2 } from "../fixtures/hike";
-import { PHOTO_FIXTURE_1, PHOTO_FIXTURE_2 } from "../fixtures/photo";
+import { HIKE_MOCK_1, HIKE_MOCK_2 } from "../models/hike";
+import { PHOTO_MOCK_1, PHOTO_MOCK_2 } from "../models/photo";
 
-export const LIST_HIKES_API_RESPONSE: Hike[] = [HIKE_FIXTURE_1, HIKE_FIXTURE_2];
+export const LIST_HIKES_RESPONSE_MOCK: Hike[] = [HIKE_MOCK_1, HIKE_MOCK_2];
 
-export const CREATE_HIKE_API_RESPONSE: Hike = HIKE_FIXTURE_1;
+export const CREATE_HIKE_RESPONSE_MOCK: Hike = HIKE_MOCK_1;
 
-export const CREATE_PHOTOS_API_RESPONSE: CreatePhotosResponse = [
+export const CREATE_PHOTOS_RESPONSE_MOCK: CreatePhotosResponse = [
   {
     index: 0,
-    result: PHOTO_FIXTURE_1,
+    result: PHOTO_MOCK_1,
     success: true,
   },
   {
     index: 1,
-    result: PHOTO_FIXTURE_2,
+    result: PHOTO_MOCK_2,
     success: true,
   },
 ];
 
-export const CREATE_PRESIGNED_URLS_API_RESPONSE: CreatePresignedUrlsResponse = [
+export const CREATE_PRESIGNED_URLS_RESPONSE_MOCK: CreatePresignedUrlsResponse = [
   {
     index: 0,
     result: {

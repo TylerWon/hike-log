@@ -5,7 +5,7 @@ import joffre_lakes_1 from "../../assets/images/joffre_lakes_1.avif";
 import joffre_lakes_2 from "../../assets/images/joffre_lakes_2.avif";
 import joffre_lakes_3 from "../../assets/images/joffre_lakes_3.avif";
 
-export const HIKE_FIXTURE_1: Hike = {
+export const HIKE_MOCK_1: Hike = {
   allTrailsUrl: "https://www.alltrails.com/trail/canada/british-columbia/joffre-lakes",
   date: "2026-05-17",
   difficulty: 5.5,
@@ -42,7 +42,7 @@ export const HIKE_FIXTURE_1: Hike = {
   trailName: "Joffre Lakes",
 };
 
-export const HIKE_FIXTURE_2: Hike = {
+export const HIKE_MOCK_2: Hike = {
   allTrailsUrl: "https://www.alltrails.com/trail/canada/british-columbia/grouse-grind",
   date: "2025-08-02",
   difficulty: 7,

@@ -4,7 +4,7 @@ import { render } from "vitest-browser-react";
 
 import { fetchHikes } from "../../api/hikes";
 import HikeLog from "../../components/HikeLog";
-import { HIKE_FIXTURE_1, HIKE_FIXTURE_2 } from "../data/fixtures/hike";
+import { HIKE_MOCK_1, HIKE_MOCK_2 } from "../mocks/models/hike";
 
 vi.mock(import("../../api/hikes"), async (importOriginal) => {
   const actual = await importOriginal();
@@ -53,12 +53,12 @@ describe("HikeLog", () => {
   });
 
   test("displays hikes when hikes are loaded", async () => {
-    const hikes = [HIKE_FIXTURE_1, HIKE_FIXTURE_2];
+    const hikes = [HIKE_MOCK_1, HIKE_MOCK_2];
     vi.mocked(fetchHikes).mockResolvedValue(hikes);
 
     const screen = await renderHikeLog();
 
-    const card = screen.getByRole("region", { name: `${HIKE_FIXTURE_1.trailName} card` });
+    const card = screen.getByRole("region", { name: `${HIKE_MOCK_1.trailName} card` });
     await expect.element(card).toBeInTheDocument();
 
     await expect(screen.container).toMatchScreenshot();
