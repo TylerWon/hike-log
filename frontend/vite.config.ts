@@ -18,10 +18,6 @@ export default defineConfig({
   test: {
     // Vitest Projects. Projects allow tests to run in different environments. Each folder listed will be treated as
     // their own Project and have their own configuration file.
-    projects: ["src/tests/component", "src/tests/unit", "src/tests/visual"],
-
-    // Vitest settings that apply to all projects
-    restoreMocks: true,
-    unstubGlobals: true,
+    projects: ["src/tests/component", "src/tests/unit-browser", "src/tests/unit-node", "src/tests/visual"],
   },
 });

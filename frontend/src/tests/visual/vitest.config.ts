@@ -1,7 +1,7 @@
-import { defineBrowserModeProject } from "../configs/browser-mode-config";
+import { defineBrowserModeTestConfig } from "../configs/browser-mode-config";
 
 // Visual test configuration
-export default defineBrowserModeProject({
+export default defineBrowserModeTestConfig({
   browser: {
     expect: {
       toMatchScreenshot: {

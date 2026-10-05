@@ -1,6 +1,6 @@
-import { defineBrowserModeProject } from "../configs/browser-mode-config";
+import { defineBrowserModeTestConfig } from "../configs/browser-mode-config";
 
 // Component test configuration
-export default defineBrowserModeProject({
+export default defineBrowserModeTestConfig({
   name: "Component Tests",
 });
