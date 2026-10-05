@@ -1,12 +1,12 @@
 import { useEffect } from "react";
 
 interface ToastProps {
-  duration?: number; // ms, default 5000
+  durationMs?: number;
   message: string;
   onDismiss: () => void;
 }
 
-export default function Toast({ duration = 10000, message, onDismiss }: ToastProps) {
+export default function Toast({ durationMs: duration = 10000, message, onDismiss }: ToastProps) {
   useEffect(() => {
     const timer = setTimeout(onDismiss, duration);
     return () => clearTimeout(timer);
@@ -14,6 +14,7 @@ export default function Toast({ duration = 10000, message, onDismiss }: ToastPro
 
   return (
     <div
+      aria-label="Toast"
       aria-live="polite"
       className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-4 py-3 rounded-lg border border-amber-700 bg-amber-950 shadow-lg min-w-[280px] max-w-[420px]"
       role="status"
