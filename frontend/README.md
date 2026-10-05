@@ -14,14 +14,12 @@ Since the application runs in a container, it is easiest to install/uninstall th
 To lint all code: `npm run lint`
 To format all code: `npm run format`
 
-It is recommended to install the [ESLint](https://marketplace.cursorapi.com/items/?itemName=dbaeumer.vscode-eslint) and
-[Prettier](https://marketplace.cursorapi.com/items/?itemName=esbenp.prettier-vscode) extensions for your code editor to
-automate these actions.
+Install the [ESLint](https://marketplace.cursorapi.com/items/?itemName=dbaeumer.vscode-eslint) and [Prettier](https://marketplace.cursorapi.com/items/?itemName=esbenp.prettier-vscode) extensions to lint and format automatically when a file is saved. These settings can be adjusted in `.vscode/settings.json`.
 
 ## Testing
 
 There are three kinds of tests for the frontend: unit, component, and visual.
-- Unit tests: Test the functionality of a block of code.
+- Unit tests: Test the functionality of a block of code. Some run in a browser environment (`unit-browser`) while others in node (`unit-node`).
 - Component tests: Test the functionality of a React component.
 - Visual tests: Check for visual regressions in a React component by comparing a new screenshot of the component with an 
 existing screenshot.
