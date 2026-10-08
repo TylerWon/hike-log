@@ -3,7 +3,7 @@ import { describe, expect, test, vi } from "vitest";
 import { render } from "vitest-browser-react";
 
 import { fetchHikes } from "../../api/hikes";
-import HikeLog from "../../components/HikeLog";
+import HikeLog from "../../components/HikeLog/HikeLog";
 import { HIKE_MOCK_1, HIKE_MOCK_2 } from "../mocks/models/hike";
 
 vi.mock(import("../../api/hikes"), async (importOriginal) => {

@@ -1,6 +1,6 @@
 import type { $ZodErrorTree } from "zod/v4/core";
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 
 import "./hike-form.css";
@@ -8,21 +8,17 @@ import * as z from "zod";
 
 import type { PhotoData } from "./types";
 
-import { createHike, createPhotos, createPresignedUrls } from "../../api/hikes";
-import { uploadFile } from "../../api/s3";
 import { type HikeFormData, HikeFormDataSchema } from "../../schemas/forms/hike";
-import { HIKES_QUERY_KEY } from "../HikeLog";
 import Field from "./Field";
 import PhotoField from "./PhotoField";
 
 interface HikeFormProps {
   onClose: () => void;
-  setToastMessage: (message: string) => void;
+  onSubmit: (formData: HikeFormData) => Promise<void>;
+  onSuccess: () => Promise<void>;
 }
 
-export default function HikeForm({ onClose, setToastMessage }: HikeFormProps) {
-  const queryClient = useQueryClient();
-
+export default function HikeForm({ onClose, onSubmit, onSuccess }: HikeFormProps) {
   const [trailName, setTrailName] = useState<string>("");
   const [date, setDate] = useState<string>("");
   const [rating, setRating] = useState<string>("");
@@ -89,119 +85,10 @@ export default function HikeForm({ onClose, setToastMessage }: HikeFormProps) {
     onClose();
   };
 
-  const handlePhotoError = (message: string) => {
-    setToastMessage(message);
-    onClose();
-  };
-
-  const refetchHikes = async () => {
-    // Invalidates the "hikes" query so all Hikes get refetched
-    await queryClient.invalidateQueries({ queryKey: [HIKES_QUERY_KEY] });
-  };
-
-  const addHike = async (formData: HikeFormData) => {
-    const { photos, ...hikeData } = formData;
-
-    let hike;
-    try {
-      hike = await createHike(hikeData);
-    } catch (e) {
-      // Hike must be created so fail-close
-      throw new Error(`Failed to create hike: ${e}`, { cause: e });
-    }
-
-    if (photos.length < 1) {
-      onClose();
-      return;
-    }
-
-    const photoErrors = [];
-    let createPresignedUrlsResponse;
-    try {
-      const reqBody = [];
-      for (let i = 0; i < photos.length; i++) {
-        const photo = photos[i];
-        const reqItem = {
-          contentLength: photo.file.size,
-          contentType: photo.file.type,
-          index: i,
-        };
-        reqBody.push(reqItem);
-      }
-      createPresignedUrlsResponse = await createPresignedUrls(hike.id, reqBody);
-    } catch (e) {
-      console.warn("Failed to create presigned URLs: ", e);
-      handlePhotoError("Photos could not be uploaded. Please try again.");
-      return;
-    }
-
-    let s3UploadResponses;
-    try {
-      const promises = [];
-      for (let i = 0; i < photos.length; i++) {
-        const createPresignedUrlResponse = createPresignedUrlsResponse[i];
-        if (createPresignedUrlResponse.success) {
-          promises.push(uploadFile(createPresignedUrlResponse.result.presignedUrl, photos[i].file));
-        } else {
-          photoErrors.push(`Failed to create presigned URL for photo ${i}`);
-          promises.push(Promise.reject());
-        }
-      }
-      s3UploadResponses = await Promise.allSettled(promises);
-    } catch (e) {
-      console.warn("Failed to upload photos to S3: ", e);
-      handlePhotoError("Photos could not be uploaded. Please try again.");
-      return;
-    }
-
-    let createPhotosResponse;
-    try {
-      const reqBody = [];
-      for (let i = 0; i < photos.length; i++) {
-        const createPresignedUrlResponse = createPresignedUrlsResponse[i];
-        if (!createPresignedUrlResponse.success) {
-          continue;
-        }
-
-        const s3UploadResponse = s3UploadResponses[i];
-        if (s3UploadResponse.status == "fulfilled") {
-          const reqItem = {
-            caption: photos[i].caption,
-            displayOrder: photos[i].displayOrder,
-            index: i,
-            objectKey: createPresignedUrlResponse.result.objectKey,
-          };
-          reqBody.push(reqItem);
-        } else {
-          photoErrors.push(`Failed to upload photo ${i} to S3`);
-        }
-      }
-      createPhotosResponse = await createPhotos(hike.id, reqBody);
-    } catch (e) {
-      console.warn("Failed to create photos: ", e);
-      handlePhotoError("Photos could not be uploaded. Please try again.");
-      return;
-    }
-
-    for (const createPhotoResponse of createPhotosResponse) {
-      if (!createPhotoResponse.success) {
-        photoErrors.push(`Failed to create Photo model for photo ${createPhotoResponse.index}`);
-      }
-    }
-
-    if (photoErrors.length > 0) {
-      console.warn(photoErrors);
-      handlePhotoError("Some photos could not be uploaded. Please try again.");
-      return;
-    }
-
-    onClose();
-  };
-
   const addHikeMutation = useMutation({
-    mutationFn: addHike, // called when mutate() is invoked for this mutation
-    onError: (error) => console.error("addHikeMutation failed: ", error),
-    onSuccess: refetchHikes,
+    mutationFn: onSubmit, // called when mutate() is invoked for this mutation
+    onError: (error) => console.error("Failed to submit HikeForm: ", error),
+    onSuccess: onSuccess,
   });
 
   const submissionPending = addHikeMutation.isPending;
@@ -222,7 +109,7 @@ export default function HikeForm({ onClose, setToastMessage }: HikeFormProps) {
         <div className="flex items-center justify-between px-5 py-4 border-b border-forest-800 bg-forest-900 sticky top-0 z-10">
           <h2 className="font-serif text-lg font-semibold text-cream-100">Add hike</h2>
           <button
-            aria-label="Cancel"
+            aria-label="Close"
             className="text-forest-700 hover:text-forest-600 transition-colors p-1 focus:outline-none"
             onClick={handleCancel}
           >

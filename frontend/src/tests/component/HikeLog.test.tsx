@@ -5,7 +5,7 @@ import { render, type RenderResult } from "vitest-browser-react";
 import type { Hike } from "../../schemas/models/hike";
 
 import { fetchHikes } from "../../api/hikes";
-import HikeLog from "../../components/HikeLog";
+import HikeLog from "../../components/HikeLog/HikeLog";
 import { formatDistance, formatDuration, formatElevation } from "../../utils/formatters";
 import { HIKE_MOCK_1, HIKE_MOCK_2 } from "../mocks/models/hike";
 
