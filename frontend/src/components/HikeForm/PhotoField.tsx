@@ -1,17 +1,9 @@
-import type { $ZodErrorTree } from "zod/v4/core";
-
 import { useRef } from "react";
 
-import type { PhotoFormData } from "../../schemas/forms/photo";
-import type { PhotoData } from "./types";
+import type { PhotoData, PhotoErrors } from "./types";
 
 import { readFileAsDataUrl } from "../../utils/file";
 import Field from "./Field";
-
-interface PhotoErrors {
-  errors: string[];
-  items?: $ZodErrorTree<PhotoFormData>[];
-}
 
 interface PhotoFieldProps {
   errors?: PhotoErrors; // Errors should be in the same order as Photos
@@ -71,11 +63,12 @@ export default function PhotoField({ errors, photos, setPhotos }: PhotoFieldProp
   };
 
   return (
-    <div className="border-t border-forest-800 pt-4">
+    <div aria-label="Photo field" className="border-t border-forest-800 pt-4" role="group">
       <div className="mb-3">
         <p className="font-mono text-[10px] uppercase tracking-widest text-forest-700">Photos</p>
         <input
           accept="image/*"
+          aria-label="Hidden file input"
           className="hidden"
           multiple
           name="Photos"
@@ -86,6 +79,7 @@ export default function PhotoField({ errors, photos, setPhotos }: PhotoFieldProp
       </div>
       {photos.length === 0 ? (
         <button
+          aria-label="Upload photos"
           className="w-full border border-dashed border-forest-800 rounded-lg py-8 flex flex-col items-center gap-2 text-forest-700 hover:border-forest-700 hover:text-forest-600 transition-colors focus:outline-none"
           onClick={openFileSelectDialog}
           type="button"
@@ -117,12 +111,17 @@ export default function PhotoField({ errors, photos, setPhotos }: PhotoFieldProp
                 />
               </div>
 
-              <Field error={errors?.items?.[idx]?.properties?.file?.errors?.[0]}>
+              <Field
+                ariaLabel={`Caption field ${idx + 1}`}
+                error={errors?.items?.[idx]?.properties?.file?.errors?.[0]}
+                label="Caption"
+              >
                 <input
+                  aria-label={`Caption input ${idx + 1}`}
                   className="hike-form-field py-1.5 text-xs"
                   name="Caption"
                   onChange={(e) => updateCaption(idx, e.target.value)}
-                  placeholder="Caption (optional)"
+                  placeholder="A beautiful day in..."
                   type="text"
                   value={photo.caption}
                 />
@@ -130,7 +129,7 @@ export default function PhotoField({ errors, photos, setPhotos }: PhotoFieldProp
 
               <div className="flex flex-col items-center gap-1 shrink-0">
                 <button
-                  aria-label="Remove photo"
+                  aria-label={`Remove photo ${idx + 1}`}
                   className="p-1 text-forest-700 hover:text-coral-500 transition-colors focus:outline-none"
                   onClick={() => removePhoto(idx)}
                   type="button"
@@ -148,7 +147,7 @@ export default function PhotoField({ errors, photos, setPhotos }: PhotoFieldProp
                   </svg>
                 </button>
                 <button
-                  aria-label="Move up"
+                  aria-label={`Move up photo ${idx + 1}`}
                   className="p-1 text-forest-700 hover:text-forest-600 transition-colors disabled:opacity-25 focus:outline-none"
                   disabled={idx === 0}
                   onClick={() => movePhoto(idx, -1)}
@@ -168,7 +167,7 @@ export default function PhotoField({ errors, photos, setPhotos }: PhotoFieldProp
                   </svg>
                 </button>
                 <button
-                  aria-label="Move down"
+                  aria-label={`Move down photo ${idx + 1}`}
                   className="p-1 text-forest-700 hover:text-forest-600 transition-colors disabled:opacity-25 focus:outline-none"
                   disabled={idx === photos.length - 1}
                   onClick={() => movePhoto(idx, 1)}
@@ -192,6 +191,7 @@ export default function PhotoField({ errors, photos, setPhotos }: PhotoFieldProp
           ))}
 
           <button
+            aria-label="Add more photos"
             className="font-mono w-full border border-dashed border-forest-800 rounded py-2.5 text-xs text-forest-700 hover:border-forest-700 hover:text-forest-600 transition-colors focus:outline-none flex items-center justify-center gap-1.5"
             onClick={openFileSelectDialog}
             type="button"
