@@ -14,7 +14,7 @@ describe("HikeLogError", () => {
     await expect.element(refreshButton).toBeInTheDocument();
   });
 
-  test("refreshes page when try again button is clicked", async () => {
+  test("invokes onRetry callback when try again button is clicked", async () => {
     const onRetryMock = vi.fn();
     const screen = await render(<HikeLogError onRetry={onRetryMock} />);
 
