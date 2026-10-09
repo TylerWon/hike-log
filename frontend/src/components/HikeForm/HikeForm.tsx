@@ -12,7 +12,7 @@ import { type HikeFormData, HikeFormDataSchema } from "../../schemas/forms/hike"
 import Field from "./Field";
 import PhotoField from "./PhotoField";
 
-interface HikeFormProps {
+export interface HikeFormProps {
   onClose: () => void;
   onSubmit: (formData: HikeFormData) => Promise<void>;
   onSuccess: () => Promise<void>;
@@ -33,7 +33,7 @@ export default function HikeForm({ onClose, onSubmit, onSuccess }: HikeFormProps
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     // target = element that was actually clicked
-    // currentTarget = element with the handler (i.e. backdrop)
+    // currentTarget = element that is assigned this handler
     if (e.target === e.currentTarget) {
       onClose();
     }
@@ -96,11 +96,13 @@ export default function HikeForm({ onClose, onSubmit, onSuccess }: HikeFormProps
 
   return (
     <div
+      aria-label="Hike form backdrop"
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-forest-950"
       onClick={(e) => handleBackdropClick(e)}
+      role="region"
     >
       <div
-        aria-label="Add hike"
+        aria-label="Hike form"
         aria-modal="true"
         className="w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-lg border border-forest-800 bg-forest-900 scrollbar-thin"
         role="dialog"
@@ -130,11 +132,11 @@ export default function HikeForm({ onClose, onSubmit, onSuccess }: HikeFormProps
         {/* Hike fields */}
         <form noValidate onSubmit={handleSubmit}>
           <div className="flex flex-col gap-4 px-5 py-5">
-            <Field error={fieldErrors?.properties?.trailName?.errors?.[0]} label="Trail Name" required>
+            <Field error={fieldErrors?.properties?.trailName?.errors?.[0]} id="trail-name" label="Trail Name" required>
               <input
                 autoFocus
                 className="hike-form-field"
-                name="Trail Name"
+                id="trail-name"
                 onChange={(e) => setTrailName(e.target.value)}
                 placeholder="e.g. Joffre Lakes"
                 type="text"
@@ -143,20 +145,25 @@ export default function HikeForm({ onClose, onSubmit, onSuccess }: HikeFormProps
             </Field>
 
             <div className="grid grid-cols-2 gap-3">
-              <Field error={fieldErrors?.properties?.date?.errors?.[0]} label="Date" required>
+              <Field error={fieldErrors?.properties?.date?.errors?.[0]} id="date" label="Date" required>
                 <input
                   className="hike-form-field scheme-dark"
-                  name="Date"
+                  id="date"
                   onChange={(e) => setDate(e.target.value)}
                   type="date"
                   value={date}
                 />
               </Field>
-              <Field error={fieldErrors?.properties?.duration?.errors?.[0]} label="Duration (minutes)" required>
+              <Field
+                error={fieldErrors?.properties?.duration?.errors?.[0]}
+                id="duration"
+                label="Duration (minutes)"
+                required
+              >
                 <input
                   className="hike-form-field"
+                  id="duration"
                   min={1}
-                  name="Duration"
                   onChange={(e) => setDuration(e.target.value)}
                   placeholder="e.g. 240"
                   step={1}
@@ -167,12 +174,12 @@ export default function HikeForm({ onClose, onSubmit, onSuccess }: HikeFormProps
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              <Field error={fieldErrors?.properties?.rating?.errors?.[0]} label="Rating (0-5)" required>
+              <Field error={fieldErrors?.properties?.rating?.errors?.[0]} id="rating" label="Rating (0-5)" required>
                 <input
                   className="hike-form-field"
+                  id="rating"
                   max={5}
                   min={0}
-                  name="Rating"
                   onChange={(e) => setRating(e.target.value)}
                   placeholder="e.g. 4.5"
                   step={0.5}
@@ -180,12 +187,17 @@ export default function HikeForm({ onClose, onSubmit, onSuccess }: HikeFormProps
                   value={rating}
                 />
               </Field>
-              <Field error={fieldErrors?.properties?.difficulty?.errors?.[0]} label="Difficulty (0-10)" required>
+              <Field
+                error={fieldErrors?.properties?.difficulty?.errors?.[0]}
+                id="difficulty"
+                label="Difficulty (0-10)"
+                required
+              >
                 <input
                   className="hike-form-field"
+                  id="difficulty"
                   max={10}
                   min={0}
-                  name="Difficulty"
                   onChange={(e) => setDifficulty(e.target.value)}
                   placeholder="e.g. 7.5"
                   step={0.5}
@@ -196,11 +208,16 @@ export default function HikeForm({ onClose, onSubmit, onSuccess }: HikeFormProps
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              <Field error={fieldErrors?.properties?.distance?.errors?.[0]} label="Distance (km)" required>
+              <Field
+                error={fieldErrors?.properties?.distance?.errors?.[0]}
+                id="distance"
+                label="Distance (km)"
+                required
+              >
                 <input
                   className="hike-form-field"
+                  id="distance"
                   min={0}
-                  name="Distance"
                   onChange={(e) => setDistance(e.target.value)}
                   placeholder="e.g. 11.8"
                   step={0.1}
@@ -208,11 +225,16 @@ export default function HikeForm({ onClose, onSubmit, onSuccess }: HikeFormProps
                   value={distance}
                 />
               </Field>
-              <Field error={fieldErrors?.properties?.elevationGain?.errors?.[0]} label="Elevation gain (m)" required>
+              <Field
+                error={fieldErrors?.properties?.elevationGain?.errors?.[0]}
+                id="elevation-gain"
+                label="Elevation gain (m)"
+                required
+              >
                 <input
                   className="hike-form-field"
+                  id="elevation-gain"
                   min={0}
-                  name="Elevation Gain"
                   onChange={(e) => setElevationGain(e.target.value)}
                   placeholder="e.g. 370"
                   step={1}
@@ -222,10 +244,15 @@ export default function HikeForm({ onClose, onSubmit, onSuccess }: HikeFormProps
               </Field>
             </div>
 
-            <Field error={fieldErrors?.properties?.allTrailsUrl?.errors?.[0]} label="AllTrails URL" required>
+            <Field
+              error={fieldErrors?.properties?.allTrailsUrl?.errors?.[0]}
+              id="all-trails-url"
+              label="AllTrails URL"
+              required
+            >
               <input
                 className="hike-form-field"
-                name="AllTrails URL"
+                id="all-trails-url"
                 onChange={(e) => setAllTrailsUrl(e.target.value)}
                 placeholder="https://www.alltrails.com/trail/…"
                 type="url"
@@ -233,10 +260,10 @@ export default function HikeForm({ onClose, onSubmit, onSuccess }: HikeFormProps
               />
             </Field>
 
-            <Field error={fieldErrors?.properties?.notes?.errors?.[0]} label="Notes" required>
+            <Field error={fieldErrors?.properties?.notes?.errors?.[0]} id="notes" label="Notes" required>
               <textarea
                 className="hike-form-field"
-                name="Notes"
+                id="notes"
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="How was the hike?"
                 rows={3}
@@ -271,6 +298,7 @@ export default function HikeForm({ onClose, onSubmit, onSuccess }: HikeFormProps
 
             <div className="flex items-center justify-end gap-3 px-5 py-4 ">
               <button
+                aria-label="Cancel"
                 className="font-mono px-4 py-2 text-xs text-forest-600 hover:text-cream-100 transition-colors focus:outline-none"
                 disabled={submissionPending}
                 onClick={handleCancel}
@@ -280,6 +308,7 @@ export default function HikeForm({ onClose, onSubmit, onSuccess }: HikeFormProps
               </button>
 
               <button
+                aria-label="Submit"
                 className="primary-button px-5 py-2 inline-flex items-center gap-2"
                 disabled={submissionPending}
                 type="submit"

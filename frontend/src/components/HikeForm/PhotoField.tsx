@@ -112,14 +112,13 @@ export default function PhotoField({ errors, photos, setPhotos }: PhotoFieldProp
               </div>
 
               <Field
-                ariaLabel={`Caption field ${idx + 1}`}
                 error={errors?.items?.[idx]?.properties?.file?.errors?.[0]}
-                label="Caption"
+                id={`caption-${idx + 1}`}
+                label={`Caption ${idx + 1}`}
               >
                 <input
-                  aria-label={`Caption input ${idx + 1}`}
                   className="hike-form-field py-1.5 text-xs"
-                  name="Caption"
+                  id={`caption-${idx + 1}`}
                   onChange={(e) => updateCaption(idx, e.target.value)}
                   placeholder="A beautiful day in..."
                   type="text"

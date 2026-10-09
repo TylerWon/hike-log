@@ -52,7 +52,7 @@ describe("PhotoField", () => {
     const previewImage = screen.getByRole("img", { name: "Photo 1" });
     await expect.element(previewImage).toBeInTheDocument();
 
-    const captionInput = screen.getByRole("textbox", { name: "Caption input 1" });
+    const captionInput = screen.getByLabelText("Caption 1");
     await expect.element(captionInput).toBeInTheDocument();
 
     const removeButton = screen.getByRole("button", { name: "Remove photo 1" });
@@ -70,7 +70,7 @@ describe("PhotoField", () => {
 
     await uploadPhotos(screen, [photo1]);
 
-    const captionInput = screen.getByRole("textbox", { name: "Caption input 1" });
+    const captionInput = screen.getByLabelText("Caption 1");
     await captionInput.fill("TESTING");
     await expect.element(captionInput).toHaveValue("TESTING");
   });
@@ -99,14 +99,14 @@ describe("PhotoField", () => {
     await uploadPhotos(screen, [photo1, photo2]);
 
     // Set caption on photo being moved so it can be used to determine if order changed later
-    let captionInput = screen.getByRole("textbox", { name: "Caption input 2" });
+    let captionInput = screen.getByLabelText("Caption 2");
     await captionInput.fill("Originally second photo");
 
     // Move second photo up
     const moveUpButton = screen.getByRole("button", { name: "Move up photo 2" });
     await moveUpButton.click();
 
-    captionInput = screen.getByRole("textbox", { name: "Caption input 1" });
+    captionInput = screen.getByLabelText("Caption 1");
     await expect.element(captionInput).toHaveValue("Originally second photo");
   });
 
@@ -116,14 +116,14 @@ describe("PhotoField", () => {
     await uploadPhotos(screen, [photo1, photo2]);
 
     // Set caption on photo being moved so it can be used to determine if order changed later
-    let captionInput = screen.getByRole("textbox", { name: "Caption input 1" });
+    let captionInput = screen.getByLabelText("Caption 1");
     await captionInput.fill("Originally first photo");
 
     // Move first photo down
     const moveDownButton = screen.getByRole("button", { name: "Move down photo 1" });
     await moveDownButton.click();
 
-    captionInput = screen.getByRole("textbox", { name: "Caption input 2" });
+    captionInput = screen.getByLabelText("Caption 2");
     await expect.element(captionInput).toHaveValue("Originally first photo");
   });
 
@@ -133,20 +133,20 @@ describe("PhotoField", () => {
     await uploadPhotos(screen, [photo1, photo2, photo3]);
 
     // Set captions on photos not being deleted so they can be used to determine if order changed later
-    let captionInput = screen.getByRole("textbox", { name: "Caption input 2" });
+    let captionInput = screen.getByLabelText("Caption 2");
     await captionInput.fill("Originally second photo");
 
-    captionInput = screen.getByRole("textbox", { name: "Caption input 3" });
+    captionInput = screen.getByLabelText("Caption 3");
     await captionInput.fill("Originally third photo");
 
     // Remove first photo
     const removeButton = screen.getByRole("button", { name: "Remove photo 1" });
     await removeButton.click();
 
-    captionInput = screen.getByRole("textbox", { name: "Caption input 1" });
+    captionInput = screen.getByLabelText("Caption 1");
     await expect.element(captionInput).toHaveValue("Originally second photo");
 
-    captionInput = screen.getByRole("textbox", { name: "Caption input 2" });
+    captionInput = screen.getByLabelText("Caption 2");
     await expect.element(captionInput).toHaveValue("Originally third photo");
   });
 
@@ -180,13 +180,13 @@ describe("PhotoField", () => {
 
     await uploadPhotos(screen, [photo1, photo2]);
 
-    // Error is displayed as part of the photo's Caption field
-    const photo1CaptionField = screen.getByRole("group", { name: "Caption field 1" });
-    const photo1Error = photo1CaptionField.getByText("Image must be under 10MB");
-    await expect.element(photo1Error).not.toBeInTheDocument();
+    // An error for a photo is displayed in its Caption field
+    const captionField1 = screen.getByRole("paragraph", { name: "Caption 1 field" });
+    const error1 = captionField1.getByText("Image must be under 10MB");
+    await expect.element(error1).not.toBeInTheDocument();
 
-    const photo2CaptionField = screen.getByRole("group", { name: "Caption field 2" });
-    const photo2Error = photo2CaptionField.getByText("Image must be under 10MB");
-    await expect.element(photo2Error).toBeInTheDocument();
+    const captionField2 = screen.getByRole("group", { name: "Caption 2 field" });
+    const error2 = captionField2.getByText("Image must be under 10MB");
+    await expect.element(error2).toBeInTheDocument();
   });
 });
