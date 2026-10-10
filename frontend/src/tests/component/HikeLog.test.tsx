@@ -1,4 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useState } from "react";
 import { describe, expect, test, vi } from "vitest";
 import { render, type RenderResult } from "vitest-browser-react";
 
@@ -28,17 +29,20 @@ async function checkCards(screen: RenderResult, hikes: Hike[]) {
 }
 
 /**
- * Wraps HikeLog with TanStack Query client for testing.
+ * Wraps a HikeLog with a TanStack Query client for testing.
  */
-function renderHikeLog() {
-  const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false } }, // disable retry to prevent error test from timing out due to retries by Tanstack Query
-  });
+function HikeLogWrapper() {
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: { queries: { retry: false } }, // disable retry to prevent error test from timing out due to retries by Tanstack Query
+      }),
+  );
 
-  return render(
+  return (
     <QueryClientProvider client={queryClient}>
       <HikeLog />
-    </QueryClientProvider>,
+    </QueryClientProvider>
   );
 }
 
@@ -46,7 +50,7 @@ describe("HikeLog", () => {
   test("displays an error when there was an issue getting the hikes", async () => {
     vi.mocked(fetchHikes).mockRejectedValue(new Error("Failed to retrieve hikes"));
 
-    const screen = await renderHikeLog();
+    const screen = await render(<HikeLogWrapper />);
 
     const error = screen.getByRole("region", { name: "Hike log error" });
     await expect.element(error).toBeInTheDocument();
@@ -55,7 +59,7 @@ describe("HikeLog", () => {
   test("displays title and skeletons of the overall stats and hike cards when hikes are loading", async () => {
     vi.mocked(fetchHikes).mockImplementation(() => new Promise(() => {})); // never resolves
 
-    const screen = await renderHikeLog();
+    const screen = await render(<HikeLogWrapper />);
 
     const title = screen.getByText("Hike Log");
     await expect.element(title).toBeInTheDocument();
@@ -83,7 +87,7 @@ describe("HikeLog", () => {
     const hikes = [HIKE_MOCK_1, HIKE_MOCK_2];
     vi.mocked(fetchHikes).mockResolvedValue(hikes);
 
-    const screen = await renderHikeLog();
+    const screen = await render(<HikeLogWrapper />);
 
     const title = screen.getByText("Hike Log");
     await expect.element(title).toBeInTheDocument();
