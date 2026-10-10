@@ -1,23 +1,465 @@
-// import { describe, test } from "vitest";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useState } from "react";
+import { beforeEach, describe, expect, type Mock, test, vi } from "vitest";
+import { render, type RenderResult } from "vitest-browser-react";
 
-// import HikeForm from "../../../components/HikeForm/HikeForm";
+import HikeForm, { type HikeFormProps } from "../../../components/HikeForm/HikeForm";
+import { MAX_PHOTO_SIZE } from "../../../schemas/forms/photo";
+import { checkForFieldError, checkNoFieldError, fillFieldInput, uploadPhotos } from "../../utils/HikeForm/test-helpers";
 
-// describe("HikeForm", () => {
-//   test("hides form when backdrop is clicked", async () => {});
+// Wraps a HikeForm with a Tanstack Query client for testing.
+function HikeFormWrapper({ onClose, onSubmit, onSuccess }: HikeFormProps) {
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: { queries: { retry: false } }, // disable retry to prevent error test from timing out due to retries by Tanstack Query
+      }),
+  );
 
-//   test("hides form when close button is clicked", async () => {});
+  return (
+    <QueryClientProvider client={queryClient}>
+      <HikeForm onClose={onClose} onSubmit={onSubmit} onSuccess={onSuccess} />
+    </QueryClientProvider>
+  );
+}
 
-//   test("hides form when cancel button is clicked", async () => {});
+// Clicks the form submit button.
+async function clickSubmitButton(screen: RenderResult) {
+  const submitButton = screen.getByRole("button", { name: "Submit" });
+  await submitButton.click();
+}
 
-//   test("displays field errors when required fields are submitted empty", async () => {});
+// Fills every form field with a valid value. Photos are optional and left empty.
+async function fillForm(screen: RenderResult) {
+  await fillFieldInput(screen, "Trail Name", "Joffre Lakes");
+  await fillFieldInput(screen, "Date", "2026-01-01");
+  await fillFieldInput(screen, "Duration (minutes)", "240");
+  await fillFieldInput(screen, "Rating (0-5)", "4.5");
+  await fillFieldInput(screen, "Difficulty (0-10)", "7.5");
+  await fillFieldInput(screen, "Distance (km)", "11.8");
+  await fillFieldInput(screen, "Elevation gain (m)", "370");
+  await fillFieldInput(screen, "AllTrails URL", "https://www.alltrails.com/trail/canada/british-columbia/joffre-lakes");
+  await fillFieldInput(screen, "Notes", "Great views at the lake.");
+}
 
-//   test("displays field errors when fields are submitted with invalid values", async () => {});
+describe("HikeForm", () => {
+  let mockOnClose: Mock;
+  let mockOnSubmit: Mock;
+  let mockOnSuccess: Mock;
 
-//   test("disables cancel and submit buttons when submission is in progress", async () => {});
+  beforeEach(() => {
+    mockOnClose = vi.fn();
+    mockOnSubmit = vi.fn();
+    mockOnSuccess = vi.fn();
+  });
 
-//   test("displays error footer when a hike cannot be created", async () => {});
+  test("invokes onClose callback when backdrop is clicked", async () => {
+    const screen = await render(
+      <HikeFormWrapper onClose={mockOnClose} onSubmit={mockOnSubmit} onSuccess={mockOnSuccess} />,
+    );
 
-//   test("creates hike and photos, closes form, and refreshes hike log on success", async () => {});
+    const backdrop = screen.getByRole("region", { name: "Hike form backdrop" });
 
-//   test("sets toast message when any photo fails to submit", async () => {});
-// });
+    // click() clicks the center of the locator by default which is the form in this case so explicitly set the click
+    // coordinates to hit the backdrop
+    await backdrop.click({ position: { x: 0, y: 0 } });
+
+    expect(mockOnClose).toHaveBeenCalledOnce();
+  });
+
+  test("invokes onClose callback when close button is clicked", async () => {
+    const screen = await render(
+      <HikeFormWrapper onClose={mockOnClose} onSubmit={mockOnSubmit} onSuccess={mockOnSuccess} />,
+    );
+
+    const closeButton = screen.getByRole("button", { name: "Close" });
+    await closeButton.click();
+
+    expect(mockOnClose).toHaveBeenCalledOnce();
+  });
+
+  test("invokes onClose callback when cancel button is clicked", async () => {
+    const screen = await render(
+      <HikeFormWrapper onClose={mockOnClose} onSubmit={mockOnSubmit} onSuccess={mockOnSuccess} />,
+    );
+
+    const closeButton = screen.getByRole("button", { name: "Cancel" });
+    await closeButton.click();
+
+    expect(mockOnClose).toHaveBeenCalledOnce();
+  });
+
+  describe("Field validation", () => {
+    describe("Trail Name", () => {
+      test("displays error on submit when value is empty", async () => {
+        const screen = await render(
+          <HikeFormWrapper onClose={mockOnClose} onSubmit={mockOnSubmit} onSuccess={mockOnSuccess} />,
+        );
+        await clickSubmitButton(screen);
+        await checkForFieldError(screen, "Trail Name", "Required");
+      });
+
+      test("does not display error on submit when value is valid", async () => {
+        const screen = await render(
+          <HikeFormWrapper onClose={mockOnClose} onSubmit={mockOnSubmit} onSuccess={mockOnSuccess} />,
+        );
+        await fillFieldInput(screen, "Trail Name", "Joffre Lakes");
+        await clickSubmitButton(screen);
+        await checkNoFieldError(screen, "Trail Name");
+      });
+    });
+
+    describe("Date", () => {
+      test("displays error on submit when value is empty", async () => {
+        const screen = await render(
+          <HikeFormWrapper onClose={mockOnClose} onSubmit={mockOnSubmit} onSuccess={mockOnSuccess} />,
+        );
+        await clickSubmitButton(screen);
+        await checkForFieldError(screen, "Date", "Invalid ISO date");
+      });
+
+      test("does not display error on submit when value is valid", async () => {
+        const screen = await render(
+          <HikeFormWrapper onClose={mockOnClose} onSubmit={mockOnSubmit} onSuccess={mockOnSuccess} />,
+        );
+        await fillFieldInput(screen, "Date", "2026-01-01");
+        await clickSubmitButton(screen);
+        await checkNoFieldError(screen, "Date");
+      });
+    });
+
+    describe("Duration", () => {
+      test("displays error on submit when value is empty", async () => {
+        const screen = await render(
+          <HikeFormWrapper onClose={mockOnClose} onSubmit={mockOnSubmit} onSuccess={mockOnSuccess} />,
+        );
+        await clickSubmitButton(screen);
+        await checkForFieldError(screen, "Duration (minutes)", "Required");
+      });
+
+      test("displays error on submit when value is a decimal", async () => {
+        const screen = await render(
+          <HikeFormWrapper onClose={mockOnClose} onSubmit={mockOnSubmit} onSuccess={mockOnSuccess} />,
+        );
+        await fillFieldInput(screen, "Duration (minutes)", "1.5");
+        await clickSubmitButton(screen);
+        await checkForFieldError(screen, "Duration (minutes)", "Must be a positive integer");
+      });
+
+      test("displays error on submit when value is negative", async () => {
+        const screen = await render(
+          <HikeFormWrapper onClose={mockOnClose} onSubmit={mockOnSubmit} onSuccess={mockOnSuccess} />,
+        );
+        await fillFieldInput(screen, "Duration (minutes)", "-1");
+        await clickSubmitButton(screen);
+        await checkForFieldError(screen, "Duration (minutes)", "Must be a positive integer");
+      });
+
+      test("does not display error on submit when value is valid", async () => {
+        const screen = await render(
+          <HikeFormWrapper onClose={mockOnClose} onSubmit={mockOnSubmit} onSuccess={mockOnSuccess} />,
+        );
+        await fillFieldInput(screen, "Duration (minutes)", "240");
+        await clickSubmitButton(screen);
+        await checkNoFieldError(screen, "Duration (minutes)");
+      });
+    });
+
+    describe("Rating", () => {
+      test("displays error on submit when value is empty", async () => {
+        const screen = await render(
+          <HikeFormWrapper onClose={mockOnClose} onSubmit={mockOnSubmit} onSuccess={mockOnSuccess} />,
+        );
+        await clickSubmitButton(screen);
+        await checkForFieldError(screen, "Rating (0-5)", "Required");
+      });
+
+      test("displays error on submit when value is below 0", async () => {
+        const screen = await render(
+          <HikeFormWrapper onClose={mockOnClose} onSubmit={mockOnSubmit} onSuccess={mockOnSuccess} />,
+        );
+        await fillFieldInput(screen, "Rating (0-5)", "-0.5");
+        await clickSubmitButton(screen);
+        await checkForFieldError(screen, "Rating (0-5)", "Too small: expected number to be >=0");
+      });
+
+      test("displays error on submit when value is above 5", async () => {
+        const screen = await render(
+          <HikeFormWrapper onClose={mockOnClose} onSubmit={mockOnSubmit} onSuccess={mockOnSuccess} />,
+        );
+        await fillFieldInput(screen, "Rating (0-5)", "5.5");
+        await clickSubmitButton(screen);
+        await checkForFieldError(screen, "Rating (0-5)", "Too big: expected number to be <=5");
+      });
+
+      test("displays error on submit when value is not a multiple of 0.5", async () => {
+        const screen = await render(
+          <HikeFormWrapper onClose={mockOnClose} onSubmit={mockOnSubmit} onSuccess={mockOnSuccess} />,
+        );
+        await fillFieldInput(screen, "Rating (0-5)", "1.2");
+        await clickSubmitButton(screen);
+        await checkForFieldError(screen, "Rating (0-5)", "Invalid number: must be a multiple of 0.5");
+      });
+
+      test("does not display error on submit when value is valid", async () => {
+        const screen = await render(
+          <HikeFormWrapper onClose={mockOnClose} onSubmit={mockOnSubmit} onSuccess={mockOnSuccess} />,
+        );
+        await fillFieldInput(screen, "Rating (0-5)", "4.5");
+        await clickSubmitButton(screen);
+        await checkNoFieldError(screen, "Rating (0-5)");
+      });
+    });
+
+    describe("Difficulty", () => {
+      test("displays error on submit when value is empty", async () => {
+        const screen = await render(
+          <HikeFormWrapper onClose={mockOnClose} onSubmit={mockOnSubmit} onSuccess={mockOnSuccess} />,
+        );
+        await clickSubmitButton(screen);
+        await checkForFieldError(screen, "Difficulty (0-10)", "Required");
+      });
+
+      test("displays error on submit when value is below 0", async () => {
+        const screen = await render(
+          <HikeFormWrapper onClose={mockOnClose} onSubmit={mockOnSubmit} onSuccess={mockOnSuccess} />,
+        );
+        await fillFieldInput(screen, "Difficulty (0-10)", "-0.5");
+        await clickSubmitButton(screen);
+        await checkForFieldError(screen, "Difficulty (0-10)", "Too small: expected number to be >=0");
+      });
+
+      test("displays error on submit when value is above 10", async () => {
+        const screen = await render(
+          <HikeFormWrapper onClose={mockOnClose} onSubmit={mockOnSubmit} onSuccess={mockOnSuccess} />,
+        );
+        await fillFieldInput(screen, "Difficulty (0-10)", "10.5");
+        await clickSubmitButton(screen);
+        await checkForFieldError(screen, "Difficulty (0-10)", "Too big: expected number to be <=10");
+      });
+
+      test("displays error on submit when value is not a multiple of 0.5", async () => {
+        const screen = await render(
+          <HikeFormWrapper onClose={mockOnClose} onSubmit={mockOnSubmit} onSuccess={mockOnSuccess} />,
+        );
+        await fillFieldInput(screen, "Difficulty (0-10)", "1.2");
+        await clickSubmitButton(screen);
+        await checkForFieldError(screen, "Difficulty (0-10)", "Invalid number: must be a multiple of 0.5");
+      });
+
+      test("does not display error on submit when value is valid", async () => {
+        const screen = await render(
+          <HikeFormWrapper onClose={mockOnClose} onSubmit={mockOnSubmit} onSuccess={mockOnSuccess} />,
+        );
+        await fillFieldInput(screen, "Difficulty (0-10)", "7.5");
+        await clickSubmitButton(screen);
+        await checkNoFieldError(screen, "Difficulty (0-10)");
+      });
+    });
+
+    describe("Distance", () => {
+      test("displays error on submit when value is empty", async () => {
+        const screen = await render(
+          <HikeFormWrapper onClose={mockOnClose} onSubmit={mockOnSubmit} onSuccess={mockOnSuccess} />,
+        );
+        await clickSubmitButton(screen);
+        await checkForFieldError(screen, "Distance (km)", "Required");
+      });
+
+      test("displays error on submit when value is negative", async () => {
+        const screen = await render(
+          <HikeFormWrapper onClose={mockOnClose} onSubmit={mockOnSubmit} onSuccess={mockOnSuccess} />,
+        );
+        await fillFieldInput(screen, "Distance (km)", "-1");
+        await clickSubmitButton(screen);
+        await checkForFieldError(screen, "Distance (km)", "Too small: expected number to be >=0");
+      });
+
+      test("does not display error on submit when value is valid", async () => {
+        const screen = await render(
+          <HikeFormWrapper onClose={mockOnClose} onSubmit={mockOnSubmit} onSuccess={mockOnSuccess} />,
+        );
+        await fillFieldInput(screen, "Distance (km)", "11.8");
+        await clickSubmitButton(screen);
+        await checkNoFieldError(screen, "Distance (km)");
+      });
+    });
+
+    describe("Elevation Gain", () => {
+      test("displays error on submit when value is empty", async () => {
+        const screen = await render(
+          <HikeFormWrapper onClose={mockOnClose} onSubmit={mockOnSubmit} onSuccess={mockOnSuccess} />,
+        );
+        await clickSubmitButton(screen);
+        await checkForFieldError(screen, "Elevation gain (m)", "Required");
+      });
+
+      test("displays error on submit when value is a decimal", async () => {
+        const screen = await render(
+          <HikeFormWrapper onClose={mockOnClose} onSubmit={mockOnSubmit} onSuccess={mockOnSuccess} />,
+        );
+        await fillFieldInput(screen, "Elevation gain (m)", "1.5");
+        await clickSubmitButton(screen);
+        await checkForFieldError(screen, "Elevation gain (m)", "Must be a positive integer");
+      });
+
+      test("displays error on submit when value is negative", async () => {
+        const screen = await render(
+          <HikeFormWrapper onClose={mockOnClose} onSubmit={mockOnSubmit} onSuccess={mockOnSuccess} />,
+        );
+        await fillFieldInput(screen, "Elevation gain (m)", "-1");
+        await clickSubmitButton(screen);
+        await checkForFieldError(screen, "Elevation gain (m)", "Must be a positive integer");
+      });
+
+      test("does not display error on submit when value is valid", async () => {
+        const screen = await render(
+          <HikeFormWrapper onClose={mockOnClose} onSubmit={mockOnSubmit} onSuccess={mockOnSuccess} />,
+        );
+        await fillFieldInput(screen, "Elevation gain (m)", "370");
+        await clickSubmitButton(screen);
+        await checkNoFieldError(screen, "Elevation gain (m)");
+      });
+    });
+
+    describe("AllTrails URL", () => {
+      test("displays error on submit when value is empty", async () => {
+        const screen = await render(
+          <HikeFormWrapper onClose={mockOnClose} onSubmit={mockOnSubmit} onSuccess={mockOnSuccess} />,
+        );
+        await clickSubmitButton(screen);
+        await checkForFieldError(screen, "AllTrails URL", "Required");
+      });
+
+      test("displays error on submit when value is not a valid URL", async () => {
+        const screen = await render(
+          <HikeFormWrapper onClose={mockOnClose} onSubmit={mockOnSubmit} onSuccess={mockOnSuccess} />,
+        );
+        await fillFieldInput(screen, "AllTrails URL", "not a url");
+        await clickSubmitButton(screen);
+        await checkForFieldError(screen, "AllTrails URL", "Invalid URL");
+      });
+
+      test("does not display error on submit when value is valid", async () => {
+        const screen = await render(
+          <HikeFormWrapper onClose={mockOnClose} onSubmit={mockOnSubmit} onSuccess={mockOnSuccess} />,
+        );
+        await fillFieldInput(
+          screen,
+          "AllTrails URL",
+          "https://www.alltrails.com/trail/canada/british-columbia/joffre-lakes",
+        );
+        await clickSubmitButton(screen);
+        await checkNoFieldError(screen, "AllTrails URL");
+      });
+    });
+
+    describe("Notes", () => {
+      test("displays error on submit when value is empty", async () => {
+        const screen = await render(
+          <HikeFormWrapper onClose={mockOnClose} onSubmit={mockOnSubmit} onSuccess={mockOnSuccess} />,
+        );
+        await clickSubmitButton(screen);
+        await checkForFieldError(screen, "Notes", "Required");
+      });
+
+      test("does not display error on submit when value is valid", async () => {
+        const screen = await render(
+          <HikeFormWrapper onClose={mockOnClose} onSubmit={mockOnSubmit} onSuccess={mockOnSuccess} />,
+        );
+        await fillFieldInput(screen, "Notes", "Great views at the lake.");
+        await clickSubmitButton(screen);
+        await checkNoFieldError(screen, "Notes");
+      });
+    });
+
+    describe("Photos", () => {
+      const oversizedPhoto = new File([new Uint8Array(MAX_PHOTO_SIZE + 1)], "oversized.png", { type: "image/png" });
+      const invalidTypePhoto = new File(["notes"], "notes.txt", { type: "text/plain" });
+      const validPhoto = new File(["photo"], "summit.png", { type: "image/png" });
+
+      test("displays error on submit when photo exceeds 10MB", async () => {
+        const screen = await render(
+          <HikeFormWrapper onClose={mockOnClose} onSubmit={mockOnSubmit} onSuccess={mockOnSuccess} />,
+        );
+        await uploadPhotos(screen, [oversizedPhoto]);
+        await clickSubmitButton(screen);
+        // An error for a photo is displayed on its Caption field
+        await checkForFieldError(screen, "Caption 1", "Image must be under 10MB");
+      });
+
+      test("displays error on submit when file is not a valid image type", async () => {
+        const screen = await render(
+          <HikeFormWrapper onClose={mockOnClose} onSubmit={mockOnSubmit} onSuccess={mockOnSuccess} />,
+        );
+        await uploadPhotos(screen, [invalidTypePhoto]);
+        await clickSubmitButton(screen);
+        await checkForFieldError(
+          screen,
+          "Caption 1",
+          'Invalid option: expected one of "image/jpeg"|"image/png"|"image/webp"|"image/heic"|"image/heif"',
+        );
+      });
+
+      test("does not display error on submit when value is valid", async () => {
+        const screen = await render(
+          <HikeFormWrapper onClose={mockOnClose} onSubmit={mockOnSubmit} onSuccess={mockOnSuccess} />,
+        );
+        await uploadPhotos(screen, [validPhoto]);
+        await clickSubmitButton(screen);
+        await checkNoFieldError(screen, "Caption 1");
+      });
+    });
+  });
+
+  test("invokes onSubmit callback when valid form is submitted and disables cancel and submit buttons while submission is in progress", async () => {
+    // Have onSubmit sleep for 5s so we can check buttons are disabled
+    mockOnSubmit.mockImplementation(() => new Promise((resolve) => setTimeout(resolve, 5000)));
+
+    const screen = await render(
+      <HikeFormWrapper onClose={mockOnClose} onSubmit={mockOnSubmit} onSuccess={mockOnSuccess} />,
+    );
+
+    await fillForm(screen);
+    await clickSubmitButton(screen);
+
+    expect(mockOnSubmit).toHaveBeenCalledOnce();
+    expect(mockOnSuccess).not.toHaveBeenCalled();
+
+    const cancelButton = screen.getByRole("button", { name: "Cancel" });
+    await expect.element(cancelButton).toBeDisabled();
+
+    const submitButton = screen.getByRole("button", { name: "Submit" });
+    await expect.element(submitButton).toBeDisabled();
+  });
+
+  test("does not invoke onSuccess callback and displays error message in footer when submission of valid form fails", async () => {
+    mockOnSubmit.mockRejectedValue(new Error("Failed to submit form"));
+
+    const screen = await render(
+      <HikeFormWrapper onClose={mockOnClose} onSubmit={mockOnSubmit} onSuccess={mockOnSuccess} />,
+    );
+
+    await fillForm(screen);
+    await clickSubmitButton(screen);
+
+    expect(mockOnSubmit).toHaveBeenCalledOnce();
+    expect(mockOnSuccess).not.toHaveBeenCalled();
+
+    const footer = screen.getByRole("region", { name: "Footer" });
+    const errorMessage = footer.getByText("Something went wrong. Please try again.");
+    await expect.element(errorMessage).toBeInTheDocument();
+  });
+
+  test("invokes onSuccess callback when submission of valid form succeeds", async () => {
+    const screen = await render(
+      <HikeFormWrapper onClose={mockOnClose} onSubmit={mockOnSubmit} onSuccess={mockOnSuccess} />,
+    );
+
+    await fillForm(screen);
+    await clickSubmitButton(screen);
+
+    expect(mockOnSubmit).toHaveBeenCalledOnce();
+    expect(mockOnSuccess).toHaveBeenCalledOnce();
+  });
+});

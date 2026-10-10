@@ -40,26 +40,26 @@ export default function HikeLog() {
     setShowHikeForm(false);
   };
 
-  const handleHikeFormSubmit = async (formData: HikeFormData): Promise<void> => {
+  const handleHikeFormSubmit = async (formData: HikeFormData) => {
     try {
       await submitHikeForm(formData);
     } catch (e) {
+      // Fail open for photo errors
       if (e instanceof PhotoCreationError) {
         console.warn(`Failed to create some photos: ${e}`);
         setToastMessage("Some photos could not be uploaded. Please try again.");
-        handleHikeFormClose();
         return;
       }
 
+      // Fail close for all other errors
       throw e;
     }
-
-    handleHikeFormClose();
   };
 
   const handleHikeFormSuccess = async () => {
     // Invalidates the list hikes query so all Hikes get refetched
     await queryClient.invalidateQueries({ queryKey: [HIKES_QUERY_KEY] });
+    handleHikeFormClose();
   };
 
   if (hikes.isError) {

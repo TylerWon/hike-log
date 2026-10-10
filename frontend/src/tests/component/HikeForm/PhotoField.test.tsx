@@ -3,8 +3,8 @@ import { render } from "vitest-browser-react";
 
 import type { PhotoErrors } from "../../../components/HikeForm/types";
 
-import { StatefulPhotoField } from "../../utils/HikeForm/photo-field-components";
-import { uploadPhotos } from "../../utils/HikeForm/photo-field-helpers";
+import { StatefulPhotoField } from "../../utils/HikeForm/test-components";
+import { checkForFieldError, checkNoFieldError, fillFieldInput, uploadPhotos } from "../../utils/HikeForm/test-helpers";
 
 describe("PhotoField", () => {
   const photo1 = new File(["photo1"], "summit.png", { type: "image/png" });
@@ -69,9 +69,9 @@ describe("PhotoField", () => {
     const screen = await render(<StatefulPhotoField />);
 
     await uploadPhotos(screen, [photo1]);
+    await fillFieldInput(screen, "Caption 1", "TESTING");
 
     const captionInput = screen.getByLabelText("Caption 1");
-    await captionInput.fill("TESTING");
     await expect.element(captionInput).toHaveValue("TESTING");
   });
 
@@ -116,14 +116,13 @@ describe("PhotoField", () => {
     await uploadPhotos(screen, [photo1, photo2]);
 
     // Set caption on photo being moved so it can be used to determine if order changed later
-    let captionInput = screen.getByLabelText("Caption 1");
-    await captionInput.fill("Originally first photo");
+    await fillFieldInput(screen, "Caption 1", "Originally first photo");
 
     // Move first photo down
     const moveDownButton = screen.getByRole("button", { name: "Move down photo 1" });
     await moveDownButton.click();
 
-    captionInput = screen.getByLabelText("Caption 2");
+    const captionInput = screen.getByLabelText("Caption 2");
     await expect.element(captionInput).toHaveValue("Originally first photo");
   });
 
@@ -133,17 +132,14 @@ describe("PhotoField", () => {
     await uploadPhotos(screen, [photo1, photo2, photo3]);
 
     // Set captions on photos not being deleted so they can be used to determine if order changed later
-    let captionInput = screen.getByLabelText("Caption 2");
-    await captionInput.fill("Originally second photo");
+    await fillFieldInput(screen, "Caption 2", "Originally second photo");
+    await fillFieldInput(screen, "Caption 3", "Originally third photo");
 
-    captionInput = screen.getByLabelText("Caption 3");
-    await captionInput.fill("Originally third photo");
-
-    // Remove first photo
+    // Remove first photo, photos shift up
     const removeButton = screen.getByRole("button", { name: "Remove photo 1" });
     await removeButton.click();
 
-    captionInput = screen.getByLabelText("Caption 1");
+    let captionInput = screen.getByLabelText("Caption 1");
     await expect.element(captionInput).toHaveValue("Originally second photo");
 
     captionInput = screen.getByLabelText("Caption 2");
@@ -180,13 +176,8 @@ describe("PhotoField", () => {
 
     await uploadPhotos(screen, [photo1, photo2]);
 
-    // An error for a photo is displayed in its Caption field
-    const captionField1 = screen.getByRole("paragraph", { name: "Caption 1 field" });
-    const error1 = captionField1.getByText("Image must be under 10MB");
-    await expect.element(error1).not.toBeInTheDocument();
-
-    const captionField2 = screen.getByRole("group", { name: "Caption 2 field" });
-    const error2 = captionField2.getByText("Image must be under 10MB");
-    await expect.element(error2).toBeInTheDocument();
+    // An error for a photo is displayed on its Caption field
+    await checkNoFieldError(screen, "Caption 1");
+    await checkForFieldError(screen, "Caption 2", "Image must be under 10MB");
   });
 });

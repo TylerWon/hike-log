@@ -40,7 +40,7 @@ export default function HikeForm({ onClose, onSubmit, onSuccess }: HikeFormProps
   };
 
   const validate = (): HikeFormData | null => {
-    const hikePhotos = photos.map((photo, idx) => ({
+    const hikePhotos = photos.map((photo: PhotoData, idx: number) => ({
       caption: photo.caption.trim(),
       displayOrder: idx + 1,
       file: photo.file,
@@ -276,7 +276,7 @@ export default function HikeForm({ onClose, onSubmit, onSuccess }: HikeFormProps
           </div>
 
           {/* Footer */}
-          <div className="border-t border-forest-800 sticky bottom-0 bg-forest-900">
+          <div aria-label="Footer" className="border-t border-forest-800 sticky bottom-0 bg-forest-900" role="region">
             {submissionError && (
               <div className="flex items-center gap-2 px-5 py-3 bg-coral-950">
                 <svg
