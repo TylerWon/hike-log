@@ -26,7 +26,7 @@ export function defineBrowserModeTestConfig({ browser, name }: BrowserModeTestCo
         browser: {
           enabled: true,
           headless: true,
-          instances: [{ browser: "chromium", viewport: { height: 720, width: 1280 } }],
+          instances: [{ browser: "chromium", viewport: { height: 1080, width: 1920 } }],
           locators: {
             exact: true,
           },
