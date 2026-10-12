@@ -4,7 +4,7 @@ import { render } from "vitest-browser-react";
 import type { PhotoErrors } from "../../../components/HikeForm/types";
 
 import { StatefulPhotoField } from "../../utils/HikeForm/test-components";
-import { checkForFieldError, checkNoFieldError, fillFieldInput, uploadPhotos } from "../../utils/HikeForm/test-helpers";
+import { checkFieldError, checkNoFieldError, fillFieldInput, uploadPhotos } from "../../utils/HikeForm/test-helpers";
 
 describe("PhotoField", () => {
   const photo1 = new File(["photo1"], "summit.png", { type: "image/png" });
@@ -178,6 +178,6 @@ describe("PhotoField", () => {
 
     // An error for a photo is displayed on its Caption field
     await checkNoFieldError(screen, "Caption 1");
-    await checkForFieldError(screen, "Caption 2", "Image must be under 10MB");
+    await checkFieldError(screen, "Caption 2", "Image must be under 10MB");
   });
 });

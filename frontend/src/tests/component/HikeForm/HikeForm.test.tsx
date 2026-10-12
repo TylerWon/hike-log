@@ -1,46 +1,16 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useState } from "react";
 import { beforeEach, describe, expect, type Mock, test, vi } from "vitest";
-import { render, type RenderResult } from "vitest-browser-react";
+import { render } from "vitest-browser-react";
 
-import HikeForm, { type HikeFormProps } from "../../../components/HikeForm/HikeForm";
 import { MAX_PHOTO_SIZE } from "../../../schemas/forms/photo";
-import { checkForFieldError, checkNoFieldError, fillFieldInput, uploadPhotos } from "../../utils/HikeForm/test-helpers";
-
-// Wraps a HikeForm with a Tanstack Query client for testing.
-function HikeFormWrapper({ onClose, onSubmit, onSuccess }: HikeFormProps) {
-  const [queryClient] = useState(
-    () =>
-      new QueryClient({
-        defaultOptions: { queries: { retry: false } }, // disable retry to prevent error test from timing out due to retries by Tanstack Query
-      }),
-  );
-
-  return (
-    <QueryClientProvider client={queryClient}>
-      <HikeForm onClose={onClose} onSubmit={onSubmit} onSuccess={onSuccess} />
-    </QueryClientProvider>
-  );
-}
-
-// Clicks the form submit button.
-async function clickSubmitButton(screen: RenderResult) {
-  const submitButton = screen.getByRole("button", { name: "Submit" });
-  await submitButton.click();
-}
-
-// Fills every form field with a valid value. Photos are optional and left empty.
-async function fillForm(screen: RenderResult) {
-  await fillFieldInput(screen, "Trail Name", "Joffre Lakes");
-  await fillFieldInput(screen, "Date", "2026-01-01");
-  await fillFieldInput(screen, "Duration (minutes)", "240");
-  await fillFieldInput(screen, "Rating (0-5)", "4.5");
-  await fillFieldInput(screen, "Difficulty (0-10)", "7.5");
-  await fillFieldInput(screen, "Distance (km)", "11.8");
-  await fillFieldInput(screen, "Elevation gain (m)", "370");
-  await fillFieldInput(screen, "AllTrails URL", "https://www.alltrails.com/trail/canada/british-columbia/joffre-lakes");
-  await fillFieldInput(screen, "Notes", "Great views at the lake.");
-}
+import { HikeFormWrapper } from "../../utils/HikeForm/test-components";
+import {
+  checkFieldError,
+  checkNoFieldError,
+  clickSubmitButton,
+  fillFieldInput,
+  fillHikeForm,
+  uploadPhotos,
+} from "../../utils/HikeForm/test-helpers";
 
 describe("HikeForm", () => {
   let mockOnClose: Mock;
@@ -96,7 +66,7 @@ describe("HikeForm", () => {
           <HikeFormWrapper onClose={mockOnClose} onSubmit={mockOnSubmit} onSuccess={mockOnSuccess} />,
         );
         await clickSubmitButton(screen);
-        await checkForFieldError(screen, "Trail Name", "Required");
+        await checkFieldError(screen, "Trail Name", "Required");
       });
 
       test("does not display error on submit when value is valid", async () => {
@@ -115,7 +85,7 @@ describe("HikeForm", () => {
           <HikeFormWrapper onClose={mockOnClose} onSubmit={mockOnSubmit} onSuccess={mockOnSuccess} />,
         );
         await clickSubmitButton(screen);
-        await checkForFieldError(screen, "Date", "Invalid ISO date");
+        await checkFieldError(screen, "Date", "Invalid ISO date");
       });
 
       test("does not display error on submit when value is valid", async () => {
@@ -134,7 +104,7 @@ describe("HikeForm", () => {
           <HikeFormWrapper onClose={mockOnClose} onSubmit={mockOnSubmit} onSuccess={mockOnSuccess} />,
         );
         await clickSubmitButton(screen);
-        await checkForFieldError(screen, "Duration (minutes)", "Required");
+        await checkFieldError(screen, "Duration (minutes)", "Required");
       });
 
       test("displays error on submit when value is a decimal", async () => {
@@ -143,7 +113,7 @@ describe("HikeForm", () => {
         );
         await fillFieldInput(screen, "Duration (minutes)", "1.5");
         await clickSubmitButton(screen);
-        await checkForFieldError(screen, "Duration (minutes)", "Must be a positive integer");
+        await checkFieldError(screen, "Duration (minutes)", "Must be a positive integer");
       });
 
       test("displays error on submit when value is negative", async () => {
@@ -152,7 +122,7 @@ describe("HikeForm", () => {
         );
         await fillFieldInput(screen, "Duration (minutes)", "-1");
         await clickSubmitButton(screen);
-        await checkForFieldError(screen, "Duration (minutes)", "Must be a positive integer");
+        await checkFieldError(screen, "Duration (minutes)", "Must be a positive integer");
       });
 
       test("does not display error on submit when value is valid", async () => {
@@ -171,7 +141,7 @@ describe("HikeForm", () => {
           <HikeFormWrapper onClose={mockOnClose} onSubmit={mockOnSubmit} onSuccess={mockOnSuccess} />,
         );
         await clickSubmitButton(screen);
-        await checkForFieldError(screen, "Rating (0-5)", "Required");
+        await checkFieldError(screen, "Rating (0-5)", "Required");
       });
 
       test("displays error on submit when value is below 0", async () => {
@@ -180,7 +150,7 @@ describe("HikeForm", () => {
         );
         await fillFieldInput(screen, "Rating (0-5)", "-0.5");
         await clickSubmitButton(screen);
-        await checkForFieldError(screen, "Rating (0-5)", "Too small: expected number to be >=0");
+        await checkFieldError(screen, "Rating (0-5)", "Too small: expected number to be >=0");
       });
 
       test("displays error on submit when value is above 5", async () => {
@@ -189,7 +159,7 @@ describe("HikeForm", () => {
         );
         await fillFieldInput(screen, "Rating (0-5)", "5.5");
         await clickSubmitButton(screen);
-        await checkForFieldError(screen, "Rating (0-5)", "Too big: expected number to be <=5");
+        await checkFieldError(screen, "Rating (0-5)", "Too big: expected number to be <=5");
       });
 
       test("displays error on submit when value is not a multiple of 0.5", async () => {
@@ -198,7 +168,7 @@ describe("HikeForm", () => {
         );
         await fillFieldInput(screen, "Rating (0-5)", "1.2");
         await clickSubmitButton(screen);
-        await checkForFieldError(screen, "Rating (0-5)", "Invalid number: must be a multiple of 0.5");
+        await checkFieldError(screen, "Rating (0-5)", "Invalid number: must be a multiple of 0.5");
       });
 
       test("does not display error on submit when value is valid", async () => {
@@ -217,7 +187,7 @@ describe("HikeForm", () => {
           <HikeFormWrapper onClose={mockOnClose} onSubmit={mockOnSubmit} onSuccess={mockOnSuccess} />,
         );
         await clickSubmitButton(screen);
-        await checkForFieldError(screen, "Difficulty (0-10)", "Required");
+        await checkFieldError(screen, "Difficulty (0-10)", "Required");
       });
 
       test("displays error on submit when value is below 0", async () => {
@@ -226,7 +196,7 @@ describe("HikeForm", () => {
         );
         await fillFieldInput(screen, "Difficulty (0-10)", "-0.5");
         await clickSubmitButton(screen);
-        await checkForFieldError(screen, "Difficulty (0-10)", "Too small: expected number to be >=0");
+        await checkFieldError(screen, "Difficulty (0-10)", "Too small: expected number to be >=0");
       });
 
       test("displays error on submit when value is above 10", async () => {
@@ -235,7 +205,7 @@ describe("HikeForm", () => {
         );
         await fillFieldInput(screen, "Difficulty (0-10)", "10.5");
         await clickSubmitButton(screen);
-        await checkForFieldError(screen, "Difficulty (0-10)", "Too big: expected number to be <=10");
+        await checkFieldError(screen, "Difficulty (0-10)", "Too big: expected number to be <=10");
       });
 
       test("displays error on submit when value is not a multiple of 0.5", async () => {
@@ -244,7 +214,7 @@ describe("HikeForm", () => {
         );
         await fillFieldInput(screen, "Difficulty (0-10)", "1.2");
         await clickSubmitButton(screen);
-        await checkForFieldError(screen, "Difficulty (0-10)", "Invalid number: must be a multiple of 0.5");
+        await checkFieldError(screen, "Difficulty (0-10)", "Invalid number: must be a multiple of 0.5");
       });
 
       test("does not display error on submit when value is valid", async () => {
@@ -263,7 +233,7 @@ describe("HikeForm", () => {
           <HikeFormWrapper onClose={mockOnClose} onSubmit={mockOnSubmit} onSuccess={mockOnSuccess} />,
         );
         await clickSubmitButton(screen);
-        await checkForFieldError(screen, "Distance (km)", "Required");
+        await checkFieldError(screen, "Distance (km)", "Required");
       });
 
       test("displays error on submit when value is negative", async () => {
@@ -272,7 +242,7 @@ describe("HikeForm", () => {
         );
         await fillFieldInput(screen, "Distance (km)", "-1");
         await clickSubmitButton(screen);
-        await checkForFieldError(screen, "Distance (km)", "Too small: expected number to be >=0");
+        await checkFieldError(screen, "Distance (km)", "Too small: expected number to be >=0");
       });
 
       test("does not display error on submit when value is valid", async () => {
@@ -291,7 +261,7 @@ describe("HikeForm", () => {
           <HikeFormWrapper onClose={mockOnClose} onSubmit={mockOnSubmit} onSuccess={mockOnSuccess} />,
         );
         await clickSubmitButton(screen);
-        await checkForFieldError(screen, "Elevation gain (m)", "Required");
+        await checkFieldError(screen, "Elevation gain (m)", "Required");
       });
 
       test("displays error on submit when value is a decimal", async () => {
@@ -300,7 +270,7 @@ describe("HikeForm", () => {
         );
         await fillFieldInput(screen, "Elevation gain (m)", "1.5");
         await clickSubmitButton(screen);
-        await checkForFieldError(screen, "Elevation gain (m)", "Must be a positive integer");
+        await checkFieldError(screen, "Elevation gain (m)", "Must be a positive integer");
       });
 
       test("displays error on submit when value is negative", async () => {
@@ -309,7 +279,7 @@ describe("HikeForm", () => {
         );
         await fillFieldInput(screen, "Elevation gain (m)", "-1");
         await clickSubmitButton(screen);
-        await checkForFieldError(screen, "Elevation gain (m)", "Must be a positive integer");
+        await checkFieldError(screen, "Elevation gain (m)", "Must be a positive integer");
       });
 
       test("does not display error on submit when value is valid", async () => {
@@ -328,7 +298,7 @@ describe("HikeForm", () => {
           <HikeFormWrapper onClose={mockOnClose} onSubmit={mockOnSubmit} onSuccess={mockOnSuccess} />,
         );
         await clickSubmitButton(screen);
-        await checkForFieldError(screen, "AllTrails URL", "Required");
+        await checkFieldError(screen, "AllTrails URL", "Required");
       });
 
       test("displays error on submit when value is not a valid URL", async () => {
@@ -337,7 +307,7 @@ describe("HikeForm", () => {
         );
         await fillFieldInput(screen, "AllTrails URL", "not a url");
         await clickSubmitButton(screen);
-        await checkForFieldError(screen, "AllTrails URL", "Invalid URL");
+        await checkFieldError(screen, "AllTrails URL", "Invalid URL");
       });
 
       test("does not display error on submit when value is valid", async () => {
@@ -360,7 +330,7 @@ describe("HikeForm", () => {
           <HikeFormWrapper onClose={mockOnClose} onSubmit={mockOnSubmit} onSuccess={mockOnSuccess} />,
         );
         await clickSubmitButton(screen);
-        await checkForFieldError(screen, "Notes", "Required");
+        await checkFieldError(screen, "Notes", "Required");
       });
 
       test("does not display error on submit when value is valid", async () => {
@@ -385,7 +355,7 @@ describe("HikeForm", () => {
         await uploadPhotos(screen, [oversizedPhoto]);
         await clickSubmitButton(screen);
         // An error for a photo is displayed on its Caption field
-        await checkForFieldError(screen, "Caption 1", "Image must be under 10MB");
+        await checkFieldError(screen, "Caption 1", "Image must be under 10MB");
       });
 
       test("displays error on submit when file is not a valid image type", async () => {
@@ -394,7 +364,7 @@ describe("HikeForm", () => {
         );
         await uploadPhotos(screen, [invalidTypePhoto]);
         await clickSubmitButton(screen);
-        await checkForFieldError(
+        await checkFieldError(
           screen,
           "Caption 1",
           'Invalid option: expected one of "image/jpeg"|"image/png"|"image/webp"|"image/heic"|"image/heif"',
@@ -413,14 +383,14 @@ describe("HikeForm", () => {
   });
 
   test("invokes onSubmit callback when valid form is submitted and disables cancel and submit buttons while submission is in progress", async () => {
-    // Have onSubmit sleep for 5s so we can check buttons are disabled
-    mockOnSubmit.mockImplementation(() => new Promise((resolve) => setTimeout(resolve, 5000)));
+    // Have onSubmit sleep for a few seconds so we can check buttons are disabled
+    mockOnSubmit.mockImplementation(() => new Promise((resolve) => setTimeout(resolve, 2000)));
 
     const screen = await render(
       <HikeFormWrapper onClose={mockOnClose} onSubmit={mockOnSubmit} onSuccess={mockOnSuccess} />,
     );
 
-    await fillForm(screen);
+    await fillHikeForm(screen);
     await clickSubmitButton(screen);
 
     expect(mockOnSubmit).toHaveBeenCalledOnce();
@@ -440,7 +410,7 @@ describe("HikeForm", () => {
       <HikeFormWrapper onClose={mockOnClose} onSubmit={mockOnSubmit} onSuccess={mockOnSuccess} />,
     );
 
-    await fillForm(screen);
+    await fillHikeForm(screen);
     await clickSubmitButton(screen);
 
     expect(mockOnSubmit).toHaveBeenCalledOnce();
@@ -456,7 +426,7 @@ describe("HikeForm", () => {
       <HikeFormWrapper onClose={mockOnClose} onSubmit={mockOnSubmit} onSuccess={mockOnSuccess} />,
     );
 
-    await fillForm(screen);
+    await fillHikeForm(screen);
     await clickSubmitButton(screen);
 
     expect(mockOnSubmit).toHaveBeenCalledOnce();

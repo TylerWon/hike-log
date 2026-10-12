@@ -11,14 +11,14 @@ export async function uploadPhotos(screen: RenderResult, photos: File[]) {
   await userEvent.upload(fileInput, photos);
 }
 
-// Fills a Field input with the provided value. The input is looked up by its associated label.
-export async function fillFieldInput(screen: RenderResult, inputLabel: string, value: string) {
-  const input = screen.getByLabelText(inputLabel);
+// Fills a Field input with the provided value. The input is looked up by its label.
+export async function fillFieldInput(screen: RenderResult, label: string, value: string) {
+  const input = screen.getByLabelText(label);
   await input.fill(value);
 }
 
 // Checks that the provided error exists for a Field.
-export async function checkForFieldError(screen: RenderResult, fieldName: string, error: string) {
+export async function checkFieldError(screen: RenderResult, fieldName: string, error: string) {
   const field = screen.getByRole("group", { name: `${fieldName} field` });
   const errorElement = field.getByText(error);
   await expect.element(errorElement).toBeInTheDocument();
@@ -29,4 +29,34 @@ export async function checkNoFieldError(screen: RenderResult, fieldName: string)
   const field = screen.getByRole("group", { name: `${fieldName} field` });
   const errorElement = field.getByRole("paragraph");
   await expect.element(errorElement).not.toBeInTheDocument();
+}
+
+// Clicks the HikeForm submit button.
+export async function clickSubmitButton(screen: RenderResult) {
+  const submitButton = screen.getByRole("button", { name: "Submit" });
+  await submitButton.click();
+}
+
+// Fills every field in a HikeForm with a valid value. Photos can optionally be added.
+export async function fillHikeForm(screen: RenderResult, photos: File[] = []) {
+  await fillFieldInput(screen, "Trail Name", "Joffre Lakes");
+  await fillFieldInput(screen, "Date", "2026-01-01");
+  await fillFieldInput(screen, "Duration (minutes)", "240");
+  await fillFieldInput(screen, "Rating (0-5)", "4.5");
+  await fillFieldInput(screen, "Difficulty (0-10)", "7.5");
+  await fillFieldInput(screen, "Distance (km)", "11.8");
+  await fillFieldInput(screen, "Elevation gain (m)", "370");
+  await fillFieldInput(screen, "AllTrails URL", "https://www.alltrails.com/trail/canada/british-columbia/joffre-lakes");
+  await fillFieldInput(screen, "Notes", "Great views at the lake.");
+
+  if (photos.length > 0) {
+    await uploadPhotos(screen, photos);
+  }
+}
+
+// Vite imports static assets as URLs. Fetch the bytes so they can be uploaded as real image files.
+export async function createPhotoFile(assetUrl: string, filename: string) {
+  const response = await fetch(new URL(assetUrl, import.meta.url));
+  const blob = await response.blob();
+  return new File([blob], filename, { type: blob.type || "image/avif" });
 }

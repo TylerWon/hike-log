@@ -8,23 +8,16 @@ import joffreLakes1 from "../../assets/images/joffre_lakes_1.avif";
 import joffreLakes2 from "../../assets/images/joffre_lakes_2.avif";
 import joffreLakes3 from "../../assets/images/joffre_lakes_3.avif";
 import { StatefulPhotoField } from "../../utils/HikeForm/test-components";
-import { fillFieldInput, uploadPhotos } from "../../utils/HikeForm/test-helpers";
-
-// Vite imports static assets as URLs. Fetch the bytes so they can be uploaded as real image files.
-async function photoFile(assetUrl: string, filename: string) {
-  const response = await fetch(new URL(assetUrl, import.meta.url));
-  const blob = await response.blob();
-  return new File([blob], filename, { type: blob.type || "image/avif" });
-}
+import { createPhotoFile, fillFieldInput, uploadPhotos } from "../../utils/HikeForm/test-helpers";
 
 describe("PhotoField", async () => {
   let photos: File[];
 
   beforeAll(async () => {
     photos = await Promise.all([
-      photoFile(joffreLakes1, "joffre_lakes_1.avif"),
-      photoFile(joffreLakes2, "joffre_lakes_2.avif"),
-      photoFile(joffreLakes3, "joffre_lakes_3.avif"),
+      createPhotoFile(joffreLakes1, "joffre_lakes_1.avif"),
+      createPhotoFile(joffreLakes2, "joffre_lakes_2.avif"),
+      createPhotoFile(joffreLakes3, "joffre_lakes_3.avif"),
     ]);
   });
 
