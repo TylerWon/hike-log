@@ -15,7 +15,8 @@ import HikeLogContent from "../HikeLogContent";
 import HikeLogError from "../HikeLogError";
 import StatValueSkeleton from "../StatValueSkeleton";
 import Toast from "../Toast";
-import { PhotoCreationError, submitHikeForm } from "./submit-hike-form";
+import { PhotoCreationError } from "./errors";
+import { submitHikeForm } from "./submit-hike-form";
 
 const HIKES_QUERY_KEY = "hikes";
 
@@ -111,7 +112,7 @@ export default function HikeLog() {
           </li>
         ))}
         <li className="mt-4 flex justify-center">
-          <button className="primary-button px-3 py-1.5" onClick={() => setShowHikeForm(true)}>
+          <button aria-label="Add hike" className="primary-button px-3 py-1.5" onClick={() => setShowHikeForm(true)}>
             <svg
               fill="none"
               height="11"

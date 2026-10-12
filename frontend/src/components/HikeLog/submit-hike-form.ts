@@ -2,23 +2,10 @@ import type { HikeFormData } from "../../schemas/forms/hike";
 
 import { createHike, createPhotos, createPresignedUrls } from "../../api/hikes";
 import { uploadFile } from "../../api/s3";
-
-class HikeCreationError extends Error {
-  constructor(message: string, options?: ErrorOptions) {
-    super(message, options);
-    this.name = this.constructor.name;
-  }
-}
-
-export class PhotoCreationError extends Error {
-  constructor(message: string, options?: ErrorOptions) {
-    super(message, options);
-    this.name = this.constructor.name;
-  }
-}
+import { HikeCreationError, PhotoCreationError } from "./errors";
 
 /**
- * Handles submission of data collected by the HikeForm.
+ * Handles submission of data collected by a HikeForm.
  *
  * Creates a Hike and any Photos that were uploaded. Photo creation is a multi-step process that involves obtaining
  * a S3 presigned PUT URL, using those URLs to upload the photos to S3, and finally creating the Photo models in the

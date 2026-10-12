@@ -19,5 +19,8 @@ export default defineConfig({
     // Vitest Projects. Projects allow tests to run in different environments. Each folder listed will be treated as
     // their own Project and have their own configuration file.
     projects: ["src/tests/component", "src/tests/unit-browser", "src/tests/unit-node", "src/tests/visual"],
+
+    // Prevent console.* logs from appearing in test output for passing tests.
+    silent: "passed-only",
   },
 });
