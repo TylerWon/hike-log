@@ -16,7 +16,9 @@ type BrowserModeTestConfigArgs = {
 
 type BrowserOptions = NonNullable<NonNullable<UserWorkspaceConfig["test"]>["browser"]>;
 
-// Creates a Vitest Project config to run tests in Vitest Browser Mode.
+/**
+ * Creates a Vitest Project config to run tests in Vitest Browser Mode.
+ */
 export function defineBrowserModeTestConfig({ browser, name }: BrowserModeTestConfigArgs) {
   return mergeConfig(
     COMMON_TEST_CONFIG,

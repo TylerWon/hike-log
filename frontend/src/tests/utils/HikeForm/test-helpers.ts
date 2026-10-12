@@ -3,41 +3,54 @@ import type { RenderResult } from "vitest-browser-react";
 import { expect } from "vitest";
 import { userEvent } from "vitest/browser";
 
-// Uploads photos to the PhotoField.
-// We cannot test photo upload through the actual user path (i.e. clicking the upload button) because that opens an OS
-// dialog that Vitest cannot access. Instead, we directly access the hidden file input and upload photos with it.
+/**
+ * Uploads photos to the PhotoField.
+ *
+ * We cannot test photo upload through the actual user path (i.e. using the upload button) because that opens an OS
+ * dialog that Vitest cannot access. Instead, we must directly access the hidden file input and upload photos with it.
+ */
 export async function uploadPhotos(screen: RenderResult, photos: File[]) {
   const fileInput = screen.getByLabelText("Hidden file input"); // file inputs don't have an ARIA role
   await userEvent.upload(fileInput, photos);
 }
 
-// Fills a Field input with the provided value. The input is looked up by its label.
+/**
+ * Fills a Field input with the provided value. The input is looked up by its label.
+ */
 export async function fillFieldInput(screen: RenderResult, label: string, value: string) {
   const input = screen.getByLabelText(label);
   await input.fill(value);
 }
 
-// Checks that the provided error exists for a Field.
+/**
+ * Checks that the provided error exists for a Field.
+ */
 export async function checkFieldError(screen: RenderResult, fieldName: string, error: string) {
   const field = screen.getByRole("group", { name: `${fieldName} field` });
   const errorElement = field.getByText(error);
   await expect.element(errorElement).toBeInTheDocument();
 }
 
-// Checks no error exists for a Field.
+/**
+ * Checks no error exists for a Field.
+ */
 export async function checkNoFieldError(screen: RenderResult, fieldName: string) {
   const field = screen.getByRole("group", { name: `${fieldName} field` });
   const errorElement = field.getByRole("paragraph");
   await expect.element(errorElement).not.toBeInTheDocument();
 }
 
-// Clicks the HikeForm submit button.
+/**
+ * Clicks the HikeForm submit button.
+ */
 export async function clickSubmitButton(screen: RenderResult) {
   const submitButton = screen.getByRole("button", { name: "Submit" });
   await submitButton.click();
 }
 
-// Fills every field in a HikeForm with a valid value. Photos can optionally be added.
+/**
+ * Fills every field in a HikeForm with a valid value. Photos can optionally be added.
+ */
 export async function fillHikeForm(screen: RenderResult, photos: File[] = []) {
   await fillFieldInput(screen, "Trail Name", "Joffre Lakes");
   await fillFieldInput(screen, "Date", "2026-01-01");
@@ -54,7 +67,9 @@ export async function fillHikeForm(screen: RenderResult, photos: File[] = []) {
   }
 }
 
-// Vite imports static assets as URLs. Fetch the bytes so they can be uploaded as real image files.
+/**
+ * Vite imports static assets as URLs. Fetch the bytes so they can be uploaded as real image files.
+ */
 export async function createPhotoFile(assetUrl: string, filename: string) {
   const response = await fetch(new URL(assetUrl, import.meta.url));
   const blob = await response.blob();

@@ -1,5 +1,8 @@
-// Uploads a file to S3 using the given presigned URL.
-// Throws an error if the response is not 200.
+/**
+ * Uploads a file to S3 using the given presigned URL.
+ *
+ * Throws an error if the response is not 200.
+ */
 export async function uploadFile(presignedUrl: string, file: File): Promise<void> {
   const response = await fetch(presignedUrl, {
     body: file,

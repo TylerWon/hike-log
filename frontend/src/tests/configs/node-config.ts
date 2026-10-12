@@ -6,7 +6,9 @@ type NodeTestConfigArgs = {
   name: string;
 };
 
-// Creates a Vitest Project config to run tests in Node.
+/**
+ * Creates a Vitest Project config to run tests in Node.
+ */
 export function defineNodeTestConfig({ name }: NodeTestConfigArgs) {
   return mergeConfig(
     COMMON_TEST_CONFIG,

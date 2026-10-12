@@ -17,10 +17,13 @@ export class PhotoCreationError extends Error {
   }
 }
 
-// Handles submission of HikeForm data.
-// Creates the Hike and any Photos that were uploaded. Photo creation is a multi-step process that involves obtaining
-// a S3 presigned PUT URL, using those URLs to upload the photos to S3, and finally creating the Photo models in the
-// backend.
+/**
+ * Handles submission of data collected by the HikeForm.
+ *
+ * Creates a Hike and any Photos that were uploaded. Photo creation is a multi-step process that involves obtaining
+ * a S3 presigned PUT URL, using those URLs to upload the photos to S3, and finally creating the Photo models in the
+ * backend.
+ */
 export async function submitHikeForm(formData: HikeFormData): Promise<void> {
   const { photos, ...hikeData } = formData;
 

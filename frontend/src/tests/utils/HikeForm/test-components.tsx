@@ -7,14 +7,18 @@ import Field from "../../../components/HikeForm/Field";
 import HikeForm, { type HikeFormProps } from "../../../components/HikeForm/HikeForm";
 import PhotoField from "../../../components/HikeForm/PhotoField";
 
-// Wrapper around a PhotoField that allows photos to be added, removed, and updated.
+/**
+ * Wrapper around a PhotoField that allows photos to be added, removed, and updated.
+ */
 export function StatefulPhotoField({ errors }: { errors?: PhotoErrors }) {
   const [photos, setPhotos] = useState<PhotoData[]>([]);
 
   return <PhotoField errors={errors} photos={photos} setPhotos={setPhotos} />;
 }
 
-// Wrapper around a Field that sets some default options.
+/**
+ * Wrapper around a Field that sets some default options.
+ */
 export function FieldWrapper({ error, required }: { error?: string; required?: boolean }) {
   return (
     <Field error={error} id="name" label="Name" required={required}>
@@ -23,7 +27,9 @@ export function FieldWrapper({ error, required }: { error?: string; required?: b
   );
 }
 
-// Wraps a HikeForm with a Tanstack Query client for testing.
+/**
+ * Wraps a HikeForm with a Tanstack Query client for testing.
+ */
 export function HikeFormWrapper({ onClose, onSubmit, onSuccess }: HikeFormProps) {
   const [queryClient] = useState(
     () =>

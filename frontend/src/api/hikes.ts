@@ -14,8 +14,11 @@ import {
 
 const API_URL = `${import.meta.env.VITE_API_URL}/hikes`;
 
-// Creates a Hike.
-// Throws an error if the response is not 201 or cannot be parsed.
+/**
+ * Creates a Hike.
+ *
+ * Throws an error if the response is not 201 or cannot be parsed.
+ */
 export async function createHike(reqBody: CreateHikeRequest): Promise<Hike> {
   const response = await fetch(API_URL, {
     body: JSON.stringify(reqBody),
@@ -38,8 +41,11 @@ export async function createHike(reqBody: CreateHikeRequest): Promise<Hike> {
   return result.data;
 }
 
-// Creates Photos for a Hike.
-// Throws an error if the response is not 201 or cannot be parsed.
+/**
+ * Creates Photos for a Hike.
+ *
+ * Throws an error if the response is not 201 or cannot be parsed.
+ */
 export async function createPhotos(hikeId: number, reqBody: CreatePhotosRequest): Promise<CreatePhotosResponse> {
   const response = await fetch(`${API_URL}/${hikeId}/photos`, {
     body: JSON.stringify(reqBody),
@@ -62,8 +68,11 @@ export async function createPhotos(hikeId: number, reqBody: CreatePhotosRequest)
   return result.data;
 }
 
-// Creates S3 presigned URLs to upload a photos for a Hike.
-// Throws an error if the response is not 201 or cannot be parsed.
+/**
+ * Creates S3 presigned URLs to upload a photos for a Hike.
+ *
+ * Throws an error if the response is not 201 or cannot be parsed.
+ */
 export async function createPresignedUrls(
   hikeId: number,
   reqBody: CreatePresignedUrlsRequest,
@@ -89,8 +98,11 @@ export async function createPresignedUrls(
   return result.data;
 }
 
-// Retrieves all hikes from the API.
-// Throws an error if the response is not 200 or cannot be parsed.
+/**
+ * Retrieves all hikes from the API.
+ *
+ * Throws an error if the response is not 200 or cannot be parsed.
+ */
 export async function fetchHikes(): Promise<Hike[]> {
   const response = await fetch(API_URL);
 

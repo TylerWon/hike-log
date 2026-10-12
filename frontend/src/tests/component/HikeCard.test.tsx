@@ -45,7 +45,9 @@ async function clickOverview(screen: RenderResult) {
   await overview.click();
 }
 
-// Wrapper around a HikeCard which allows it to be expanded/unexpanded
+/**
+ * Wrapper around a HikeCard which allows it to be expanded/unexpanded
+ */
 function StatefulHikeCard() {
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
 
