@@ -69,7 +69,7 @@ export async function createPhotos(hikeId: number, reqBody: CreatePhotosRequest)
 }
 
 /**
- * Creates S3 presigned URLs to upload a photos for a Hike.
+ * Creates S3 presigned URLs to upload photos for a Hike.
  *
  * Throws an error if the response is not 201 or cannot be parsed.
  */
