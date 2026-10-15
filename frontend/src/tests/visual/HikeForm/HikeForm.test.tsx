@@ -3,8 +3,9 @@ import { render } from "vitest-browser-react";
 
 import joffreLakes1 from "../../assets/images/joffre_lakes_1.avif";
 import joffreLakes2 from "../../assets/images/joffre_lakes_2.avif";
+import { createFileFromUrl } from "../../utils/files";
 import { HikeFormWrapper } from "../../utils/HikeForm/test-components";
-import { clickSubmitButton, createPhotoFile, fillFieldInput, fillHikeForm } from "../../utils/HikeForm/test-helpers";
+import { clickSubmitButton, fillFieldInput, fillHikeForm } from "../../utils/HikeForm/test-helpers";
 
 describe("HikeForm", () => {
   let mockOnClose: Mock;
@@ -32,8 +33,8 @@ describe("HikeForm", () => {
     );
 
     const photos = await Promise.all([
-      createPhotoFile(joffreLakes1, "joffre_lakes_1.avif"),
-      createPhotoFile(joffreLakes2, "joffre_lakes_2.avif"),
+      createFileFromUrl(joffreLakes1, "joffre_lakes_1.avif"),
+      createFileFromUrl(joffreLakes2, "joffre_lakes_2.avif"),
     ]);
     await fillHikeForm(screen, photos);
 

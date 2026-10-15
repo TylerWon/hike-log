@@ -7,17 +7,18 @@ import type { PhotoErrors } from "../../../components/HikeForm/types";
 import joffreLakes1 from "../../assets/images/joffre_lakes_1.avif";
 import joffreLakes2 from "../../assets/images/joffre_lakes_2.avif";
 import joffreLakes3 from "../../assets/images/joffre_lakes_3.avif";
+import { createFileFromUrl } from "../../utils/files";
 import { StatefulPhotoField } from "../../utils/HikeForm/test-components";
-import { createPhotoFile, fillFieldInput, uploadPhotos } from "../../utils/HikeForm/test-helpers";
+import { fillFieldInput, uploadPhotos } from "../../utils/HikeForm/test-helpers";
 
 describe("PhotoField", async () => {
   let photos: File[];
 
   beforeAll(async () => {
     photos = await Promise.all([
-      createPhotoFile(joffreLakes1, "joffre_lakes_1.avif"),
-      createPhotoFile(joffreLakes2, "joffre_lakes_2.avif"),
-      createPhotoFile(joffreLakes3, "joffre_lakes_3.avif"),
+      createFileFromUrl(joffreLakes1, "joffre_lakes_1.avif"),
+      createFileFromUrl(joffreLakes2, "joffre_lakes_2.avif"),
+      createFileFromUrl(joffreLakes3, "joffre_lakes_3.avif"),
     ]);
   });
 
