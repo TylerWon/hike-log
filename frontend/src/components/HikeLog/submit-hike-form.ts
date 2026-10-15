@@ -1,16 +1,11 @@
 import type { HikeFormData } from "../../schemas/forms/hike";
 import type { PhotoFormData } from "../../schemas/forms/photo";
 import type { CreatePhotosResponse, CreatePresignedUrlsResponse } from "../../schemas/responses/hikes";
+import type { UploadPhotosResponse } from "../../schemas/responses/s3";
 
 import { createHike, createPhotos, createPresignedUrls } from "../../api/hikes";
-import { uploadFile } from "../../api/s3";
+import { uploadPhotos } from "../../api/s3";
 import { HikeCreationError, PhotoCreationError } from "./errors";
-
-interface UploadPhotoResponse {
-  index: number;
-  success: boolean;
-}
-type UploadPhotosResponse = UploadPhotoResponse[];
 
 /**
  * Handles submission of data collected by a HikeForm.
@@ -56,7 +51,7 @@ export async function uploadAndCreatePhotos(photos: PhotoFormData[], hikeId: num
       }
     }
 
-    const uploadPhotosResponse = await uploadPhotos(photos, createPresignedUrlsResponse);
+    const uploadPhotosResponse = await uploadPhotosHelper(photos, createPresignedUrlsResponse);
     for (const response of uploadPhotosResponse) {
       if (!errors.has(response.index) && !response.success) {
         errors.set(response.index, `Failed to upload photo ${response.index} to S3`);
@@ -103,35 +98,32 @@ export async function createPresignedUrlsHelper(
 }
 
 /**
- * Uploads photos to S3 using the provided presigned PUT URLs. Skips photos that failed to have a presigned URL
- * generated.
+ * Uploads photos to S3 using the provided presigned PUT URLs. Skips photos that failed to have a presigned URL created.
  */
-export async function uploadPhotos(
+export async function uploadPhotosHelper(
   photos: PhotoFormData[],
   createPresignedUrlsResponse: CreatePresignedUrlsResponse,
 ): Promise<UploadPhotosResponse> {
-  const promises = [];
+  const reqBody = [];
   for (const response of createPresignedUrlsResponse) {
     if (!response.success) {
       continue;
     }
 
     const photoIndex = response.index;
-    promises.push(
-      uploadFile(response.result.presignedUrl, photos[photoIndex].file).then(
-        // on resolved
-        () => ({ index: photoIndex, success: true }),
-        // on rejected
-        () => ({ index: photoIndex, success: false }),
-      ),
-    );
+    const reqItem = {
+      index: photoIndex,
+      photo: photos[photoIndex].file,
+      presignedUrl: response.result.presignedUrl,
+    };
+    reqBody.push(reqItem);
   }
 
-  return await Promise.all(promises);
+  return await uploadPhotos(reqBody);
 }
 
 /**
- * Creates Photo models for each provided photo. Skips photos that failed to have a presigned URL generated or could not
+ * Creates Photo models for each provided photo. Skips photos that failed to have a presigned URL created or could not
  * be uploaded to S3.
  */
 export async function createPhotosHelper(

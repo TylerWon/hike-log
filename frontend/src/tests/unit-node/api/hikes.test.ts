@@ -11,8 +11,8 @@ import type {
 import { createHike, createPhotos, createPresignedUrls, fetchHikes } from "../../../api/hikes";
 import {
   CREATE_HIKE_RESPONSE_MOCK,
-  CREATE_PHOTOS_RESPONSE_MOCK,
-  CREATE_PRESIGNED_URLS_RESPONSE_MOCK,
+  CREATE_PHOTOS_RESPONSE_MOCK_1,
+  CREATE_PRESIGNED_URLS_RESPONSE_MOCK_1,
   LIST_HIKES_RESPONSE_MOCK,
 } from "../../mocks/api-responses/hikes";
 import { HIKE_MOCK_1, HIKE_MOCK_2 } from "../../mocks/models/hike";
@@ -102,12 +102,12 @@ describe("hikes", () => {
 
     test("returns newly created photos when successful", async () => {
       const handler = http.post(`${API_URL}/${hikeId}/photos`, () => {
-        return HttpResponse.json(CREATE_PHOTOS_RESPONSE_MOCK, { status: 201 });
+        return HttpResponse.json(CREATE_PHOTOS_RESPONSE_MOCK_1, { status: 201 });
       });
       server.use(handler);
 
       const photos = await createPhotos(hikeId, reqBody);
-      expect(photos).toEqual(CREATE_PHOTOS_RESPONSE_MOCK);
+      expect(photos).toEqual(CREATE_PHOTOS_RESPONSE_MOCK_1);
     });
 
     test("throws an error when the response is not 201", async () => {
@@ -155,12 +155,12 @@ describe("hikes", () => {
 
     test("returns newly created presigned URLs when successful", async () => {
       const handler = http.post(`${API_URL}/${hikeId}/photos/presigned-urls`, () => {
-        return HttpResponse.json(CREATE_PRESIGNED_URLS_RESPONSE_MOCK, { status: 201 });
+        return HttpResponse.json(CREATE_PRESIGNED_URLS_RESPONSE_MOCK_1, { status: 201 });
       });
       server.use(handler);
 
       const presignedUrls = await createPresignedUrls(hikeId, reqBody);
-      expect(presignedUrls).toEqual(CREATE_PRESIGNED_URLS_RESPONSE_MOCK);
+      expect(presignedUrls).toEqual(CREATE_PRESIGNED_URLS_RESPONSE_MOCK_1);
     });
 
     test("throws an error when the response is not 201", async () => {
