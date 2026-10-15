@@ -6,11 +6,13 @@ To run the application locally, use docker compose: `docker compose up`. This ru
 
 See the [frontend README](frontend/README.md) and [backend README](backend/README.md) for more specific instructions for those environments.
 
-## Localstack Set-up
+## LocalStack Set-up
 
-You must obtain an [auth token](https://docs.localstack.cloud/aws/getting-started/auth-token/) in order for Localstack to work. Add it to a `.env` file in the root of the project:
+You must obtain an [auth token](https://docs.localstack.cloud/aws/getting-started/auth-token/) in order for LocalStack to work. Add it to a `.env` file in the root of the project:
 
 ```
 LOCALSTACK_AUTH_TOKEN=<your_token_here>
 
 ```
+
+Note: data will not be persisted by LocalStack between container restarts unless you have a pro account.

@@ -67,7 +67,7 @@ services:
       - "127.0.0.1:443:443"
     environment:
       - LOCALSTACK_AUTH_TOKEN=${LOCALSTACK_AUTH_TOKEN}
-      # Persist LocalStack data to a volume
+      # Persist LocalStack data to a volume (only works if you have a pro account)
       - PERSISTENCE=1
     volumes:
       # Named volume for LocalStack's data
