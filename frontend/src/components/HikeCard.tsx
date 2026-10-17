@@ -9,9 +9,10 @@ interface HikeCardProps {
   index: number;
   isExpanded: boolean;
   onClick: () => void;
+  onDelete: () => Promise<void>;
 }
 
-export default function HikeCard({ hike, index, isExpanded, onClick }: HikeCardProps) {
+export default function HikeCard({ hike, index, isExpanded, onClick, onDelete }: HikeCardProps) {
   return (
     <div
       aria-label={`${hike.trailName} card`}
@@ -22,9 +23,7 @@ export default function HikeCard({ hike, index, isExpanded, onClick }: HikeCardP
       role="region"
     >
       {/* Hike overview (always shown) */}
-      <button aria-expanded={isExpanded} className="w-full text-left cursor-pointer group/hike-card" onClick={onClick}>
-        <HikeOverview hike={hike} index={index} isExpanded={isExpanded} />
-      </button>
+      <HikeOverview hike={hike} index={index} isExpanded={isExpanded} onClick={onClick} onDelete={onDelete} />
 
       {/* Hike details (shown when overview is clicked) */}
       <div

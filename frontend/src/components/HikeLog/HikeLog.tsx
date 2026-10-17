@@ -6,7 +6,7 @@ import { useState } from "react";
 
 import type { HikeFormData } from "../../schemas/forms/hike";
 
-import { fetchHikes } from "../../api/hikes";
+import { deleteHike, fetchHikes } from "../../api/hikes";
 import { formatDistance, formatDuration, formatElevation } from "../../utils/formatters";
 import HikeCard from "../HikeCard";
 import HikeCardSkeleton from "../HikeCardSkeleton";
@@ -33,8 +33,19 @@ export default function HikeLog() {
     refetchOnWindowFocus: false,
   });
 
-  const handleCardClick = (id: number) => {
-    setExpandedCardId((prev) => (prev === id ? null : id));
+  const handleCardClick = (hikeId: number) => {
+    setExpandedCardId((prev) => (prev === hikeId ? null : hikeId));
+  };
+
+  const handleCardDelete = async (hikeId: number) => {
+    // Fail close on error
+    await deleteHike(hikeId);
+
+    if (hikeId === expandedCardId) {
+      setExpandedCardId(null);
+    }
+
+    await refreshLog();
   };
 
   const handleHikeFormClose = () => {
@@ -58,9 +69,13 @@ export default function HikeLog() {
   };
 
   const handleHikeFormSuccess = async () => {
-    // Invalidates the list hikes query so all Hikes get refetched
-    await queryClient.invalidateQueries({ queryKey: [HIKES_QUERY_KEY] });
+    await refreshLog();
     handleHikeFormClose();
+  };
+
+  const refreshLog = async () => {
+    // Invalidates the hike query so all Hikes get refetched
+    await queryClient.invalidateQueries({ queryKey: [HIKES_QUERY_KEY] });
   };
 
   if (hikes.isError) {
@@ -108,6 +123,7 @@ export default function HikeLog() {
               index={i + 1}
               isExpanded={expandedCardId === hike.id}
               onClick={() => handleCardClick(hike.id)}
+              onDelete={async () => await handleCardDelete(hike.id)}
             />
           </li>
         ))}

@@ -99,6 +99,21 @@ export async function createPresignedUrls(
 }
 
 /**
+ * Deletes a Hike.
+ *
+ * Throws an error if the response is not 200.
+ */
+export async function deleteHike(hikeId: number): Promise<void> {
+  const response = await fetch(`${API_URL}/${hikeId}`, {
+    method: "DELETE",
+  });
+
+  if (response.status !== 200) {
+    throw new Error(`Failed to delete hike: ${response.status} - ${response.statusText}`);
+  }
+}
+
+/**
  * Retrieves all hikes from the API.
  *
  * Throws an error if the response is not 200 or cannot be parsed.

@@ -1,3 +1,5 @@
+import "../assets/styles/dialog.css";
+
 import { useState } from "react";
 
 import type { Photo } from "../schemas/models/photo";
@@ -46,12 +48,7 @@ export default function PhotoGallery({ photos }: PhotoGalleryProps) {
 
       {/* Lightbox (shown when a photo is clicked) */}
       {lightboxIndex !== null && (
-        <div
-          aria-label="Photo lightbox"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-[#050805]/95"
-          onClick={closeLightbox}
-          role="region"
-        >
+        <div aria-label="Photo lightbox" className="dialog-backdrop" onClick={closeLightbox} role="region">
           {/* Close */}
           <button
             aria-label="Close button"
