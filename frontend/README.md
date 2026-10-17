@@ -14,7 +14,7 @@ Since the application runs in a container, it is easiest to install/uninstall th
 To lint all code: `npm run lint`
 To format all code: `npm run format`
 
-Install the [ESLint](https://marketplace.cursorapi.com/items/?itemName=dbaeumer.vscode-eslint) and [Prettier](https://marketplace.cursorapi.com/items/?itemName=esbenp.prettier-vscode) extensions to lint and format automatically when a file is saved. These settings can be adjusted in `.vscode/settings.json`.
+Install the [ESLint](https://marketplace.cursorapi.com/items/?itemName=dbaeumer.vscode-eslint), [Prettier](https://marketplace.cursorapi.com/items/?itemName=esbenp.prettier-vscode), [Tailwind CSS IntelliSense](https://marketplace.cursorapi.com/items/?itemName=bradlc.vscode-tailwindcss) extensions to lint and format automatically when a file is saved. These settings can be adjusted in `.vscode/settings.json`.
 
 ## Testing
 
