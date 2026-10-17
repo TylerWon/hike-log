@@ -8,19 +8,19 @@ import { HikeFormWrapper } from "../../utils/HikeForm/test-components";
 import { clickSubmitButton, fillFieldInput, fillHikeForm } from "../../utils/HikeForm/test-helpers";
 
 describe("HikeForm", () => {
-  let mockOnClose: Mock;
+  let mockOnCancel: Mock;
   let mockOnSubmit: Mock;
   let mockOnSuccess: Mock;
 
   beforeEach(() => {
-    mockOnClose = vi.fn();
+    mockOnCancel = vi.fn();
     mockOnSubmit = vi.fn();
     mockOnSuccess = vi.fn();
   });
 
   test("displays empty form", async () => {
     const screen = await render(
-      <HikeFormWrapper onClose={mockOnClose} onSubmit={mockOnSubmit} onSuccess={mockOnSuccess} />,
+      <HikeFormWrapper onCancel={mockOnCancel} onSubmit={mockOnSubmit} onSuccess={mockOnSuccess} />,
     );
 
     const form = screen.getByRole("region", { name: "Hike form backdrop" });
@@ -29,7 +29,7 @@ describe("HikeForm", () => {
 
   test("displays completed form", async () => {
     const screen = await render(
-      <HikeFormWrapper onClose={mockOnClose} onSubmit={mockOnSubmit} onSuccess={mockOnSuccess} />,
+      <HikeFormWrapper onCancel={mockOnCancel} onSubmit={mockOnSubmit} onSuccess={mockOnSuccess} />,
     );
 
     const photos = await Promise.all([
@@ -44,7 +44,7 @@ describe("HikeForm", () => {
 
   test("displays field errors when form is submitted with invalid values", async () => {
     const screen = await render(
-      <HikeFormWrapper onClose={mockOnClose} onSubmit={mockOnSubmit} onSuccess={mockOnSuccess} />,
+      <HikeFormWrapper onCancel={mockOnCancel} onSubmit={mockOnSubmit} onSuccess={mockOnSuccess} />,
     );
 
     // Fill in some fields correctly, some incorrectly, and leave some empty
@@ -63,7 +63,7 @@ describe("HikeForm", () => {
     mockOnSubmit.mockImplementation(() => new Promise((resolve) => setTimeout(resolve, 2000)));
 
     const screen = await render(
-      <HikeFormWrapper onClose={mockOnClose} onSubmit={mockOnSubmit} onSuccess={mockOnSuccess} />,
+      <HikeFormWrapper onCancel={mockOnCancel} onSubmit={mockOnSubmit} onSuccess={mockOnSuccess} />,
     );
 
     await fillHikeForm(screen);
@@ -77,7 +77,7 @@ describe("HikeForm", () => {
     mockOnSubmit.mockRejectedValue(new Error("Failed to submit form"));
 
     const screen = await render(
-      <HikeFormWrapper onClose={mockOnClose} onSubmit={mockOnSubmit} onSuccess={mockOnSuccess} />,
+      <HikeFormWrapper onCancel={mockOnCancel} onSubmit={mockOnSubmit} onSuccess={mockOnSuccess} />,
     );
 
     await fillHikeForm(screen);

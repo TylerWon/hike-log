@@ -35,8 +35,15 @@ export default function ConfirmationDialog({
   const acceptPending = mutation.isPending;
   const acceptError = mutation.isError;
 
+  const handleCancel = () => {
+    // Don't allow dialog to be cancelled while accept is in progress
+    if (!acceptPending) {
+      onCancel();
+    }
+  };
+
   return (
-    <div className="dialog-backdrop" onClick={onCancel}>
+    <div className="dialog-backdrop" onClick={handleCancel}>
       <div
         aria-modal="true"
         className="w-full max-w-sm rounded-lg border border-forest-800 bg-forest-900 overflow-hidden"
@@ -55,7 +62,7 @@ export default function ConfirmationDialog({
           {acceptError && <FormError />}
 
           <div className="flex items-center justify-end gap-2 px-5 py-4">
-            <button className="secondary-button px-4 py-2" disabled={acceptPending} onClick={onCancel}>
+            <button className="secondary-button px-4 py-2" disabled={acceptPending} onClick={handleCancel}>
               Cancel
             </button>
             <button

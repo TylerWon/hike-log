@@ -48,7 +48,7 @@ export default function HikeLog() {
     await refreshLog();
   };
 
-  const handleHikeFormClose = () => {
+  const handleHikeFormCancel = () => {
     setShowHikeForm(false);
   };
 
@@ -70,7 +70,7 @@ export default function HikeLog() {
 
   const handleHikeFormSuccess = async () => {
     await refreshLog();
-    handleHikeFormClose();
+    handleHikeFormCancel();
   };
 
   const refreshLog = async () => {
@@ -144,7 +144,7 @@ export default function HikeLog() {
         </li>
       </HikeLogContent>
       {showHikeForm && (
-        <HikeForm onClose={handleHikeFormClose} onSubmit={handleHikeFormSubmit} onSuccess={handleHikeFormSuccess} />
+        <HikeForm onCancel={handleHikeFormCancel} onSubmit={handleHikeFormSubmit} onSuccess={handleHikeFormSuccess} />
       )}
       {toastMessage && <Toast message={toastMessage} onDismiss={() => setToastMessage(null)} />}
     </>

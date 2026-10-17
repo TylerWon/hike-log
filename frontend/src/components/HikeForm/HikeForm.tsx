@@ -16,12 +16,12 @@ import Field from "./Field";
 import PhotoField from "./PhotoField";
 
 export interface HikeFormProps {
-  onClose: () => void;
+  onCancel: () => void;
   onSubmit: (formData: HikeFormData) => Promise<void>;
   onSuccess: () => Promise<void>;
 }
 
-export default function HikeForm({ onClose, onSubmit, onSuccess }: HikeFormProps) {
+export default function HikeForm({ onCancel, onSubmit, onSuccess }: HikeFormProps) {
   const [trailName, setTrailName] = useState<string>("");
   const [date, setDate] = useState<string>("");
   const [rating, setRating] = useState<string>("");
@@ -33,6 +33,15 @@ export default function HikeForm({ onClose, onSubmit, onSuccess }: HikeFormProps
   const [notes, setNotes] = useState<string>("");
   const [photos, setPhotos] = useState<PhotoData[]>([]);
   const [fieldErrors, setFieldErrors] = useState<$ZodErrorTree<HikeFormData>>();
+
+  const addHikeMutation = useMutation({
+    mutationFn: onSubmit, // called when mutate() is invoked for this mutation
+    onError: (error) => console.error("Failed to submit HikeForm: ", error),
+    onSuccess: onSuccess,
+  });
+
+  const submissionPending = addHikeMutation.isPending;
+  const submissionError = addHikeMutation.isError;
 
   const validate = (): HikeFormData | null => {
     const hikePhotos = photos.map((photo: PhotoData, idx: number) => ({
@@ -74,17 +83,15 @@ export default function HikeForm({ onClose, onSubmit, onSuccess }: HikeFormProps
     addHikeMutation.mutate(formData);
   };
 
-  const addHikeMutation = useMutation({
-    mutationFn: onSubmit, // called when mutate() is invoked for this mutation
-    onError: (error) => console.error("Failed to submit HikeForm: ", error),
-    onSuccess: onSuccess,
-  });
-
-  const submissionPending = addHikeMutation.isPending;
-  const submissionError = addHikeMutation.isError;
+  const handleCancel = () => {
+    // Don't allow form to be cancelled while submission is in progress
+    if (!submissionPending) {
+      onCancel();
+    }
+  };
 
   return (
-    <div aria-label="Hike form backdrop" className="dialog-backdrop" onClick={onClose} role="region">
+    <div aria-label="Hike form backdrop" className="dialog-backdrop" onClick={handleCancel} role="region">
       <div
         aria-label="Hike form"
         aria-modal="true"
@@ -98,7 +105,7 @@ export default function HikeForm({ onClose, onSubmit, onSuccess }: HikeFormProps
           <button
             aria-label="Close"
             className="text-forest-700 hover:text-forest-600 transition-colors p-1 focus:outline-none"
-            onClick={onClose}
+            onClick={handleCancel}
           >
             <svg
               fill="none"
@@ -269,7 +276,7 @@ export default function HikeForm({ onClose, onSubmit, onSuccess }: HikeFormProps
                 aria-label="Cancel"
                 className="secondary-button px-4 py-2"
                 disabled={submissionPending}
-                onClick={onClose}
+                onClick={handleCancel}
                 type="button"
               >
                 Cancel
