@@ -34,14 +34,6 @@ export default function HikeForm({ onClose, onSubmit, onSuccess }: HikeFormProps
   const [photos, setPhotos] = useState<PhotoData[]>([]);
   const [fieldErrors, setFieldErrors] = useState<$ZodErrorTree<HikeFormData>>();
 
-  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-    // target = element that was actually clicked
-    // currentTarget = element that is assigned this handler
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
-  };
-
   const validate = (): HikeFormData | null => {
     const hikePhotos = photos.map((photo: PhotoData, idx: number) => ({
       caption: photo.caption.trim(),
@@ -82,12 +74,6 @@ export default function HikeForm({ onClose, onSubmit, onSuccess }: HikeFormProps
     addHikeMutation.mutate(formData);
   };
 
-  const handleCancel = () => {
-    // Clears any errors for the mutation
-    addHikeMutation.reset();
-    onClose();
-  };
-
   const addHikeMutation = useMutation({
     mutationFn: onSubmit, // called when mutate() is invoked for this mutation
     onError: (error) => console.error("Failed to submit HikeForm: ", error),
@@ -98,16 +84,12 @@ export default function HikeForm({ onClose, onSubmit, onSuccess }: HikeFormProps
   const submissionError = addHikeMutation.isError;
 
   return (
-    <div
-      aria-label="Hike form backdrop"
-      className="dialog-backdrop"
-      onClick={(e) => handleBackdropClick(e)}
-      role="region"
-    >
+    <div aria-label="Hike form backdrop" className="dialog-backdrop" onClick={onClose} role="region">
       <div
         aria-label="Hike form"
         aria-modal="true"
         className="w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-lg border border-forest-800 bg-forest-900 scrollbar-thin"
+        onClick={(e) => e.stopPropagation()} // Prevents form from closing when it is clicked
         role="dialog"
       >
         {/* Header */}
@@ -116,7 +98,7 @@ export default function HikeForm({ onClose, onSubmit, onSuccess }: HikeFormProps
           <button
             aria-label="Close"
             className="text-forest-700 hover:text-forest-600 transition-colors p-1 focus:outline-none"
-            onClick={handleCancel}
+            onClick={onClose}
           >
             <svg
               fill="none"
@@ -287,7 +269,7 @@ export default function HikeForm({ onClose, onSubmit, onSuccess }: HikeFormProps
                 aria-label="Cancel"
                 className="secondary-button px-4 py-2"
                 disabled={submissionPending}
-                onClick={handleCancel}
+                onClick={onClose}
                 type="button"
               >
                 Cancel
