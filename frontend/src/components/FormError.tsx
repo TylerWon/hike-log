@@ -1,6 +1,6 @@
 export default function FormError() {
   return (
-    <div className="flex items-center gap-2 px-5 py-3 bg-coral-950">
+    <div aria-label="Form error" className="flex items-center gap-2 px-5 py-3 bg-coral-950" role="region">
       <svg
         className="shrink-0"
         fill="none"
