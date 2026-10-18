@@ -4,11 +4,13 @@ interface TextWithSpinnerProps {
 
 export default function TextWithSpinner({ text }: TextWithSpinnerProps) {
   return (
-    <div className="inline-flex items-center gap-2">
+    <div aria-label="Text with spinner" className="inline-flex items-center gap-2" role="group">
       <svg
+        aria-label="Spinner"
         className="animate-spin"
         fill="none"
         height="12"
+        role="img"
         stroke="currentColor"
         strokeLinecap="round"
         strokeWidth="1.5"
