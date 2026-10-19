@@ -1,9 +1,8 @@
-import { useState } from "react";
 import { describe, expect, test } from "vitest";
 import { render, type RenderResult } from "vitest-browser-react";
 
-import HikeCard from "../../components/HikeCard";
 import { HIKE_MOCK_1 } from "../mocks/models/hike";
+import { HikeCardWrapper, StatefulHikeCard } from "../utils/HikeCard/test-components";
 
 /**
  * Checks that the card displays an overview of the hike. If the card is expanded, also verifies that more details about
@@ -22,7 +21,6 @@ async function checkCard(screen: RenderResult, isExpanded: boolean) {
   await expect.element(details).toBeInTheDocument();
 
   const detailsWrapper = screen.getByRole("region", { name: `${HIKE_MOCK_1.trailName} details wrapper` });
-
   if (!isExpanded) {
     // When the card is not expanded, the details section be hidden from view. The wrapper of the detail section handles
     // this by collapsing it to zero height
@@ -45,22 +43,9 @@ async function clickOverview(screen: RenderResult) {
   await overview.click();
 }
 
-/**
- * Wrapper around a HikeCard which allows it to be expanded/unexpanded
- */
-function StatefulHikeCard() {
-  const [isExpanded, setIsExpanded] = useState<boolean>(false);
-
-  const handleClick = () => {
-    setIsExpanded(!isExpanded);
-  };
-
-  return <HikeCard hike={HIKE_MOCK_1} index={1} isExpanded={isExpanded} onClick={handleClick} />;
-}
-
 describe("HikeCard", () => {
   test("displays overview of the hike but no additional details by default", async () => {
-    const screen = await render(<HikeCard hike={HIKE_MOCK_1} index={1} isExpanded={false} onClick={() => {}} />);
+    const screen = await render(<HikeCardWrapper />);
     await checkCard(screen, false);
   });
 
