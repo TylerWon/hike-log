@@ -6,6 +6,8 @@ import { HIKE_MOCK_1 } from "../../mocks/models/hike";
 
 /**
  * Wraps a HikeOverview with a TanStack Query client for testing.
+ *
+ * HikeOverview doesn't use TanStack Query but one of its child components, ConfirmationDialog, does.
  */
 export function HikeOverviewWrapper({
   isExpanded = false,
@@ -16,12 +18,7 @@ export function HikeOverviewWrapper({
   onClick: () => void;
   onDelete: () => Promise<void>;
 }) {
-  const [queryClient] = useState(
-    () =>
-      new QueryClient({
-        defaultOptions: { queries: { retry: false } }, // disable retry to prevent error test from timing out due to retries by Tanstack Query
-      }),
-  );
+  const [queryClient] = useState(() => new QueryClient());
 
   return (
     <QueryClientProvider client={queryClient}>

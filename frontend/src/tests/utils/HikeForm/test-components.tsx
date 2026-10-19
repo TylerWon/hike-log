@@ -31,12 +31,7 @@ export function FieldWrapper({ error, required }: { error?: string; required?: b
  * Wraps a HikeForm with a Tanstack Query client for testing.
  */
 export function HikeFormWrapper({ onCancel, onSubmit, onSuccess }: HikeFormProps) {
-  const [queryClient] = useState(
-    () =>
-      new QueryClient({
-        defaultOptions: { queries: { retry: false } }, // disable retry to prevent error test from timing out due to retries by Tanstack Query
-      }),
-  );
+  const [queryClient] = useState(() => new QueryClient());
 
   return (
     <QueryClientProvider client={queryClient}>
