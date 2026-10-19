@@ -43,8 +43,9 @@ export default function ConfirmationDialog({
   };
 
   return (
-    <div className="dialog-backdrop" onClick={handleCancel}>
+    <div aria-label="Confirmation dialog backdrop" className="dialog-backdrop" onClick={handleCancel} role="region">
       <div
+        aria-label="Confirmation dialog"
         aria-modal="true"
         className="w-full max-w-sm rounded-lg border border-forest-800 bg-forest-900 overflow-hidden"
         onClick={(e) => e.stopPropagation()} // Prevents dialog from closing when it is clicked
@@ -62,10 +63,16 @@ export default function ConfirmationDialog({
           {acceptError && <FormError />}
 
           <div className="flex items-center justify-end gap-2 px-5 py-4">
-            <button className="secondary-button px-4 py-2" disabled={acceptPending} onClick={handleCancel}>
+            <button
+              aria-label="Cancel"
+              className="secondary-button px-4 py-2"
+              disabled={acceptPending}
+              onClick={handleCancel}
+            >
               Cancel
             </button>
             <button
+              aria-label="Accept"
               className={classnames("px-5 py-2", {
                 "danger-button": actionType === "destructive",
                 "primary-button": actionType === "default",
