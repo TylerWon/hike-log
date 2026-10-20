@@ -6,11 +6,11 @@ import type { Hike } from "../../schemas/models/hike";
 import { deleteHike, fetchHikes } from "../../api/hikes";
 import { HikeCreationError, PhotoCreationError } from "../../components/HikeLog/errors";
 import { submitHikeForm } from "../../components/HikeLog/submit-hike-form";
-import { formatDistance, formatDuration, formatElevation } from "../../utils/formatters";
 import { HIKE_MOCK_1, HIKE_MOCK_2 } from "../mocks/models/hike";
 import { clickSubmitButton, fillHikeForm } from "../utils/HikeForm/test-helpers";
 import { HikeLogWrapper } from "../utils/HikeLog/test-components";
 import { clickAddHikeButton } from "../utils/HikeLog/test-helpers";
+import { checkStatLabels, checkStatValues } from "../utils/StatsOverview/test-helpers";
 
 vi.mock(import("../../components/HikeLog/submit-hike-form"), async (importOriginal) => {
   const actual = await importOriginal();
@@ -30,9 +30,9 @@ vi.mock(import("../../api/hikes"), async (importOriginal) => {
 });
 
 /**
- * Checks that cards are displayed/not displayed for each of the given `hikes`.
+ * Checks that cards are displayed/not displayed for each of the given hikes.
  */
-async function checkCards(screen: RenderResult, hikes: Hike[], shouldExist: boolean = true) {
+async function checkCardsExist(screen: RenderResult, hikes: Hike[], shouldExist: boolean) {
   for (const hike of hikes) {
     const card = screen.getByRole("region", { name: `${hike.trailName} card` });
     if (shouldExist) {
@@ -41,44 +41,6 @@ async function checkCards(screen: RenderResult, hikes: Hike[], shouldExist: bool
       await expect.element(card).not.toBeInTheDocument();
     }
   }
-}
-
-async function checkStatLabels(screen: RenderResult) {
-  const statsOverview = screen.getByRole("region", { name: "Statistic overview" });
-
-  const hikesStatLabel = statsOverview.getByText("Hikes");
-  await expect.element(hikesStatLabel).toBeInTheDocument();
-
-  const distanceStatLabel = statsOverview.getByText("Distance");
-  await expect.element(distanceStatLabel).toBeInTheDocument();
-
-  const elevationStatLabel = statsOverview.getByText("Elevation");
-  await expect.element(elevationStatLabel).toBeInTheDocument();
-
-  const timeStatLabel = statsOverview.getByText("Time");
-  await expect.element(timeStatLabel).toBeInTheDocument();
-}
-
-async function checkStatValues(
-  screen: RenderResult,
-  hikes: number,
-  distance: number,
-  elevationGain: number,
-  duration: number,
-) {
-  const statsOverview = screen.getByRole("region", { name: "Statistic overview" });
-
-  const hikesStatValue = statsOverview.getByText(`${hikes}`);
-  await expect.element(hikesStatValue).toBeInTheDocument();
-
-  const distanceStatValue = statsOverview.getByText(formatDistance(distance));
-  await expect.element(distanceStatValue).toBeInTheDocument();
-
-  const elevationStatValue = statsOverview.getByText(formatElevation(elevationGain));
-  await expect.element(elevationStatValue).toBeInTheDocument();
-
-  const timeStatValue = statsOverview.getByText(formatDuration(duration));
-  await expect.element(timeStatValue).toBeInTheDocument();
 }
 
 /**
@@ -100,7 +62,6 @@ async function deleteCard(screen: RenderResult, trailName: string) {
  */
 async function checkCardExpanded(screen: RenderResult, trailName: string, isExpanded: boolean) {
   const card = screen.getByRole("region", { name: `${trailName} details` });
-
   if (isExpanded) {
     await expect.element(card).toBeInTheDocument();
   } else {
@@ -112,7 +73,7 @@ async function checkCardExpanded(screen: RenderResult, trailName: string, isExpa
  * Clicks the card with the given trail name.
  */
 async function clickCard(screen: RenderResult, trailName: string) {
-  // Only overview portion of card can control expand/unexpand
+  // Only the overview portion of card reacts to clicks
   const card = screen.getByRole("region", { name: `${trailName} overview` });
   await card.click();
 }
@@ -135,7 +96,8 @@ describe("HikeLog", () => {
     const title = screen.getByText("Hike Log");
     await expect.element(title).toBeInTheDocument();
 
-    await checkStatLabels(screen);
+    const statsOverview = screen.getByRole("region", { name: "Statistic overview" });
+    await checkStatLabels(statsOverview);
 
     const statValueSkeletons = screen.getByRole("region", { name: "Statistic skeleton" });
     expect(statValueSkeletons.length).toEqual(4);
@@ -153,16 +115,17 @@ describe("HikeLog", () => {
     const title = screen.getByText("Hike Log");
     await expect.element(title).toBeInTheDocument();
 
-    await checkStatLabels(screen);
+    const statsOverview = screen.getByRole("region", { name: "Statistic overview" });
+    await checkStatLabels(statsOverview);
     await checkStatValues(
-      screen,
+      statsOverview,
       hikes.length,
       hikes[0].distance + hikes[1].distance,
       hikes[0].elevationGain + hikes[1].elevationGain,
       hikes[0].duration + hikes[1].duration,
     );
 
-    await checkCards(screen, hikes);
+    await checkCardsExist(screen, hikes, true);
 
     const addHikeButton = screen.getByRole("button", { name: "Add hike" });
     await expect.element(addHikeButton).toBeInTheDocument();
@@ -170,7 +133,7 @@ describe("HikeLog", () => {
 
   describe("Add hike", () => {
     test("displays add hike form when add hike button is clicked", async () => {
-      vi.mocked(fetchHikes).mockResolvedValueOnce([]);
+      vi.mocked(fetchHikes).mockResolvedValue([]);
 
       const screen = await render(<HikeLogWrapper />);
 
@@ -203,15 +166,16 @@ describe("HikeLog", () => {
       const screen = await render(<HikeLogWrapper />);
 
       await clickAddHikeButton(screen);
-      await fillHikeForm(screen);
-      await clickSubmitButton(screen);
 
       const form = screen.getByRole("dialog", { name: "Hike form" });
+      await fillHikeForm(form);
+      await clickSubmitButton(form);
+
       const error = form.getByText("Something went wrong. Please try again.");
       await expect.element(error).toBeInTheDocument();
     });
 
-    test("closes add hike form, displays hike card for new hike, and displays warning when form submission partially fails", async () => {
+    test("closes add hike form, displays hike card for new hike, updates overall stats, and displays warning when form submission partially fails", async () => {
       const hikes = [HIKE_MOCK_1];
       // Mock fetchHikes twice since it is called on component load and again when submission succeeds
       vi.mocked(fetchHikes).mockResolvedValueOnce([]).mockResolvedValueOnce(hikes);
@@ -219,16 +183,20 @@ describe("HikeLog", () => {
 
       const screen = await render(<HikeLogWrapper />);
 
-      await checkCards(screen, hikes, false);
+      await checkCardsExist(screen, hikes, false);
 
       await clickAddHikeButton(screen);
-      await fillHikeForm(screen);
-      await clickSubmitButton(screen);
 
       const form = screen.getByRole("dialog", { name: "Hike form" });
+      await fillHikeForm(form);
+      await clickSubmitButton(form);
+
       await expect.element(form).not.toBeInTheDocument();
 
-      await checkCards(screen, hikes);
+      await checkCardsExist(screen, hikes, true);
+
+      const statsOverview = screen.getByRole("region", { name: "Statistic overview" });
+      await checkStatValues(statsOverview, 1, hikes[0].distance, hikes[0].elevationGain, hikes[0].duration);
 
       const warning = screen.getByRole("status", { name: "Toast" });
       await expect.element(warning).toBeInTheDocument();
@@ -241,18 +209,20 @@ describe("HikeLog", () => {
 
       const screen = await render(<HikeLogWrapper />);
 
-      await checkCards(screen, hikes, false);
+      await checkCardsExist(screen, hikes, false);
 
       await clickAddHikeButton(screen);
-      await fillHikeForm(screen);
-      await clickSubmitButton(screen);
 
       const form = screen.getByRole("dialog", { name: "Hike form" });
+      await fillHikeForm(form);
+      await clickSubmitButton(form);
+
       await expect.element(form).not.toBeInTheDocument();
 
-      await checkCards(screen, hikes);
+      await checkCardsExist(screen, hikes, true);
 
-      await checkStatValues(screen, 1, hikes[0].distance, hikes[0].elevationGain, hikes[0].duration);
+      const statsOverview = screen.getByRole("region", { name: "Statistic overview" });
+      await checkStatValues(statsOverview, 1, hikes[0].distance, hikes[0].elevationGain, hikes[0].duration);
     });
   });
 
@@ -322,7 +292,8 @@ describe("HikeLog", () => {
         const card2 = screen.getByRole("region", { name: `${hikes[1].trailName} card` });
         await expect.element(card2).toBeInTheDocument();
 
-        await checkStatValues(screen, 1, hikes[1].distance, hikes[1].elevationGain, hikes[1].duration);
+        const statsOverview = screen.getByRole("region", { name: "Statistic overview" });
+        await checkStatValues(statsOverview, 1, hikes[1].distance, hikes[1].elevationGain, hikes[1].duration);
       });
 
       test("removes expanded hike card and leaves remaining cards unexpanded when delete succeeds", async () => {

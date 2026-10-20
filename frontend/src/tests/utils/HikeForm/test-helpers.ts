@@ -1,7 +1,7 @@
 import type { RenderResult } from "vitest-browser-react";
 
 import { expect } from "vitest";
-import { userEvent } from "vitest/browser";
+import { type Locator, userEvent } from "vitest/browser";
 
 /**
  * Uploads photos to a PhotoField.
@@ -9,7 +9,7 @@ import { userEvent } from "vitest/browser";
  * We cannot test photo upload through the actual user path (i.e. using the upload button) because that opens an OS
  * dialog that Vitest cannot access. Instead, we must directly access the hidden file input and upload photos with it.
  */
-export async function uploadPhotos(screen: RenderResult, photos: File[]) {
+export async function uploadPhotos(screen: Locator | RenderResult, photos: File[]) {
   const fileInput = screen.getByLabelText("Hidden file input"); // file inputs don't have an ARIA role
   await userEvent.upload(fileInput, photos);
 
@@ -26,7 +26,7 @@ export async function uploadPhotos(screen: RenderResult, photos: File[]) {
 /**
  * Fills a Field input with the provided value. The input is looked up by its label.
  */
-export async function fillFieldInput(screen: RenderResult, label: string, value: string) {
+export async function fillFieldInput(screen: Locator | RenderResult, label: string, value: string) {
   const input = screen.getByLabelText(label);
   await input.fill(value);
 }
@@ -52,7 +52,7 @@ export async function checkNoFieldError(screen: RenderResult, fieldName: string)
 /**
  * Clicks the HikeForm submit button.
  */
-export async function clickSubmitButton(screen: RenderResult) {
+export async function clickSubmitButton(screen: Locator | RenderResult) {
   const submitButton = screen.getByRole("button", { name: "Submit" });
   await submitButton.click();
 }
@@ -60,7 +60,7 @@ export async function clickSubmitButton(screen: RenderResult) {
 /**
  * Fills every field in a HikeForm with a valid value. Photos can optionally be added.
  */
-export async function fillHikeForm(screen: RenderResult, photos: File[] = []) {
+export async function fillHikeForm(screen: Locator | RenderResult, photos: File[] = []) {
   await fillFieldInput(screen, "Trail Name", "Joffre Lakes");
   await fillFieldInput(screen, "Date", "2026-01-01");
   await fillFieldInput(screen, "Duration (minutes)", "240");
