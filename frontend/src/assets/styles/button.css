@@ -9,5 +9,5 @@
 }
 
 .danger-button {
-  @apply font-mono text-xs text-coral-500 hover:text-coral-400 transition-colors rounded border border-coral-700 hover:border-coral-500; 
+  @apply font-mono text-xs text-coral-500 hover:text-coral-400 transition-colors rounded border border-coral-700 hover:border-coral-500;
 }

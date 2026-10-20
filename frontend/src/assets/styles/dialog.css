@@ -1,5 +1,5 @@
 @reference "../../index.css";
 
 .dialog-backdrop {
-  @apply fixed inset-0 z-50 flex items-center justify-center p-4 bg-forest-950/95
+  @apply fixed inset-0 z-50 flex items-center justify-center p-4 bg-forest-950/95;
 }
