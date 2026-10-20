@@ -1,4 +1,4 @@
-import StatsOverview, { type Stat } from "./StatsOverview/StatsOverview";
+import StatsOverview, { type Stat } from "../StatsOverview/StatsOverview";
 
 interface HikeLogContentProps {
   children: React.ReactNode;

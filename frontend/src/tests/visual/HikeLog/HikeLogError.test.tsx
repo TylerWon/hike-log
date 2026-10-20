@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { render } from "vitest-browser-react";
 
-import HikeLogError from "../../components/HikeLogError";
+import HikeLogError from "../../../components/HikeLog/HikeLogError";
 
 describe("HikeLogError", () => {
   test("displays component", async () => {

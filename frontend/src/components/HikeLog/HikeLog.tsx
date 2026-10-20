@@ -11,8 +11,8 @@ import { formatDistance, formatDuration, formatElevation } from "../../utils/for
 import HikeCard from "../HikeCard";
 import HikeCardSkeleton from "../HikeCardSkeleton";
 import HikeForm from "../HikeForm/HikeForm";
-import HikeLogContent from "../HikeLogContent";
-import HikeLogError from "../HikeLogError";
+import HikeLogContent from "./HikeLogContent";
+import HikeLogError from "./HikeLogError";
 import StatValueSkeleton from "../StatValueSkeleton";
 import Toast from "../Toast";
 import { PhotoCreationError } from "./errors";
