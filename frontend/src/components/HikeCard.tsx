@@ -22,24 +22,8 @@ export default function HikeCard({ hike, index, isExpanded, onClick, onDelete }:
       )}
       role="region"
     >
-      {/* Hike overview (always shown) */}
       <HikeOverview hike={hike} index={index} isExpanded={isExpanded} onClick={onClick} onDelete={onDelete} />
-
-      {/* Hike details (shown when overview is clicked) */}
-      <div
-        aria-label={`${hike.trailName} details wrapper`}
-        role="region"
-        // Easier to use inline CSS here than Tailwind
-        style={{
-          display: "grid",
-          gridTemplateRows: isExpanded ? "1fr" : "0fr",
-          transition: "grid-template-rows 0.3s ease",
-        }}
-      >
-        <div className="overflow-hidden" {...(!isExpanded && { inert: true })}>
-          <HikeDetail hike={hike} />
-        </div>
-      </div>
+      {isExpanded && <HikeDetail hike={hike} />}
     </div>
   );
 }

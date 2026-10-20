@@ -12,21 +12,11 @@ async function checkCard(screen: RenderResult, isExpanded: boolean) {
   const overview = screen.getByRole("region", { name: `${HIKE_MOCK_1.trailName} overview` });
   await expect.element(overview).toBeInTheDocument();
 
-  // The details section appears in the DOM regardless of whether it should be visible to the user or not. We check
-  // whether it is visible below
-  const details = screen.getByRole("region", {
-    includeHidden: true,
-    name: `${HIKE_MOCK_1.trailName} details`,
-  });
-  await expect.element(details).toBeInTheDocument();
-
-  const detailsWrapper = screen.getByRole("region", { name: `${HIKE_MOCK_1.trailName} details wrapper` });
+  const details = screen.getByRole("region", { name: `${HIKE_MOCK_1.trailName} details` });
   if (!isExpanded) {
-    // When the card is not expanded, the details section be hidden from view. The wrapper of the detail section handles
-    // this by collapsing it to zero height
-    await expect.poll(() => detailsWrapper.element().getBoundingClientRect().height).toEqual(0);
+    await expect.element(details).not.toBeInTheDocument();
   } else {
-    await expect.poll(() => detailsWrapper.element().getBoundingClientRect().height).toBeGreaterThan(0);
+    await expect.element(details).toBeInTheDocument();
   }
 }
 
