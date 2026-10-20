@@ -44,7 +44,6 @@ export default function HikeLog() {
     if (hikeId === expandedCardId) {
       setExpandedCardId(null);
     }
-
     await refreshLog();
   };
 
@@ -56,21 +55,18 @@ export default function HikeLog() {
     try {
       await submitHikeForm(formData);
     } catch (e) {
-      // Fail open for photo errors
-      if (e instanceof PhotoCreationError) {
-        console.warn(`Failed to create some photos: ${e}`);
-        setToastMessage("Some photos could not be uploaded. Please try again.");
-        return;
+      // Fail close for all errors besides photo ones
+      if (!(e instanceof PhotoCreationError)) {
+        throw e;
       }
 
-      // Fail close for all other errors
-      throw e;
+      // Fail open for photo errors
+      console.warn(`Failed to create some photos: ${e}`);
+      setToastMessage("New log entry created but some photos could not be uploaded.");
     }
-  };
 
-  const handleHikeFormSuccess = async () => {
     await refreshLog();
-    handleHikeFormCancel();
+    setShowHikeForm(false);
   };
 
   const refreshLog = async () => {
@@ -143,9 +139,7 @@ export default function HikeLog() {
           </button>
         </li>
       </HikeLogContent>
-      {showHikeForm && (
-        <HikeForm onCancel={handleHikeFormCancel} onSubmit={handleHikeFormSubmit} onSuccess={handleHikeFormSuccess} />
-      )}
+      {showHikeForm && <HikeForm onCancel={handleHikeFormCancel} onSubmit={handleHikeFormSubmit} />}
       {toastMessage && <Toast message={toastMessage} onDismiss={() => setToastMessage(null)} />}
     </>
   );

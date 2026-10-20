@@ -18,10 +18,9 @@ import PhotoField from "./PhotoField";
 export interface HikeFormProps {
   onCancel: () => void;
   onSubmit: (formData: HikeFormData) => Promise<void>;
-  onSuccess: () => Promise<void>;
 }
 
-export default function HikeForm({ onCancel, onSubmit, onSuccess }: HikeFormProps) {
+export default function HikeForm({ onCancel, onSubmit }: HikeFormProps) {
   const [trailName, setTrailName] = useState<string>("");
   const [date, setDate] = useState<string>("");
   const [rating, setRating] = useState<string>("");
@@ -37,7 +36,6 @@ export default function HikeForm({ onCancel, onSubmit, onSuccess }: HikeFormProp
   const addHikeMutation = useMutation({
     mutationFn: onSubmit, // called when mutate() is invoked for this mutation
     onError: (error) => console.error("Failed to submit HikeForm: ", error),
-    onSuccess: onSuccess,
   });
 
   const submissionPending = addHikeMutation.isPending;
