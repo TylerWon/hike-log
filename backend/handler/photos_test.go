@@ -14,17 +14,17 @@ import (
 	"github.com/TylerWon/hike-log/backend/testutils"
 )
 
-func (suite *handlerTestSuite) TestDeletePhoto_ReturnsErrorWhenPhotoIDIsInvalid() {
+func (suite *handlerTestSuite) TestDeletePhoto_Returns400ErrorWhenPhotoIDIsInvalid() {
 	res := testutils.SendRequest(suite.router, http.MethodDelete, "/api/v1/photos/abc", nil)
 	suite.Equal(http.StatusBadRequest, res.Code)
 }
 
-func (suite *handlerTestSuite) TestDeletePhoto_ReturnsErrorWhenPhotoDoesNotExist() {
+func (suite *handlerTestSuite) TestDeletePhoto_Returns404ErrorWhenPhotoDoesNotExist() {
 	res := testutils.SendRequest(suite.router, http.MethodDelete, "/api/v1/photos/1", nil)
 	suite.Equal(http.StatusNotFound, res.Code)
 }
 
-func (suite *handlerTestSuite) TestDeletePhoto_ReturnsErrorWhenDBErrors() {
+func (suite *handlerTestSuite) TestDeletePhoto_Returns500ErrorWhenDBErrors() {
 	mockStore := store.MockStore{GetPhotoByIDError: errors.New("Something went wrong")}
 	handler := handler.New(&mockStore, suite.s3Client)
 	router := testutils.NewRouter(suite.T(), handler)
@@ -88,12 +88,12 @@ func (suite *handlerTestSuite) TestDeletePhoto_DeletesPhotoAndS3Object() {
 	suite.False(exists)
 }
 
-func (suite *handlerTestSuite) TestUpdatePhoto_ReturnsErrorWhenPhotoIDIsInvalid() {
+func (suite *handlerTestSuite) TestUpdatePhoto_Returns400ErrorWhenPhotoIDIsInvalid() {
 	res := testutils.SendRequest(suite.router, http.MethodPut, "/api/v1/photos/abc", nil)
 	suite.Equal(http.StatusBadRequest, res.Code)
 }
 
-func (suite *handlerTestSuite) TestUpdatePhoto_ReturnsErrorWhenPhotoDoesNotExist() {
+func (suite *handlerTestSuite) TestUpdatePhoto_Returns404ErrorWhenPhotoDoesNotExist() {
 	body := map[string]any{
 		"caption":      "Updated caption",
 		"displayOrder": 2,
@@ -103,7 +103,7 @@ func (suite *handlerTestSuite) TestUpdatePhoto_ReturnsErrorWhenPhotoDoesNotExist
 	suite.Equal(http.StatusNotFound, res.Code)
 }
 
-func (suite *handlerTestSuite) TestUpdatePhoto_ReturnsErrorWhenRequestBodyHasInvalidFields() {
+func (suite *handlerTestSuite) TestUpdatePhoto_Returns400ErrorWhenRequestBodyHasInvalidFields() {
 	photo := testutils.ConstructHikes(suite.T(), 1, suite.store, true, true)[0].Photos[0]
 
 	body := map[string]any{
@@ -116,7 +116,7 @@ func (suite *handlerTestSuite) TestUpdatePhoto_ReturnsErrorWhenRequestBodyHasInv
 	suite.Equal(http.StatusBadRequest, res.Code)
 }
 
-func (suite *handlerTestSuite) TestUpdatePhoto_ReturnsErrorWhenRequestBodyIsMissingFields() {
+func (suite *handlerTestSuite) TestUpdatePhoto_Returns400ErrorWhenRequestBodyIsMissingFields() {
 	photo := testutils.ConstructHikes(suite.T(), 1, suite.store, true, true)[0].Photos[0]
 
 	body := map[string]any{
@@ -128,7 +128,7 @@ func (suite *handlerTestSuite) TestUpdatePhoto_ReturnsErrorWhenRequestBodyIsMiss
 	suite.Equal(http.StatusBadRequest, res.Code)
 }
 
-func (suite *handlerTestSuite) TestUpdatePhoto_ReturnsErrorWhenDBErrors() {
+func (suite *handlerTestSuite) TestUpdatePhoto_Returns500ErrorWhenDBErrors() {
 	photo := testutils.ConstructHikes(suite.T(), 1, suite.store, true, true)[0].Photos[0]
 
 	mockStore := store.MockStore{
