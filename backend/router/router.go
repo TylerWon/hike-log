@@ -14,7 +14,10 @@ func New(handler *handler.Handler) *gin.Engine {
 
 	// Middleware (must come before routes)
 	corsConfig := cors.DefaultConfig()
+	// Allow frontend to access API
 	corsConfig.AllowOrigins = []string{os.Getenv("FRONTEND_URL")}
+	// Allow frontend to pass session cookie for auth
+	corsConfig.AllowCredentials = true
 	router.Use(cors.New(corsConfig))
 
 	// Routes
@@ -54,6 +57,12 @@ func New(handler *handler.Handler) *gin.Engine {
 					photo.DELETE("", handler.DeletePhoto)
 					photo.PUT("", handler.UpdatePhoto)
 				}
+			}
+
+			// /api/v1/auth
+			auth := v1.Group("/auth")
+			{
+				auth.POST("", handler.Login)
 			}
 		}
 	}

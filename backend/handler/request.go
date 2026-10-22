@@ -71,3 +71,8 @@ type updatePhotoRequest struct {
 	// missing so 0 fails validation.
 	DisplayOrder uint `json:"displayOrder" binding:"required,gt=0"`
 }
+
+type loginRequest struct {
+	// Password entered by user.
+	Password string `json:"password" binding:"required"`
+}
