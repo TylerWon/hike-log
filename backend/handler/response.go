@@ -15,7 +15,6 @@ type createPhotosResponseItem struct {
 	// Error message when "Success" is false.
 	Error string `json:"error,omitempty"`
 }
-
 type CreatePhotosResponse []createPhotosResponseItem
 
 type createPresignedURLsResponseItemResult struct {
@@ -25,7 +24,6 @@ type createPresignedURLsResponseItemResult struct {
 	// The key that is assigned to the photo when it is uploaded to the S3 bucket. Format "hikes/<hike_id>/photos/<uuid>".
 	ObjectKey string `json:"objectKey"`
 }
-
 type createPresignedURLsResponseItem struct {
 	// Position of this photo in the caller's list. Echoed from the request. Starts at 0.
 	Index uint `json:"index"`
@@ -39,5 +37,9 @@ type createPresignedURLsResponseItem struct {
 	// Error message when "Success" is false.
 	Error string `json:"error,omitempty"`
 }
-
 type CreatePresignedURLsResponse []createPresignedURLsResponseItem
+
+type CheckAuthResponse struct {
+	// Whether the user is authenticated or not.
+	Authenticated bool `json:"authenticated"`
+}

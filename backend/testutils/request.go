@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
+	"net/http"
 	"net/http/httptest"
 	"testing"
 
@@ -20,8 +21,11 @@ func SerializeJSONRequestBody(t *testing.T, body any) *bytes.Reader {
 }
 
 // Sends a request to the provided endpoint and returns the response.
-func SendRequest(router *gin.Engine, method string, endpoint string, body io.Reader) *httptest.ResponseRecorder {
+func SendRequest(router *gin.Engine, method string, endpoint string, body io.Reader, cookies ...*http.Cookie) *httptest.ResponseRecorder {
 	req := httptest.NewRequest(method, endpoint, body)
+	for _, cookie := range cookies {
+		req.AddCookie(cookie)
+	}
 	res := httptest.NewRecorder()
 	router.ServeHTTP(res, req)
 	return res

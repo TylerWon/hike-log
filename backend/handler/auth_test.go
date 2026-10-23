@@ -4,6 +4,7 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
 	"net/http"
 	"os"
 	"strconv"
@@ -13,6 +14,117 @@ import (
 	"github.com/TylerWon/hike-log/backend/handler"
 	"github.com/TylerWon/hike-log/backend/testutils"
 )
+
+var sessionSecret = os.Getenv("SESSION_SECRET")
+
+func (suite *handlerTestSuite) TestCheckAuth_ReturnsUnauthenticatedWhenCookieIsMissing() {
+	res := testutils.SendRequest(suite.router, http.MethodGet, "/api/v1/auth", nil)
+
+	suite.Equal(http.StatusOK, res.Code)
+
+	var response handler.CheckAuthResponse
+	err := json.Unmarshal(res.Body.Bytes(), &response)
+	suite.NoError(err)
+
+	suite.False(response.Authenticated)
+}
+
+func (suite *handlerTestSuite) TestCheckAuth_ReturnsUnauthenticatedWhenCookieValueIsInvalid() {
+	res := testutils.SendRequest(suite.router, http.MethodGet, "/api/v1/auth", nil, &http.Cookie{
+		Name:  handler.SESSION_COOKIE_NAME,
+		Value: "invalid value",
+	})
+
+	suite.Equal(http.StatusOK, res.Code)
+
+	var response handler.CheckAuthResponse
+	err := json.Unmarshal(res.Body.Bytes(), &response)
+	suite.NoError(err)
+
+	suite.False(response.Authenticated)
+}
+
+func (suite *handlerTestSuite) TestCheckAuth_ReturnsUnauthenticatedWhenExpiryTimeIsNotAnInteger() {
+	expiry := "abc"
+	signature := handler.GenerateHmacSha256Signature(expiry, sessionSecret)
+	res := testutils.SendRequest(suite.router, http.MethodGet, "/api/v1/auth", nil, &http.Cookie{
+		Name:  handler.SESSION_COOKIE_NAME,
+		Value: expiry + "." + signature,
+	})
+
+	suite.Equal(http.StatusOK, res.Code)
+
+	var response handler.CheckAuthResponse
+	err := json.Unmarshal(res.Body.Bytes(), &response)
+	suite.NoError(err)
+
+	suite.False(response.Authenticated)
+}
+
+func (suite *handlerTestSuite) TestCheckAuth_ReturnsUnauthenticatedWhenCookieIsExpired() {
+	expiry := strconv.FormatInt(time.Now().Unix(), 10) // Set expiry to now so it is invalid by request time
+	signature := handler.GenerateHmacSha256Signature(expiry, sessionSecret)
+	res := testutils.SendRequest(suite.router, http.MethodGet, "/api/v1/auth", nil, &http.Cookie{
+		Name:  handler.SESSION_COOKIE_NAME,
+		Value: expiry + "." + signature,
+	})
+
+	suite.Equal(http.StatusOK, res.Code)
+
+	var response handler.CheckAuthResponse
+	err := json.Unmarshal(res.Body.Bytes(), &response)
+	suite.NoError(err)
+
+	suite.False(response.Authenticated)
+}
+
+func (suite *handlerTestSuite) TestCheckAuth_ReturnsUnauthenticatedWhenSignatureDoesNotMatch() {
+	expiry := strconv.FormatInt(time.Now().Add(time.Hour).Unix(), 10)
+	signature := handler.GenerateHmacSha256Signature(expiry, "abc") // Do not use session secret to generate signature
+	res := testutils.SendRequest(suite.router, http.MethodGet, "/api/v1/auth", nil, &http.Cookie{
+		Name:  handler.SESSION_COOKIE_NAME,
+		Value: expiry + "." + signature,
+	})
+
+	suite.Equal(http.StatusOK, res.Code)
+
+	var response handler.CheckAuthResponse
+	err := json.Unmarshal(res.Body.Bytes(), &response)
+	suite.NoError(err)
+
+	suite.False(response.Authenticated)
+}
+
+func (suite *handlerTestSuite) TestCheckAuth_Returns500ErrorWhenSecretIsMissing() {
+	expiry := strconv.FormatInt(time.Now().Add(time.Hour).Unix(), 10)
+	signature := handler.GenerateHmacSha256Signature(expiry, sessionSecret)
+
+	suite.T().Setenv("SESSION_SECRET", "") // Mock missing secret value
+
+	res := testutils.SendRequest(suite.router, http.MethodGet, "/api/v1/auth", nil, &http.Cookie{
+		Name:  handler.SESSION_COOKIE_NAME,
+		Value: expiry + "." + signature,
+	})
+
+	suite.Equal(http.StatusInternalServerError, res.Code)
+}
+
+func (suite *handlerTestSuite) TestCheckAuth_ReturnsAuthenticated() {
+	expiry := strconv.FormatInt(time.Now().Add(time.Hour).Unix(), 10)
+	signature := handler.GenerateHmacSha256Signature(expiry, sessionSecret)
+	res := testutils.SendRequest(suite.router, http.MethodGet, "/api/v1/auth", nil, &http.Cookie{
+		Name:  handler.SESSION_COOKIE_NAME,
+		Value: expiry + "." + signature,
+	})
+
+	suite.Equal(http.StatusOK, res.Code)
+
+	var response handler.CheckAuthResponse
+	err := json.Unmarshal(res.Body.Bytes(), &response)
+	suite.NoError(err)
+
+	suite.True(response.Authenticated)
+}
 
 func (suite *handlerTestSuite) TestLogin_Returns400ErrorWhenRequestBodyHasInvalidField() {
 	body := map[string]any{
@@ -39,7 +151,7 @@ func (suite *handlerTestSuite) TestLogin_Returns401ErrorWhenPasswordIsIncorrect(
 	suite.Equal(http.StatusUnauthorized, res.Code)
 }
 
-func (suite *handlerTestSuite) TestLogin_Returns500ErrorWhenConfigurationIsMissing() {
+func (suite *handlerTestSuite) TestLogin_Returns500ErrorWhenSecretIsMissing() {
 	suite.T().Setenv("ADMIN_PASSWORD_HASH", "")
 
 	body := map[string]any{

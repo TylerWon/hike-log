@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -18,6 +19,66 @@ const (
 	ONE_DAY_IN_SECONDS  = 24 * 60 * 60
 	SESSION_COOKIE_NAME = "hike-log-session"
 )
+
+/*
+Checks if a user is authenticated with the admin account.
+
+A user is authenticated if they have a session cookie and its value satisfies the following criteria:
+1. The expiry time in the value is valid, and
+2. A HMAC-SHA256 signature of the expiry time matches the signature in the value.
+
+Returns:
+ 1. 200 OK and [CheckAuthResponse] when successful.
+ 2. 500 Internal Server Error and an error message when there is an unexpected error
+*/
+func (h *Handler) CheckAuth(c *gin.Context) {
+	res := CheckAuthResponse{Authenticated: false}
+
+	value, err := c.Cookie(SESSION_COOKIE_NAME)
+	if err != nil {
+		// Session cookie is missing
+		c.JSON(http.StatusOK, res)
+		return
+	}
+
+	parts := strings.Split(value, ".")
+	if len(parts) != 2 {
+		// Session cookie value has incorrect format
+		c.JSON(http.StatusOK, res)
+		return
+	}
+
+	expiryStr := parts[0]
+	expiryInt, err := strconv.ParseInt(expiryStr, 10, 64)
+	if err != nil {
+		// Expiry time is not an int
+		c.JSON(http.StatusOK, res)
+		return
+	}
+
+	if expiryInt <= time.Now().Unix() {
+		// Cookie is expired
+		c.JSON(http.StatusOK, res)
+		return
+	}
+
+	sessionSecret := os.Getenv("SESSION_SECRET")
+	if sessionSecret == "" {
+		log.Println("Session secret could not be retrieved from SESSION_SECRET env var")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": http.StatusText(http.StatusInternalServerError)})
+		return
+	}
+
+	signature := parts[1]
+	if !hmac.Equal([]byte(signature), []byte(generateHmacSha256Signature(expiryStr, sessionSecret))) {
+		// Signature mismatch
+		c.JSON(http.StatusOK, res)
+		return
+	}
+
+	res.Authenticated = true
+	c.JSON(http.StatusOK, res)
+}
 
 /*
 Logs in to the admin account.
@@ -74,14 +135,9 @@ expiry time>". The signature is included so that the API can verify the authenti
 to restricted routes.
 */
 func setSessionCookie(c *gin.Context, sessionSecret string) {
-	expiry := time.Now().Add(24 * time.Hour).Unix()
-	expiryStr := strconv.FormatInt(expiry, 10)
-
-	mac := hmac.New(sha256.New, []byte(sessionSecret))
-	mac.Write([]byte(expiryStr))
-	digest := mac.Sum(nil)
-	signature := hex.EncodeToString(digest)
-
+	expiryInt := time.Now().Add(24 * time.Hour).Unix()
+	expiryStr := strconv.FormatInt(expiryInt, 10)
+	signature := generateHmacSha256Signature(expiryStr, sessionSecret)
 	cookieValue := expiryStr + "." + signature
 
 	// Only allow cookie to be sent between same sites (same site = scheme + host are the same)
@@ -99,4 +155,16 @@ func setSessionCookie(c *gin.Context, sessionSecret string) {
 		// Cookie cannot be accessed by the browser
 		true,
 	)
+}
+
+/*
+Generates a HMAC-SHA256 signature of the given payload using the provided key as the hash key. Returns it as a hex
+string.
+*/
+func generateHmacSha256Signature(payload string, key string) string {
+	mac := hmac.New(sha256.New, []byte(key))
+	mac.Write([]byte(payload))
+	digest := mac.Sum(nil)
+	signature := hex.EncodeToString(digest)
+	return signature
 }

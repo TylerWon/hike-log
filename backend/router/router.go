@@ -63,6 +63,7 @@ func New(handler *handler.Handler) *gin.Engine {
 			auth := v1.Group("/auth")
 			{
 				auth.POST("", handler.Login)
+				auth.GET("", handler.CheckAuth)
 			}
 		}
 	}
