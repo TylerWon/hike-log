@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/TylerWon/hike-log/backend/handler"
+	"github.com/TylerWon/hike-log/backend/middleware"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
@@ -12,7 +13,7 @@ import (
 func New(handler *handler.Handler) *gin.Engine {
 	router := gin.Default()
 
-	// Middleware (must come before routes)
+	// CORS middleware (must come before routes)
 	corsConfig := cors.DefaultConfig()
 	// Allow frontend to access API
 	corsConfig.AllowOrigins = []string{os.Getenv("FRONTEND_URL")}
@@ -31,19 +32,19 @@ func New(handler *handler.Handler) *gin.Engine {
 			hikes := v1.Group("/hikes")
 			{
 				hikes.GET("", handler.ListHikes)
-				hikes.POST("", handler.CreateHike)
+				hikes.POST("", middleware.RequireAuth, handler.CreateHike)
 
 				// /api/v1/hikes/:hikeId
 				hike := hikes.Group("/:hikeId")
 				{
-					hike.DELETE("", handler.DeleteHike)
-					hike.PUT("", handler.UpdateHike)
+					hike.DELETE("", middleware.RequireAuth, handler.DeleteHike)
+					hike.PUT("", middleware.RequireAuth, handler.UpdateHike)
 
 					// /api/v1/hikes/:hikeId/photos
 					photos := hike.Group("/photos")
 					{
-						photos.POST("", handler.CreatePhotos)
-						photos.POST("/presigned-urls", handler.CreatePresignedURLs)
+						photos.POST("", middleware.RequireAuth, handler.CreatePhotos)
+						photos.POST("/presigned-urls", middleware.RequireAuth, handler.CreatePresignedURLs)
 					}
 				}
 			}
@@ -54,8 +55,8 @@ func New(handler *handler.Handler) *gin.Engine {
 				// /api/v1/photos/:photoId
 				photo := photos.Group("/:photoId")
 				{
-					photo.DELETE("", handler.DeletePhoto)
-					photo.PUT("", handler.UpdatePhoto)
+					photo.DELETE("", middleware.RequireAuth, handler.DeletePhoto)
+					photo.PUT("", middleware.RequireAuth, handler.UpdatePhoto)
 				}
 			}
 
@@ -68,6 +69,7 @@ func New(handler *handler.Handler) *gin.Engine {
 		}
 	}
 
+	// /health
 	router.GET("/health", handler.HealthCheck)
 
 	return router

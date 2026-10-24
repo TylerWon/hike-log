@@ -20,6 +20,24 @@ import (
 	s3types "github.com/aws/aws-sdk-go-v2/service/s3/types"
 )
 
+func (suite *handlerTestSuite) TestCreateHike_Returns401ErrorWhenUnauthorized() {
+	body := map[string]any{
+		"trailName":     "Trail 1",
+		"date":          "2026-02-05",
+		"notes":         "Easy hike",
+		"rating":        4.5,
+		"difficulty":    3,
+		"distance":      8.2,
+		"elevationGain": 1200,
+		"duration":      60,
+		"allTrailsUrl":  "https://www.alltrails.com/",
+	}
+	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
+	res := testutils.SendRequest(suite.router, http.MethodPost, "/api/v1/hikes", reqBody) // Missing session cookie
+
+	suite.Equal(http.StatusUnauthorized, res.Code)
+}
+
 func (suite *handlerTestSuite) TestCreateHike_Returns400ErrorWhenRequestBodyHasInvalidFields() {
 	body := map[string]any{
 		"trailName":     "Trail 1",
@@ -33,7 +51,13 @@ func (suite *handlerTestSuite) TestCreateHike_Returns400ErrorWhenRequestBodyHasI
 		"allTrailsUrl":  "https://www.alltrails.com/",
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(suite.router, http.MethodPost, "/api/v1/hikes", reqBody)
+	res := testutils.SendRequest(
+		suite.router,
+		http.MethodPost,
+		"/api/v1/hikes",
+		reqBody,
+		testutils.CreateValidSessionCookie(),
+	)
 
 	suite.Equal(http.StatusBadRequest, res.Code)
 }
@@ -49,7 +73,13 @@ func (suite *handlerTestSuite) TestCreateHike_Returns400ErrorWhenRequestBodyIsMi
 		"allTrailsUrl":  "https://www.alltrails.com/",
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(suite.router, http.MethodPost, "/api/v1/hikes", reqBody)
+	res := testutils.SendRequest(
+		suite.router,
+		http.MethodPost,
+		"/api/v1/hikes",
+		reqBody,
+		testutils.CreateValidSessionCookie(),
+	)
 
 	suite.Equal(http.StatusBadRequest, res.Code)
 }
@@ -71,7 +101,13 @@ func (suite *handlerTestSuite) TestCreateHike_Returns500ErrorWhenDBErrors() {
 		"allTrailsUrl":  "https://www.alltrails.com/",
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(router, http.MethodPost, "/api/v1/hikes", reqBody)
+	res := testutils.SendRequest(
+		router,
+		http.MethodPost,
+		"/api/v1/hikes",
+		reqBody,
+		testutils.CreateValidSessionCookie(),
+	)
 
 	suite.Equal(http.StatusInternalServerError, res.Code)
 }
@@ -89,7 +125,13 @@ func (suite *handlerTestSuite) TestCreateHike_CreatesAndReturnsHike() {
 		"allTrailsUrl":  "https://www.alltrails.com/",
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(suite.router, http.MethodPost, "/api/v1/hikes", reqBody)
+	res := testutils.SendRequest(
+		suite.router,
+		http.MethodPost,
+		"/api/v1/hikes",
+		reqBody,
+		testutils.CreateValidSessionCookie(),
+	)
 
 	suite.Equal(http.StatusCreated, res.Code)
 
@@ -113,6 +155,42 @@ func (suite *handlerTestSuite) TestCreateHike_CreatesAndReturnsHike() {
 	suite.Equal(expected, response)
 }
 
+func (suite *handlerTestSuite) TestCreatePhotos_Returns401ErrorWhenUnauthorized() {
+	hikes := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)
+
+	objectKey1 := s3.CreatePhotoObjectKey(hikes[0].ID)
+	_, err := suite.s3Client.PutObject(context.TODO(), objectKey1, strings.NewReader("content"), "image/png")
+	suite.NoError(err)
+
+	objectKey2 := s3.CreatePhotoObjectKey(hikes[0].ID)
+	_, err = suite.s3Client.PutObject(context.TODO(), objectKey2, strings.NewReader("content"), "image/jpeg")
+	suite.NoError(err)
+
+	body := [](map[string]any){
+		{
+			"index":        0,
+			"objectKey":    objectKey1,
+			"caption":      "Caption 1",
+			"displayOrder": 1,
+		},
+		{
+			"index":        1,
+			"objectKey":    objectKey2,
+			"caption":      "Caption 2",
+			"displayOrder": 2,
+		},
+	}
+	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
+	res := testutils.SendRequest(
+		suite.router,
+		http.MethodPost,
+		fmt.Sprintf("/api/v1/hikes/%d/photos", hikes[0].ID),
+		reqBody,
+	) // Missing session cookie
+
+	suite.Equal(http.StatusUnauthorized, res.Code)
+}
+
 func (suite *handlerTestSuite) TestCreatePhotos_Returns400ErrorWhenHikeIDIsInvalid() {
 	body := [](map[string]any){
 		{
@@ -123,7 +201,13 @@ func (suite *handlerTestSuite) TestCreatePhotos_Returns400ErrorWhenHikeIDIsInval
 		},
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(suite.router, http.MethodPost, "/api/v1/hikes/abc/photos", reqBody)
+	res := testutils.SendRequest(
+		suite.router,
+		http.MethodPost,
+		"/api/v1/hikes/abc/photos",
+		reqBody,
+		testutils.CreateValidSessionCookie(),
+	)
 
 	suite.Equal(http.StatusBadRequest, res.Code)
 }
@@ -138,7 +222,13 @@ func (suite *handlerTestSuite) TestCreatePhotos_Returns404ErrorWhenHikeDoesNotEx
 		},
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(suite.router, http.MethodPost, "/api/v1/hikes/1/photos", reqBody)
+	res := testutils.SendRequest(
+		suite.router,
+		http.MethodPost,
+		"/api/v1/hikes/1/photos",
+		reqBody,
+		testutils.CreateValidSessionCookie(),
+	)
 
 	suite.Equal(http.StatusNotFound, res.Code)
 }
@@ -160,7 +250,13 @@ func (suite *handlerTestSuite) TestCreatePhotos_Returns400ErrorWhenRequestItemIs
 		},
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(suite.router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos", hikes[0].ID), reqBody)
+	res := testutils.SendRequest(
+		suite.router,
+		http.MethodPost,
+		fmt.Sprintf("/api/v1/hikes/%d/photos", hikes[0].ID),
+		reqBody,
+		testutils.CreateValidSessionCookie(),
+	)
 
 	suite.Equal(http.StatusBadRequest, res.Code)
 }
@@ -177,7 +273,13 @@ func (suite *handlerTestSuite) TestCreatePhotos_Returns400ErrorWhenObjectKeyIsIn
 		},
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(suite.router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos", hikes[0].ID), reqBody)
+	res := testutils.SendRequest(
+		suite.router,
+		http.MethodPost,
+		fmt.Sprintf("/api/v1/hikes/%d/photos", hikes[0].ID),
+		reqBody,
+		testutils.CreateValidSessionCookie(),
+	)
 
 	suite.Equal(http.StatusBadRequest, res.Code)
 }
@@ -194,7 +296,13 @@ func (suite *handlerTestSuite) TestCreatePhotos_Returns400ErrorWhenPathAndObject
 		},
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(suite.router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos", hikes[0].ID), reqBody)
+	res := testutils.SendRequest(
+		suite.router,
+		http.MethodPost,
+		fmt.Sprintf("/api/v1/hikes/%d/photos", hikes[0].ID),
+		reqBody,
+		testutils.CreateValidSessionCookie(),
+	)
 
 	suite.Equal(http.StatusBadRequest, res.Code)
 }
@@ -211,7 +319,13 @@ func (suite *handlerTestSuite) TestCreatePhotos_ReturnsPartialErrorWhenPhotoDoes
 		},
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(suite.router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos", hikes[0].ID), reqBody)
+	res := testutils.SendRequest(
+		suite.router,
+		http.MethodPost,
+		fmt.Sprintf("/api/v1/hikes/%d/photos", hikes[0].ID),
+		reqBody,
+		testutils.CreateValidSessionCookie(),
+	)
 
 	suite.Equal(http.StatusCreated, res.Code)
 
@@ -243,7 +357,13 @@ func (suite *handlerTestSuite) TestCreatePhotos_ReturnsPartialErrorWhenS3Errors(
 		},
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos", hikes[0].ID), reqBody)
+	res := testutils.SendRequest(
+		router,
+		http.MethodPost,
+		fmt.Sprintf("/api/v1/hikes/%d/photos", hikes[0].ID),
+		reqBody,
+		testutils.CreateValidSessionCookie(),
+	)
 
 	suite.Equal(http.StatusCreated, res.Code)
 
@@ -276,7 +396,13 @@ func (suite *handlerTestSuite) TestCreatePhotos_ReturnsPartialErrorWhenDBErrors(
 		},
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos", hikes[0].ID), reqBody)
+	res := testutils.SendRequest(
+		router,
+		http.MethodPost,
+		fmt.Sprintf("/api/v1/hikes/%d/photos", hikes[0].ID),
+		reqBody,
+		testutils.CreateValidSessionCookie(),
+	)
 
 	suite.Equal(http.StatusCreated, res.Code)
 
@@ -315,7 +441,13 @@ func (suite *handlerTestSuite) TestCreatePhotos_CreatesPhotos() {
 		},
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(suite.router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos", hikes[0].ID), reqBody)
+	res := testutils.SendRequest(
+		suite.router,
+		http.MethodPost,
+		fmt.Sprintf("/api/v1/hikes/%d/photos", hikes[0].ID),
+		reqBody,
+		testutils.CreateValidSessionCookie(),
+	)
 
 	suite.Equal(http.StatusCreated, res.Code)
 
@@ -349,6 +481,32 @@ func (suite *handlerTestSuite) TestCreatePhotos_CreatesPhotos() {
 	suite.NoError(err)
 }
 
+func (suite *handlerTestSuite) TestCreatePresignedURLs_Returns401ErrorWhenUnauthorized() {
+	hikes := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)
+
+	body := [](map[string]any){
+		{
+			"index":         0,
+			"contentType":   "image/jpeg",
+			"contentLength": 100,
+		},
+		{
+			"index":         1,
+			"contentType":   "image/png",
+			"contentLength": 200,
+		},
+	}
+	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
+	res := testutils.SendRequest(
+		suite.router,
+		http.MethodPost,
+		fmt.Sprintf("/api/v1/hikes/%d/photos/presigned-urls", hikes[0].ID),
+		reqBody,
+	) // Missing session cookie
+
+	suite.Equal(http.StatusUnauthorized, res.Code)
+}
+
 func (suite *handlerTestSuite) TestCreatePresignedURLs_Returns400ErrorWhenHikeIDIsInvalid() {
 	body := [](map[string]any){
 		{
@@ -358,7 +516,13 @@ func (suite *handlerTestSuite) TestCreatePresignedURLs_Returns400ErrorWhenHikeID
 		},
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(suite.router, http.MethodPost, "/api/v1/hikes/abc/photos/presigned-urls", reqBody)
+	res := testutils.SendRequest(
+		suite.router,
+		http.MethodPost,
+		"/api/v1/hikes/abc/photos/presigned-urls",
+		reqBody,
+		testutils.CreateValidSessionCookie(),
+	)
 	suite.Equal(http.StatusBadRequest, res.Code)
 }
 
@@ -371,7 +535,13 @@ func (suite *handlerTestSuite) TestCreatePresignedURLs_Returns404ErrorWhenHikeDo
 		},
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(suite.router, http.MethodPost, "/api/v1/hikes/1/photos/presigned-urls", reqBody)
+	res := testutils.SendRequest(
+		suite.router,
+		http.MethodPost,
+		"/api/v1/hikes/1/photos/presigned-urls",
+		reqBody,
+		testutils.CreateValidSessionCookie(),
+	)
 	suite.Equal(http.StatusNotFound, res.Code)
 }
 
@@ -385,7 +555,13 @@ func (suite *handlerTestSuite) TestCreatePresignedURLs_Returns400ErrorWhenReques
 		},
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(suite.router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos/presigned-urls", hikes[0].ID), reqBody)
+	res := testutils.SendRequest(
+		suite.router,
+		http.MethodPost,
+		fmt.Sprintf("/api/v1/hikes/%d/photos/presigned-urls", hikes[0].ID),
+		reqBody,
+		testutils.CreateValidSessionCookie(),
+	)
 	suite.Equal(http.StatusBadRequest, res.Code)
 }
 
@@ -400,7 +576,13 @@ func (suite *handlerTestSuite) TestCreatePresignedURLs_Returns400ErrorWhenReques
 		},
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(suite.router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos/presigned-urls", hikes[0].ID), reqBody)
+	res := testutils.SendRequest(
+		suite.router,
+		http.MethodPost,
+		fmt.Sprintf("/api/v1/hikes/%d/photos/presigned-urls", hikes[0].ID),
+		reqBody,
+		testutils.CreateValidSessionCookie(),
+	)
 	suite.Equal(http.StatusBadRequest, res.Code)
 }
 
@@ -411,22 +593,34 @@ func (suite *handlerTestSuite) TestCreatePresignedURLs_Returns400ErrorWhenConten
 		{
 			"index":         0,
 			"contentType":   "image/jpeg",
-			"contentLength": -1,
+			"contentLength": -1, // Below lower bound
 		},
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(suite.router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos/presigned-urls", hikes[0].ID), reqBody)
+	res := testutils.SendRequest(
+		suite.router,
+		http.MethodPost,
+		fmt.Sprintf("/api/v1/hikes/%d/photos/presigned-urls", hikes[0].ID),
+		reqBody,
+		testutils.CreateValidSessionCookie(),
+	)
 	suite.Equal(http.StatusBadRequest, res.Code)
 
 	body = [](map[string]any){
 		{
 			"index":         0,
 			"contentType":   "image/jpeg",
-			"contentLength": 10485761,
+			"contentLength": 10485761, // Above upper bound
 		},
 	}
 	reqBody = testutils.SerializeJSONRequestBody(suite.T(), body)
-	res = testutils.SendRequest(suite.router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos/presigned-urls", hikes[0].ID), reqBody)
+	res = testutils.SendRequest(
+		suite.router,
+		http.MethodPost,
+		fmt.Sprintf("/api/v1/hikes/%d/photos/presigned-urls", hikes[0].ID),
+		reqBody,
+		testutils.CreateValidSessionCookie(),
+	)
 	suite.Equal(http.StatusBadRequest, res.Code)
 }
 
@@ -448,7 +642,13 @@ func (suite *handlerTestSuite) TestCreatePresignedURLs_Returns500ErrorWhenDBErro
 		},
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos/presigned-urls", hikes[0].ID), reqBody)
+	res := testutils.SendRequest(
+		router,
+		http.MethodPost,
+		fmt.Sprintf("/api/v1/hikes/%d/photos/presigned-urls", hikes[0].ID),
+		reqBody,
+		testutils.CreateValidSessionCookie(),
+	)
 	suite.Equal(http.StatusInternalServerError, res.Code)
 }
 
@@ -470,7 +670,13 @@ func (suite *handlerTestSuite) TestCreatePresignedURLs_ReturnsPartialErrorWhenS3
 		},
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos/presigned-urls", hikes[0].ID), reqBody)
+	res := testutils.SendRequest(
+		router,
+		http.MethodPost,
+		fmt.Sprintf("/api/v1/hikes/%d/photos/presigned-urls", hikes[0].ID),
+		reqBody,
+		testutils.CreateValidSessionCookie(),
+	)
 
 	suite.Equal(http.StatusCreated, res.Code)
 
@@ -503,7 +709,13 @@ func (suite *handlerTestSuite) TestCreatePresignedURLs_ReturnsPresignedURLs() {
 		},
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(suite.router, http.MethodPost, fmt.Sprintf("/api/v1/hikes/%d/photos/presigned-urls", hikes[0].ID), reqBody)
+	res := testutils.SendRequest(
+		suite.router,
+		http.MethodPost,
+		fmt.Sprintf("/api/v1/hikes/%d/photos/presigned-urls", hikes[0].ID),
+		reqBody,
+		testutils.CreateValidSessionCookie(),
+	)
 
 	suite.Equal(http.StatusCreated, res.Code)
 
@@ -526,13 +738,44 @@ func (suite *handlerTestSuite) TestCreatePresignedURLs_ReturnsPresignedURLs() {
 	}
 }
 
+func (suite *handlerTestSuite) TestDeleteHike_Returns401ErrorWhenUnauthorized() {
+	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, true, true)[0]
+
+	photo := hike.Photos[0]
+	objectKey := s3.GetPhotoObjectKey(photo.SrcUrl, "local")
+	_, err := suite.s3Client.PutObject(
+		context.TODO(),
+		objectKey,
+		strings.NewReader("content"),
+		"image/png",
+	)
+	suite.NoError(err)
+
+	res := testutils.SendRequest(suite.router, http.MethodDelete, fmt.Sprintf("/api/v1/hikes/%d", hike.ID), nil) // Missing session cookie
+	suite.Equal(http.StatusUnauthorized, res.Code)
+
+	suite.s3Client.DeleteObject(context.TODO(), objectKey)
+}
+
 func (suite *handlerTestSuite) TestDeleteHike_Returns400ErrorWhenHikeIDIsInvalid() {
-	res := testutils.SendRequest(suite.router, http.MethodDelete, "/api/v1/hikes/abc", nil)
+	res := testutils.SendRequest(
+		suite.router,
+		http.MethodDelete,
+		"/api/v1/hikes/abc",
+		nil,
+		testutils.CreateValidSessionCookie(),
+	)
 	suite.Equal(http.StatusBadRequest, res.Code)
 }
 
 func (suite *handlerTestSuite) TestDeleteHike_Returns404ErrorWhenHikeDoesNotExist() {
-	res := testutils.SendRequest(suite.router, http.MethodDelete, "/api/v1/hikes/1", nil)
+	res := testutils.SendRequest(
+		suite.router,
+		http.MethodDelete,
+		"/api/v1/hikes/1",
+		nil,
+		testutils.CreateValidSessionCookie(),
+	)
 	suite.Equal(http.StatusNotFound, res.Code)
 }
 
@@ -543,7 +786,13 @@ func (suite *handlerTestSuite) TestDeleteHike_Returns500ErrorWhenDBErrors() {
 	handler := handler.New(&mockStore, suite.s3Client)
 	router := testutils.NewRouter(handler)
 
-	res := testutils.SendRequest(router, http.MethodDelete, fmt.Sprintf("/api/v1/hikes/%d", hike.ID), nil)
+	res := testutils.SendRequest(
+		router,
+		http.MethodDelete,
+		fmt.Sprintf("/api/v1/hikes/%d", hike.ID),
+		nil,
+		testutils.CreateValidSessionCookie(),
+	)
 	suite.Equal(http.StatusInternalServerError, res.Code)
 }
 
@@ -568,7 +817,13 @@ func (suite *handlerTestSuite) TestDeleteHike_DeletesHikeAndPhotosWhenS3Errors()
 	)
 	suite.NoError(err)
 
-	res := testutils.SendRequest(router, http.MethodDelete, fmt.Sprintf("/api/v1/hikes/%d", hike.ID), nil)
+	res := testutils.SendRequest(
+		router,
+		http.MethodDelete,
+		fmt.Sprintf("/api/v1/hikes/%d", hike.ID),
+		nil,
+		testutils.CreateValidSessionCookie(),
+	)
 	suite.Equal(http.StatusOK, res.Code)
 
 	_, err = suite.store.GetHikeByID(hike.ID)
@@ -597,7 +852,13 @@ func (suite *handlerTestSuite) TestDeleteHike_DeletesHikeAndPhotosAndS3Objects()
 	)
 	suite.NoError(err)
 
-	res := testutils.SendRequest(suite.router, http.MethodDelete, fmt.Sprintf("/api/v1/hikes/%d", hike.ID), nil)
+	res := testutils.SendRequest(
+		suite.router,
+		http.MethodDelete,
+		fmt.Sprintf("/api/v1/hikes/%d", hike.ID),
+		nil,
+		testutils.CreateValidSessionCookie(),
+	)
 	suite.Equal(http.StatusOK, res.Code)
 
 	_, err = suite.store.GetHikeByID(hike.ID)
@@ -657,13 +918,45 @@ func (suite *handlerTestSuite) TestListHike_ReturnsHikes() {
 	suite.Equal(hikes[0], response[1])
 }
 
+func (suite *handlerTestSuite) TestUpdateHike_Returns401ErrorWhenUnauthorized() {
+	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)[0]
+
+	body := map[string]any{
+		"trailName":     "Updated Trail",
+		"date":          "2026-03-15",
+		"notes":         "Updated notes",
+		"rating":        4.5,
+		"difficulty":    3,
+		"distance":      8.2,
+		"elevationGain": 1200,
+		"duration":      60,
+		"allTrailsUrl":  "https://www.alltrails.com/updated",
+	}
+	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
+	res := testutils.SendRequest(suite.router, http.MethodPut, fmt.Sprintf("/api/v1/hikes/%d", hike.ID), reqBody) // Missing session cookie
+
+	suite.Equal(http.StatusUnauthorized, res.Code)
+}
+
 func (suite *handlerTestSuite) TestUpdateHike_Returns400ErrorWhenHikeIDIsInvalid() {
-	res := testutils.SendRequest(suite.router, http.MethodPut, "/api/v1/hikes/abc", nil)
+	res := testutils.SendRequest(
+		suite.router,
+		http.MethodPut,
+		"/api/v1/hikes/abc",
+		nil,
+		testutils.CreateValidSessionCookie(),
+	)
 	suite.Equal(http.StatusBadRequest, res.Code)
 }
 
 func (suite *handlerTestSuite) TestUpdateHike_Returns404ErrorWhenHikeDoesNotExist() {
-	res := testutils.SendRequest(suite.router, http.MethodPut, "/api/v1/hikes/1", nil)
+	res := testutils.SendRequest(
+		suite.router,
+		http.MethodPut,
+		"/api/v1/hikes/1",
+		nil,
+		testutils.CreateValidSessionCookie(),
+	)
 	suite.Equal(http.StatusNotFound, res.Code)
 }
 
@@ -682,7 +975,13 @@ func (suite *handlerTestSuite) TestUpdateHike_Returns400ErrorWhenRequestBodyHasI
 		"allTrailsUrl":  "https://www.alltrails.com/",
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(suite.router, http.MethodPut, fmt.Sprintf("/api/v1/hikes/%d", hike.ID), reqBody)
+	res := testutils.SendRequest(
+		suite.router,
+		http.MethodPut,
+		fmt.Sprintf("/api/v1/hikes/%d", hike.ID),
+		reqBody,
+		testutils.CreateValidSessionCookie(),
+	)
 
 	suite.Equal(http.StatusBadRequest, res.Code)
 }
@@ -700,7 +999,13 @@ func (suite *handlerTestSuite) TestUpdateHike_Returns400ErrorWhenRequestBodyIsMi
 		"allTrailsUrl":  "https://www.alltrails.com/",
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(suite.router, http.MethodPut, fmt.Sprintf("/api/v1/hikes/%d", hike.ID), reqBody)
+	res := testutils.SendRequest(
+		suite.router,
+		http.MethodPut,
+		fmt.Sprintf("/api/v1/hikes/%d", hike.ID),
+		reqBody,
+		testutils.CreateValidSessionCookie(),
+	)
 
 	suite.Equal(http.StatusBadRequest, res.Code)
 }
@@ -727,7 +1032,13 @@ func (suite *handlerTestSuite) TestUpdateHike_Returns500ErrorWhenDBErrors() {
 		"allTrailsUrl":  "https://www.alltrails.com/",
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(router, http.MethodPut, fmt.Sprintf("/api/v1/hikes/%d", hike.ID), reqBody)
+	res := testutils.SendRequest(
+		router,
+		http.MethodPut,
+		fmt.Sprintf("/api/v1/hikes/%d", hike.ID),
+		reqBody,
+		testutils.CreateValidSessionCookie(),
+	)
 
 	suite.Equal(http.StatusInternalServerError, res.Code)
 }
@@ -747,7 +1058,13 @@ func (suite *handlerTestSuite) TestUpdateHike_UpdatesHike() {
 		"allTrailsUrl":  "https://www.alltrails.com/updated",
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(suite.router, http.MethodPut, fmt.Sprintf("/api/v1/hikes/%d", hike.ID), reqBody)
+	res := testutils.SendRequest(
+		suite.router,
+		http.MethodPut,
+		fmt.Sprintf("/api/v1/hikes/%d", hike.ID),
+		reqBody,
+		testutils.CreateValidSessionCookie(),
+	)
 
 	suite.Equal(http.StatusOK, res.Code)
 
