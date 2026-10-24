@@ -27,7 +27,7 @@ func (suite *handlerTestSuite) TestDeletePhoto_Returns404ErrorWhenPhotoDoesNotEx
 func (suite *handlerTestSuite) TestDeletePhoto_Returns500ErrorWhenDBErrors() {
 	mockStore := store.MockStore{GetPhotoByIDError: errors.New("Something went wrong")}
 	handler := handler.New(&mockStore, suite.s3Client)
-	router := testutils.NewRouter(suite.T(), handler)
+	router := testutils.NewRouter(handler)
 
 	photo := testutils.ConstructHikes(suite.T(), 1, suite.store, true, true)[0].Photos[0]
 
@@ -41,7 +41,7 @@ func (suite *handlerTestSuite) TestDeletePhoto_DeletesPhotoWhenS3Errors() {
 		DeleteObjectError:  errors.New("Something went wrong"),
 	}
 	handler := handler.New(suite.store, &mockS3Client)
-	router := testutils.NewRouter(suite.T(), handler)
+	router := testutils.NewRouter(handler)
 
 	photo := testutils.ConstructHikes(suite.T(), 1, suite.store, true, true)[0].Photos[0]
 	objectKey := s3.GetPhotoObjectKey(photo.SrcUrl, "local")
@@ -136,7 +136,7 @@ func (suite *handlerTestSuite) TestUpdatePhoto_Returns500ErrorWhenDBErrors() {
 		UpdateRecordError:  errors.New("Something went wrong"),
 	}
 	handler := handler.New(&mockStore, suite.s3Client)
-	router := testutils.NewRouter(suite.T(), handler)
+	router := testutils.NewRouter(handler)
 
 	body := map[string]any{
 		"caption":      "Updated caption",

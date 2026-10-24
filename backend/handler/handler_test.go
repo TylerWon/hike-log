@@ -33,7 +33,7 @@ func (suite *handlerTestSuite) SetupTest() {
 	suite.suiteDB.Reset(suite.T())
 	suite.s3Client = testutils.NewS3Client(suite.T())
 	handler := handler.New(suite.store, suite.s3Client)
-	suite.router = testutils.NewRouter(suite.T(), handler)
+	suite.router = testutils.NewRouter(handler)
 }
 
 func TestHandlerTestSuite(t *testing.T) {

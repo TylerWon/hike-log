@@ -13,6 +13,8 @@ import (
 
 // Serializes a JSON request body.
 func SerializeJSONRequestBody(t *testing.T, body any) *bytes.Reader {
+	t.Helper()
+
 	rawBody, err := json.Marshal(body)
 	if err != nil {
 		t.Fatal(err)

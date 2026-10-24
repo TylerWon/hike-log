@@ -8,6 +8,8 @@ import (
 
 // Creates a S3Client to use during testing.
 func NewS3Client(t *testing.T) s3.S3Client {
+	t.Helper()
+
 	s3Client, err := s3.NewS3Client()
 	if err != nil {
 		t.Fatal("Failed to setup S3 client: ", err)

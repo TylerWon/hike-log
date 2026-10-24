@@ -57,7 +57,7 @@ func (suite *handlerTestSuite) TestCreateHike_Returns400ErrorWhenRequestBodyIsMi
 func (suite *handlerTestSuite) TestCreateHike_Returns500ErrorWhenDBErrors() {
 	mockStore := store.MockStore{CreateRecordError: errors.New("Something went wrong")}
 	handler := handler.New(&mockStore, suite.s3Client)
-	router := testutils.NewRouter(suite.T(), handler)
+	router := testutils.NewRouter(handler)
 
 	body := map[string]any{
 		"trailName":     "Trail 1",
@@ -230,7 +230,7 @@ func (suite *handlerTestSuite) TestCreatePhotos_ReturnsPartialErrorWhenS3Errors(
 		DoesObjectExistError:  errors.New("Something went wrong"),
 	}
 	h := handler.New(suite.store, &mockS3Client)
-	router := testutils.NewRouter(suite.T(), h)
+	router := testutils.NewRouter(h)
 
 	hikes := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)
 
@@ -265,7 +265,7 @@ func (suite *handlerTestSuite) TestCreatePhotos_ReturnsPartialErrorWhenDBErrors(
 	}
 	mockS3Client := s3.MockS3Client{DoesObjectExistResult: true}
 	h := handler.New(&mockStore, &mockS3Client)
-	router := testutils.NewRouter(suite.T(), h)
+	router := testutils.NewRouter(h)
 
 	body := [](map[string]any){
 		{
@@ -436,7 +436,7 @@ func (suite *handlerTestSuite) TestCreatePresignedURLs_Returns500ErrorWhenDBErro
 		GetHikeByIDError:  errors.New("Something went wrong"),
 	}
 	handler := handler.New(&mockStore, suite.s3Client)
-	router := testutils.NewRouter(suite.T(), handler)
+	router := testutils.NewRouter(handler)
 
 	hikes := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)
 
@@ -458,7 +458,7 @@ func (suite *handlerTestSuite) TestCreatePresignedURLs_ReturnsPartialErrorWhenS3
 		CreatePresignedPutObjectRequestError:  errors.New("Something went wrong"),
 	}
 	h := handler.New(suite.store, &mockS3Client)
-	router := testutils.NewRouter(suite.T(), h)
+	router := testutils.NewRouter(h)
 
 	hikes := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)
 
@@ -541,7 +541,7 @@ func (suite *handlerTestSuite) TestDeleteHike_Returns500ErrorWhenDBErrors() {
 
 	mockStore := store.MockStore{DeleteRecordError: errors.New("Something went wrong")}
 	handler := handler.New(&mockStore, suite.s3Client)
-	router := testutils.NewRouter(suite.T(), handler)
+	router := testutils.NewRouter(handler)
 
 	res := testutils.SendRequest(router, http.MethodDelete, fmt.Sprintf("/api/v1/hikes/%d", hike.ID), nil)
 	suite.Equal(http.StatusInternalServerError, res.Code)
@@ -554,7 +554,7 @@ func (suite *handlerTestSuite) TestDeleteHike_DeletesHikeAndPhotosWhenS3Errors()
 		DeleteObjectsError:  errors.New("Something went wrong"),
 	}
 	handler := handler.New(suite.store, &mockS3Client)
-	router := testutils.NewRouter(suite.T(), handler)
+	router := testutils.NewRouter(handler)
 
 	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, true, true)[0]
 
@@ -620,7 +620,7 @@ func (suite *handlerTestSuite) TestListHike_Returns500ErrorWhenDBErrors() {
 		ListHikesError:  errors.New("Something went wrong"),
 	}
 	handler := handler.New(&mockStore, suite.s3Client)
-	router := testutils.NewRouter(suite.T(), handler)
+	router := testutils.NewRouter(handler)
 
 	testutils.ConstructHikes(suite.T(), 2, suite.store, true, true)
 
@@ -713,7 +713,7 @@ func (suite *handlerTestSuite) TestUpdateHike_Returns500ErrorWhenDBErrors() {
 		UpdateRecordError: errors.New("Something went wrong"),
 	}
 	handler := handler.New(&mockStore, suite.s3Client)
-	router := testutils.NewRouter(suite.T(), handler)
+	router := testutils.NewRouter(handler)
 
 	body := map[string]any{
 		"trailName":     "Updated Trail",
