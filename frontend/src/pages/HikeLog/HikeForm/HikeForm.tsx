@@ -1,5 +1,5 @@
 import "./hike-form.css";
-import "../../assets/styles/dialog.css";
+import "../../../assets/styles/dialog.css";
 
 import type { $ZodErrorTree } from "zod/v4/core";
 
@@ -9,7 +9,7 @@ import * as z from "zod";
 
 import type { PhotoData } from "./types";
 
-import { type HikeFormData, HikeFormDataSchema } from "../../schemas/forms/hike";
+import { type HikeFormData, HikeFormDataSchema } from "../../../schemas/forms/hike";
 import FormError from "../FormError";
 import TextWithSpinner from "../TextWithSpinner";
 import Field from "./Field";

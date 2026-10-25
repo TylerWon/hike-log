@@ -5,14 +5,14 @@ import type { PhotoFormData } from "../../../../schemas/forms/photo";
 
 import { createHike, createPhotos, createPresignedUrls } from "../../../../api/hikes";
 import { uploadPhotos } from "../../../../api/s3";
-import { HikeCreationError, PhotoCreationError } from "../../../../components/HikeLog/errors";
+import { HikeCreationError, PhotoCreationError } from "../../../../pages/HikeLog/HikeLog/errors";
 import {
   createPhotosHelper,
   createPresignedUrlsHelper,
   submitHikeForm,
   uploadAndCreatePhotos,
   uploadPhotosHelper,
-} from "../../../../components/HikeLog/submit-hike-form";
+} from "../../../../pages/HikeLog/HikeLog/submit-hike-form";
 import {
   CREATE_HIKE_RESPONSE_MOCK,
   CREATE_PHOTOS_RESPONSE_MOCK_1,

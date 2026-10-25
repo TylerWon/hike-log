@@ -1,7 +1,7 @@
 import { describe, test } from "vitest";
 import { render } from "vitest-browser-react";
 
-import StatsOverview from "../../components/StatsOverview/StatsOverview";
+import StatsOverview from "../../pages/HikeLog/StatsOverview/StatsOverview";
 import { checkStatLabels, checkStatValues } from "../utils/StatsOverview/test-helpers";
 
 describe("StatsOverview", () => {

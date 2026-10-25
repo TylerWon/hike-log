@@ -1,7 +1,7 @@
-import "../assets/styles/button.css";
-import "../assets/styles/text.css";
+import "../../assets/styles/button.css";
+import "../../assets/styles/text.css";
 
-import type { Hike } from "../schemas/models/hike";
+import type { Hike } from "../../schemas/models/hike";
 
 import DifficultyBar from "./DifficultyBar";
 import PhotoGallery from "./PhotoGallery";

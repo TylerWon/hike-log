@@ -1,7 +1,7 @@
-import "../../assets/styles/text.css";
-import { Fragment } from "react/jsx-runtime";
-
+import "../../../assets/styles/text.css";
 import "./stats-overview.css";
+
+import { Fragment } from "react/jsx-runtime";
 
 export interface Stat {
   label: string;

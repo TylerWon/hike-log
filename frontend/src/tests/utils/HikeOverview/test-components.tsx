@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 
-import HikeOverview from "../../../components/HikeOverview";
+import HikeOverview from "../../../pages/HikeLog/HikeOverview";
 import { HIKE_MOCK_1 } from "../../mocks/models/hike";
 
 /**

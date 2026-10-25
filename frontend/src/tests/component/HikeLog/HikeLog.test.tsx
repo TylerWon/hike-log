@@ -4,15 +4,15 @@ import { render, type RenderResult } from "vitest-browser-react";
 import type { Hike } from "../../../schemas/models/hike";
 
 import { deleteHike, fetchHikes } from "../../../api/hikes";
-import { HikeCreationError, PhotoCreationError } from "../../../components/HikeLog/errors";
-import { submitHikeForm } from "../../../components/HikeLog/submit-hike-form";
+import { HikeCreationError, PhotoCreationError } from "../../../pages/HikeLog/HikeLog/errors";
+import { submitHikeForm } from "../../../pages/HikeLog/HikeLog/submit-hike-form";
 import { HIKE_MOCK_1, HIKE_MOCK_2 } from "../../mocks/models/hike";
 import { clickSubmitButton, fillHikeForm } from "../../utils/HikeForm/test-helpers";
 import { HikeLogWrapper } from "../../utils/HikeLog/test-components";
 import { clickAddHikeButton } from "../../utils/HikeLog/test-helpers";
 import { checkStatLabels, checkStatValues } from "../../utils/StatsOverview/test-helpers";
 
-vi.mock(import("../../../components/HikeLog/submit-hike-form"), async (importOriginal) => {
+vi.mock(import("../../../pages/HikeLog/HikeLog/submit-hike-form"), async (importOriginal) => {
   const actual = await importOriginal();
   return {
     ...actual,

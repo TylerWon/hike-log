@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import HikeCard from "../../../components/HikeCard";
+import HikeCard from "../../../pages/HikeLog/HikeCard";
 import { HIKE_MOCK_1 } from "../../mocks/models/hike";
 
 /**

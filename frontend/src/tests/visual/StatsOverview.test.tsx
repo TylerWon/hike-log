@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { render } from "vitest-browser-react";
 
-import StatsOverview from "../../components/StatsOverview/StatsOverview";
+import StatsOverview from "../../pages/HikeLog/StatsOverview/StatsOverview";
 
 describe("StatsOverview", () => {
   test("displays component", async () => {

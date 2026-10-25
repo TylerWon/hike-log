@@ -1,6 +1,6 @@
 import type { $ZodErrorTree } from "zod/v4/core";
 
-import type { PhotoFormData } from "../../schemas/forms/photo";
+import type { PhotoFormData } from "../../../schemas/forms/photo";
 
 export interface PhotoData {
   caption: string;

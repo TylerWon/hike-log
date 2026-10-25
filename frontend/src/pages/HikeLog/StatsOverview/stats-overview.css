@@ -1,4 +1,4 @@
-@reference "../../index.css";
+@reference "../../../index.css";
 
 .stats-overview-stat-value {
   @apply text-2xl font-semibold font-serif text-cream-100;

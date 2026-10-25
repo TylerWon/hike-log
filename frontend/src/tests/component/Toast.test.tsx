@@ -1,7 +1,7 @@
 import { describe, expect, test, vi } from "vitest";
 import { render } from "vitest-browser-react";
 
-import Toast from "../../components/Toast";
+import Toast from "../../pages/HikeLog/Toast";
 
 describe("Toast", () => {
   test("displays toast for 1 second then invokes onDismiss callback", async () => {

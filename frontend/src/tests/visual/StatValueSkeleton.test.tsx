@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { render } from "vitest-browser-react";
 
-import StatValueSkeleton from "../../components/StatValueSkeleton";
+import StatValueSkeleton from "../../pages/HikeLog/StatValueSkeleton";
 
 describe("StatValueSkeleton", () => {
   test("displays component", async () => {

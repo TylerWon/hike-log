@@ -1,8 +1,9 @@
-import "../assets/styles/dialog.css";
-import "../assets/styles/button.css";
+import "../../assets/styles/dialog.css";
+import "../../assets/styles/button.css";
+
 import { useMutation } from "@tanstack/react-query";
 
-import { classnames } from "../utils/classnames";
+import { classnames } from "../../utils/classnames";
 import FormError from "./FormError";
 import TextWithSpinner from "./TextWithSpinner";
 

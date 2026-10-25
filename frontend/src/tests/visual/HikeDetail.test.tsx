@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { render } from "vitest-browser-react";
 
-import HikeDetail from "../../components/HikeDetail";
+import HikeDetail from "../../pages/HikeLog/HikeDetail";
 import { HIKE_MOCK_1 } from "../mocks/models/hike";
 
 describe("HikeDetail", () => {

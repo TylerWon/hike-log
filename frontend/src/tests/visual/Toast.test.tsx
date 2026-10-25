@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { render } from "vitest-browser-react";
 
-import Toast from "../../components/Toast";
+import Toast from "../../pages/HikeLog/Toast";
 
 describe("Toast", () => {
   test("displays component", async () => {

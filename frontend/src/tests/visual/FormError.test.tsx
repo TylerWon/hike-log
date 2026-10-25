@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { render } from "vitest-browser-react";
 
-import FormError from "../../components/FormError";
+import FormError from "../../pages/HikeLog/FormError";
 
 describe("FormError", () => {
   test("displays component", async () => {

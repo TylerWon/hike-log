@@ -1,8 +1,8 @@
-import "../assets/styles/dialog.css";
+import "../../assets/styles/dialog.css";
 
 import { useState } from "react";
 
-import type { Photo } from "../schemas/models/photo";
+import type { Photo } from "../../schemas/models/photo";
 
 interface PhotoGalleryProps {
   photos: Photo[];

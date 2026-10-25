@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { render } from "vitest-browser-react";
 
-import HikeCardSkeleton from "../../components/HikeCardSkeleton";
+import HikeCardSkeleton from "../../pages/HikeLog/HikeCardSkeleton";
 
 describe("HikeCardSkeleton", () => {
   test("displays component", async () => {

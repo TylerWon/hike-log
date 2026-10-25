@@ -2,7 +2,7 @@ import { describe, expect, test } from "vitest";
 import { beforeAll } from "vitest";
 import { render } from "vitest-browser-react";
 
-import type { PhotoErrors } from "../../../components/HikeForm/types";
+import type { PhotoErrors } from "../../../pages/HikeLog/HikeForm/types";
 
 import joffreLakes1 from "../../assets/images/joffre_lakes_1.avif";
 import joffreLakes2 from "../../assets/images/joffre_lakes_2.avif";

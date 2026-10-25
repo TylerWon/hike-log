@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { render, type RenderResult } from "vitest-browser-react";
 
-import StarRating from "../../components/StarRating";
+import StarRating from "../../pages/HikeLog/StarRating";
 
 /**
  * Checks the number of filled, half, and empty stars matches the provided counts.

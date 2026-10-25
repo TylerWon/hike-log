@@ -2,7 +2,7 @@ import { useRef } from "react";
 
 import type { PhotoData, PhotoErrors } from "./types";
 
-import { readFileAsDataUrl } from "../../utils/file";
+import { readFileAsDataUrl } from "../../../utils/file";
 import Field from "./Field";
 
 interface PhotoFieldProps {

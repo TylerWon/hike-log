@@ -1,10 +1,10 @@
-import type { HikeFormData } from "../../schemas/forms/hike";
-import type { PhotoFormData } from "../../schemas/forms/photo";
-import type { CreatePhotosResponse, CreatePresignedUrlsResponse } from "../../schemas/responses/hikes";
-import type { UploadPhotosResponse } from "../../schemas/responses/s3";
+import type { HikeFormData } from "../../../schemas/forms/hike";
+import type { PhotoFormData } from "../../../schemas/forms/photo";
+import type { CreatePhotosResponse, CreatePresignedUrlsResponse } from "../../../schemas/responses/hikes";
+import type { UploadPhotosResponse } from "../../../schemas/responses/s3";
 
-import { createHike, createPhotos, createPresignedUrls } from "../../api/hikes";
-import { uploadPhotos } from "../../api/s3";
+import { createHike, createPhotos, createPresignedUrls } from "../../../api/hikes";
+import { uploadPhotos } from "../../../api/s3";
 import { HikeCreationError, PhotoCreationError } from "./errors";
 
 /**

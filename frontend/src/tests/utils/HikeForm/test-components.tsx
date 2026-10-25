@@ -1,11 +1,11 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 
-import type { PhotoData, PhotoErrors } from "../../../components/HikeForm/types";
+import type { PhotoData, PhotoErrors } from "../../../pages/HikeLog/HikeForm/types";
 
-import Field from "../../../components/HikeForm/Field";
-import HikeForm, { type HikeFormProps } from "../../../components/HikeForm/HikeForm";
-import PhotoField from "../../../components/HikeForm/PhotoField";
+import Field from "../../../pages/HikeLog/HikeForm/Field";
+import HikeForm, { type HikeFormProps } from "../../../pages/HikeLog/HikeForm/HikeForm";
+import PhotoField from "../../../pages/HikeLog/HikeForm/PhotoField";
 
 /**
  * Wrapper around a PhotoField that allows photos to be added, removed, and updated.

@@ -1,13 +1,13 @@
-import "../../assets/styles/animation.css";
-import "../../assets/styles/button.css";
+import "../../../assets/styles/animation.css";
+import "../../../assets/styles/button.css";
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
-import type { HikeFormData } from "../../schemas/forms/hike";
+import type { HikeFormData } from "../../../schemas/forms/hike";
 
-import { deleteHike, fetchHikes } from "../../api/hikes";
-import { formatDistance, formatDuration, formatElevation } from "../../utils/formatters";
+import { deleteHike, fetchHikes } from "../../../api/hikes";
+import { formatDistance, formatDuration, formatElevation } from "../../../utils/formatters";
 import HikeCard from "../HikeCard";
 import HikeCardSkeleton from "../HikeCardSkeleton";
 import HikeForm from "../HikeForm/HikeForm";
