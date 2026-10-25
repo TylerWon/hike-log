@@ -17,11 +17,13 @@ Terminates middleware chain if request is unauthenticated or check fails.
 func RequireAuth(c *gin.Context) {
 	authenticated, err := auth.IsAuthenticated(c)
 	if !authenticated {
-		// Log error if authentication fails for non-auth reason
+		// Return 500 error if authentication fails for non-auth reason
 		if err != nil {
 			_, ok := errors.AsType[auth.AuthError](err)
 			if !ok {
 				log.Println(err)
+				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": http.StatusText(http.StatusInternalServerError)})
+				return
 			}
 		}
 

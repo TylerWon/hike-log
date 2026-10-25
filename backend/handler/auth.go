@@ -14,16 +14,20 @@ import (
 /*
 Checks session cookie to see if a user is authenticated.
 
-Returns: 200 OK and [CheckAuthResponse].
+Returns:
+ 1. 200 OK and [CheckAuthResponse] when successful.
+ 2. 500 Internal Server Error and an error message when there is an unexpected error
 */
 func (h *Handler) CheckAuth(c *gin.Context) {
 	authenticated, err := auth.IsAuthenticated(c)
 
-	// Log error if authentication fails for non-auth reason
+	// Return 500 error if authentication fails for non-auth reason
 	if err != nil {
 		_, ok := errors.AsType[auth.AuthError](err)
 		if !ok {
 			log.Println(err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": http.StatusText(http.StatusInternalServerError)})
+			return
 		}
 	}
 

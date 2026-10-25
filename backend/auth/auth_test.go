@@ -162,7 +162,7 @@ func (suite *authTestSuite) TestIsAuthenticated_ReturnsTrue() {
 	suite.NoError(err)
 }
 
-func (suite *authTestSuite) TestSetSessionCookie_ReturnsErrorWhenSecretIsMissing() {
+func (suite *authTestSuite) TestSetSessionCookie_ReturnsErrorWhenSessionSecretIsMissing() {
 	c := testutils.NewGinContext(nil)
 	suite.T().Setenv("SESSION_SECRET", "") // Set secret value to empty string
 	err := auth.SetSessionCookie(c)

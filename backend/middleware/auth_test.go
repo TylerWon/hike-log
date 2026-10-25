@@ -13,6 +13,18 @@ type authTestSuite struct {
 	suite.Suite
 }
 
+func (suite *authTestSuite) TestRequireAuth_Returns500ErrorWhenSessionSecretIsMissing() {
+	c := testutils.NewGinContext(testutils.CreateValidSessionCookie())
+
+	suite.T().Setenv("SESSION_SECRET", "")
+
+	middleware.RequireAuth(c)
+
+	res := c.Writer
+	suite.Equal(http.StatusInternalServerError, res.Status())
+	suite.True(c.IsAborted())
+}
+
 func (suite *authTestSuite) TestRequireAuth_Returns401ErrorAndAbortsWhenUnauthenticated() {
 	c := testutils.NewGinContext(nil) // Missing session cookie
 
