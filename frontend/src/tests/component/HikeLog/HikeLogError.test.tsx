@@ -1,7 +1,7 @@
 import { describe, expect, test, vi } from "vitest";
 import { render } from "vitest-browser-react";
 
-import HikeLogError from "../../../pages/HikeLog/HikeLog/HikeLogError";
+import HikeLogError from "../../../pages/HikeLog/HikeLogError";
 
 describe("HikeLogError", () => {
   test("displays error message and refresh button", async () => {

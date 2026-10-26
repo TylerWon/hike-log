@@ -1,9 +1,9 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 
-import HikeCard from "../../../pages/HikeLog/HikeCard";
+import HikeCard from "../../../pages/HikeLog/HikeCard/HikeCard";
 import HikeLog from "../../../pages/HikeLog/HikeLog/HikeLog";
-import HikeLogContent from "../../../pages/HikeLog/HikeLog/HikeLogContent";
+import HikeLogContent from "../../../pages/HikeLog/HikeLogContent";
 import { formatDistance, formatDuration, formatElevation } from "../../../utils/formatters";
 import { HIKE_MOCK_1, HIKE_MOCK_2 } from "../../mocks/models/hike";
 

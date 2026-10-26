@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { render } from "vitest-browser-react";
 
-import DifficultyBar from "../../pages/HikeLog/DifficultyBar";
+import DifficultyBar from "../../pages/HikeLog/HikeCard/DifficultyBar";
 
 describe("DifficultyBar", () => {
   test("displays 10 empty bars when difficulty is 0", async () => {

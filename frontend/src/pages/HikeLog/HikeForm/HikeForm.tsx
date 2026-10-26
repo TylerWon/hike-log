@@ -1,5 +1,5 @@
-import "./hike-form.css";
 import "../../../assets/styles/dialog.css";
+import "../../../assets/styles/form.css";
 
 import type { $ZodErrorTree } from "zod/v4/core";
 
@@ -9,11 +9,11 @@ import * as z from "zod";
 
 import type { PhotoData } from "./types";
 
+import Field from "../../../components/form/Field";
+import FormError from "../../../components/form/FormError";
+import PhotoField from "../../../components/form/PhotoField";
+import TextWithSpinner from "../../../components/TextWithSpinner";
 import { type HikeFormData, HikeFormDataSchema } from "../../../schemas/forms/hike";
-import FormError from "../FormError";
-import TextWithSpinner from "../TextWithSpinner";
-import Field from "./Field";
-import PhotoField from "./PhotoField";
 
 export interface HikeFormProps {
   onCancel: () => void;
@@ -125,7 +125,7 @@ export default function HikeForm({ onCancel, onSubmit }: HikeFormProps) {
             <Field error={fieldErrors?.properties?.trailName?.errors?.[0]} id="trail-name" label="Trail Name" required>
               <input
                 autoFocus
-                className="hike-form-field"
+                className="form-input"
                 id="trail-name"
                 onChange={(e) => setTrailName(e.target.value)}
                 placeholder="e.g. Joffre Lakes"
@@ -137,7 +137,7 @@ export default function HikeForm({ onCancel, onSubmit }: HikeFormProps) {
             <div className="grid grid-cols-2 gap-3">
               <Field error={fieldErrors?.properties?.date?.errors?.[0]} id="date" label="Date" required>
                 <input
-                  className="hike-form-field scheme-dark"
+                  className="form-input scheme-dark"
                   id="date"
                   onChange={(e) => setDate(e.target.value)}
                   type="date"
@@ -151,7 +151,7 @@ export default function HikeForm({ onCancel, onSubmit }: HikeFormProps) {
                 required
               >
                 <input
-                  className="hike-form-field"
+                  className="form-input"
                   id="duration"
                   min={1}
                   onChange={(e) => setDuration(e.target.value)}
@@ -166,7 +166,7 @@ export default function HikeForm({ onCancel, onSubmit }: HikeFormProps) {
             <div className="grid grid-cols-2 gap-3">
               <Field error={fieldErrors?.properties?.rating?.errors?.[0]} id="rating" label="Rating (0-5)" required>
                 <input
-                  className="hike-form-field"
+                  className="form-input"
                   id="rating"
                   max={5}
                   min={0}
@@ -184,7 +184,7 @@ export default function HikeForm({ onCancel, onSubmit }: HikeFormProps) {
                 required
               >
                 <input
-                  className="hike-form-field"
+                  className="form-input"
                   id="difficulty"
                   max={10}
                   min={0}
@@ -205,7 +205,7 @@ export default function HikeForm({ onCancel, onSubmit }: HikeFormProps) {
                 required
               >
                 <input
-                  className="hike-form-field"
+                  className="form-input"
                   id="distance"
                   min={0}
                   onChange={(e) => setDistance(e.target.value)}
@@ -222,7 +222,7 @@ export default function HikeForm({ onCancel, onSubmit }: HikeFormProps) {
                 required
               >
                 <input
-                  className="hike-form-field"
+                  className="form-input"
                   id="elevation-gain"
                   min={0}
                   onChange={(e) => setElevationGain(e.target.value)}
@@ -241,7 +241,7 @@ export default function HikeForm({ onCancel, onSubmit }: HikeFormProps) {
               required
             >
               <input
-                className="hike-form-field"
+                className="form-input"
                 id="all-trails-url"
                 onChange={(e) => setAllTrailsUrl(e.target.value)}
                 placeholder="https://www.alltrails.com/trail/…"
@@ -252,7 +252,7 @@ export default function HikeForm({ onCancel, onSubmit }: HikeFormProps) {
 
             <Field error={fieldErrors?.properties?.notes?.errors?.[0]} id="notes" label="Notes" required>
               <textarea
-                className="hike-form-field"
+                className="form-input"
                 id="notes"
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="How was the hike?"

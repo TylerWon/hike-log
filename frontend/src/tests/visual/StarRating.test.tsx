@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { render } from "vitest-browser-react";
 
-import StarRating from "../../pages/HikeLog/StarRating";
+import StarRating from "../../pages/HikeLog/HikeCard/StarRating";
 
 describe("StarRating", () => {
   test("displays 5 empty stars when rating is 0", async () => {

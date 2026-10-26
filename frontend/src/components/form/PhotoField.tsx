@@ -1,8 +1,10 @@
+import "../../assets/styles/form.css";
+
 import { useRef } from "react";
 
-import type { PhotoData, PhotoErrors } from "./types";
+import type { PhotoData, PhotoErrors } from "../../pages/HikeLog/HikeForm/types";
 
-import { readFileAsDataUrl } from "../../../utils/file";
+import { readFileAsDataUrl } from "../../utils/file";
 import Field from "./Field";
 
 interface PhotoFieldProps {
@@ -117,7 +119,7 @@ export default function PhotoField({ errors, photos, setPhotos }: PhotoFieldProp
                 label={`Caption ${idx + 1}`}
               >
                 <input
-                  className="hike-form-field py-1.5 text-xs"
+                  className="form-input py-1.5 text-xs"
                   id={`caption-${idx + 1}`}
                   onChange={(e) => updateCaption(idx, e.target.value)}
                   placeholder="A beautiful day in..."

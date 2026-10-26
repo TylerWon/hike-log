@@ -7,15 +7,15 @@ import { useState } from "react";
 import type { HikeFormData } from "../../../schemas/forms/hike";
 
 import { deleteHike, fetchHikes } from "../../../api/hikes";
+import Toast from "../../../components/Toast";
 import { formatDistance, formatDuration, formatElevation } from "../../../utils/formatters";
-import HikeCard from "../HikeCard";
+import HikeCard from "../HikeCard/HikeCard";
 import HikeCardSkeleton from "../HikeCardSkeleton";
 import HikeForm from "../HikeForm/HikeForm";
+import HikeLogContent from "../HikeLogContent";
+import HikeLogError from "../HikeLogError";
 import StatValueSkeleton from "../StatValueSkeleton";
-import Toast from "../Toast";
 import { PhotoCreationError } from "./errors";
-import HikeLogContent from "./HikeLogContent";
-import HikeLogError from "./HikeLogError";
 import { submitHikeForm } from "./submit-hike-form";
 
 const HIKES_QUERY_KEY = "hikes";

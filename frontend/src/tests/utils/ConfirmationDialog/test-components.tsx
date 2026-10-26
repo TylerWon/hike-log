@@ -3,7 +3,7 @@ import type { Mock } from "vitest";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 
-import ConfirmationDialog from "../../../pages/HikeLog/ConfirmationDialog";
+import ConfirmationDialog from "../../../components/ConfirmationDialog";
 
 /**
  * Wraps a ConfirmationDialog with a TanStack Query client for testing.

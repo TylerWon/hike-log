@@ -1,11 +1,11 @@
-import "../../assets/styles/text.css";
+import "../../../assets/styles/text.css";
 import { useState } from "react";
 
-import type { Hike } from "../../schemas/models/hike";
+import type { Hike } from "../../../schemas/models/hike";
 
-import { classnames } from "../../utils/classnames";
-import { formatDate, formatDistance, formatDuration, formatElevation } from "../../utils/formatters";
-import ConfirmationDialog from "./ConfirmationDialog";
+import ConfirmationDialog from "../../../components/ConfirmationDialog";
+import { classnames } from "../../../utils/classnames";
+import { formatDate, formatDistance, formatDuration, formatElevation } from "../../../utils/formatters";
 import StarRating from "./StarRating";
 import Thumbnail from "./Thumbnail";
 

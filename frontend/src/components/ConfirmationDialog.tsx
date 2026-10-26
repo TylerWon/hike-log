@@ -1,10 +1,10 @@
-import "../../assets/styles/dialog.css";
-import "../../assets/styles/button.css";
+import "../assets/styles/button.css";
+import "../assets/styles/dialog.css";
 
 import { useMutation } from "@tanstack/react-query";
 
-import { classnames } from "../../utils/classnames";
-import FormError from "./FormError";
+import { classnames } from "../utils/classnames";
+import FormError from "./form/FormError";
 import TextWithSpinner from "./TextWithSpinner";
 
 type ActionType = "default" | "destructive";

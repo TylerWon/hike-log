@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { render, type RenderResult } from "vitest-browser-react";
 
-import DifficultyBar from "../../pages/HikeLog/DifficultyBar";
+import DifficultyBar from "../../pages/HikeLog/HikeCard/DifficultyBar";
 
 /**
  * Checks the number of filled, half, and empty bars matches the provided counts.

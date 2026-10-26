@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { render } from "vitest-browser-react";
 
-import TextWithSpinner from "../../pages/HikeLog/TextWithSpinner";
+import TextWithSpinner from "../../components/TextWithSpinner";
 
 describe("TextWithSpinner", () => {
   test("displays spinner and text", async () => {

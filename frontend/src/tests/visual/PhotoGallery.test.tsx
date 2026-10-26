@@ -3,7 +3,7 @@ import { render, type RenderResult } from "vitest-browser-react";
 
 import type { Photo } from "../../schemas/models/photo";
 
-import PhotoGallery from "../../pages/HikeLog/PhotoGallery";
+import PhotoGallery from "../../pages/HikeLog/HikeCard/PhotoGallery";
 import { HIKE_MOCK_1 } from "../mocks/models/hike";
 
 async function clickFirstPhotoInGallery(screen: RenderResult) {

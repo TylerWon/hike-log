@@ -20,7 +20,7 @@ export default function Toast({ durationMs: duration = 10000, message, onDismiss
       role="status"
     >
       <svg
-        className="flex-shrink-0 mt-px"
+        className="shrink-0 mt-px"
         fill="none"
         height="16"
         stroke="#c09a4a"
@@ -38,7 +38,7 @@ export default function Toast({ durationMs: duration = 10000, message, onDismiss
 
       <button
         aria-label="Dismiss"
-        className="flex-shrink-0 text-amber-700 hover:text-amber-500 transition-colors focus:outline-none mt-px"
+        className="shrink-0 text-amber-700 hover:text-amber-500 transition-colors focus:outline-none mt-px"
         onClick={onDismiss}
       >
         <svg

@@ -3,9 +3,9 @@ import { useState } from "react";
 
 import type { PhotoData, PhotoErrors } from "../../../pages/HikeLog/HikeForm/types";
 
-import Field from "../../../pages/HikeLog/HikeForm/Field";
+import Field from "../../../components/form/Field";
+import PhotoField from "../../../components/form/PhotoField";
 import HikeForm, { type HikeFormProps } from "../../../pages/HikeLog/HikeForm/HikeForm";
-import PhotoField from "../../../pages/HikeLog/HikeForm/PhotoField";
 
 /**
  * Wrapper around a PhotoField that allows photos to be added, removed, and updated.
@@ -30,12 +30,12 @@ export function FieldWrapper({ error, required }: { error?: string; required?: b
 /**
  * Wraps a HikeForm with a Tanstack Query client for testing.
  */
-export function HikeFormWrapper({ onCancel, onSubmit, onSuccess }: HikeFormProps) {
+export function HikeFormWrapper({ onCancel, onSubmit }: HikeFormProps) {
   const [queryClient] = useState(() => new QueryClient());
 
   return (
     <QueryClientProvider client={queryClient}>
-      <HikeForm onCancel={onCancel} onSubmit={onSubmit} onSuccess={onSuccess} />
+      <HikeForm onCancel={onCancel} onSubmit={onSubmit} />
     </QueryClientProvider>
   );
 }

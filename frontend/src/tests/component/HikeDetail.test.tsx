@@ -3,7 +3,7 @@ import { render, type RenderResult } from "vitest-browser-react";
 
 import type { Hike } from "../../schemas/models/hike";
 
-import HikeDetail from "../../pages/HikeLog/HikeDetail";
+import HikeDetail from "../../pages/HikeLog/HikeCard/HikeDetail";
 import { HIKE_MOCK_1 } from "../mocks/models/hike";
 
 /**

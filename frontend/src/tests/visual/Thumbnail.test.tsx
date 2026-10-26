@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { render } from "vitest-browser-react";
 
-import Thumbnail from "../../pages/HikeLog/Thumbnail";
+import Thumbnail from "../../pages/HikeLog/HikeCard/Thumbnail";
 import { PHOTO_MOCK_1 } from "../mocks/models/photo";
 
 describe("Thumbnail", () => {
