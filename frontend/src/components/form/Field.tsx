@@ -1,7 +1,9 @@
+import type React from "react";
+
 interface FieldProps {
-  children: React.ReactNode;
+  children: React.ReactElement<React.ComponentProps<"input">> | React.ReactElement<React.ComponentProps<"textarea">>;
   error?: string;
-  id: string; // should match id on input
+  id: string;
   label: string;
   required?: boolean;
 }

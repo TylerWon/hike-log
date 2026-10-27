@@ -4,7 +4,7 @@ import "../assets/styles/dialog.css";
 import { useMutation } from "@tanstack/react-query";
 
 import { classnames } from "../utils/classnames";
-import FormError from "./form/FormError";
+import GenericError from "./GenericError";
 import TextWithSpinner from "./TextWithSpinner";
 
 type ActionType = "default" | "destructive";
@@ -61,7 +61,7 @@ export default function ConfirmationDialog({
         </div>
 
         <div className="border-t border-forest-800">
-          {acceptError && <FormError />}
+          {acceptError && <GenericError />}
 
           <div className="flex items-center justify-end gap-2 px-5 py-4">
             <button

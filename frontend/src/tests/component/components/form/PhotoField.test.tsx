@@ -3,8 +3,8 @@ import { render } from "vitest-browser-react";
 
 import type { PhotoErrors } from "../../../../pages/HikeLog/HikeForm/types";
 
-import { StatefulPhotoField } from "../../../utils/HikeForm/test-components";
 import { checkFieldError, checkNoFieldError, fillFieldInput, uploadPhotos } from "../../../utils/HikeForm/test-helpers";
+import { StatefulPhotoField } from "../../../utils/PhotoField/test-components";
 
 describe("PhotoField", () => {
   const photo1 = new File(["photo1"], "summit.png", { type: "image/png" });

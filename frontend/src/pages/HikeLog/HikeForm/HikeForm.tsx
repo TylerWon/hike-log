@@ -1,5 +1,4 @@
 import "../../../assets/styles/dialog.css";
-import "../../../assets/styles/form.css";
 
 import type { $ZodErrorTree } from "zod/v4/core";
 
@@ -9,9 +8,10 @@ import * as z from "zod";
 
 import type { PhotoData } from "./types";
 
-import Field from "../../../components/form/Field";
-import FormError from "../../../components/form/FormError";
 import PhotoField from "../../../components/form/PhotoField";
+import TextAreaField from "../../../components/form/TextAreaField";
+import TextField from "../../../components/form/TextField";
+import GenericError from "../../../components/GenericError";
 import TextWithSpinner from "../../../components/TextWithSpinner";
 import { type HikeFormData, HikeFormDataSchema } from "../../../schemas/forms/hike";
 
@@ -122,144 +122,138 @@ export default function HikeForm({ onCancel, onSubmit }: HikeFormProps) {
         {/* Hike fields */}
         <form noValidate onSubmit={handleSubmit}>
           <div className="flex flex-col gap-4 px-5 py-5">
-            <Field error={fieldErrors?.properties?.trailName?.errors?.[0]} id="trail-name" label="Trail Name" required>
-              <input
-                autoFocus
-                className="form-input"
-                id="trail-name"
-                onChange={(e) => setTrailName(e.target.value)}
-                placeholder="e.g. Joffre Lakes"
-                type="text"
-                value={trailName}
-              />
-            </Field>
+            <TextField
+              error={fieldErrors?.properties?.trailName?.errors?.[0]}
+              id="trail-name"
+              inputProps={{
+                autoFocus: true,
+                onChange: (e) => setTrailName(e.target.value),
+                placeholder: "e.g. Joffre Lakes",
+                type: "text",
+                value: trailName,
+              }}
+              label="Trail Name"
+              required
+            />
 
             <div className="grid grid-cols-2 gap-3">
-              <Field error={fieldErrors?.properties?.date?.errors?.[0]} id="date" label="Date" required>
-                <input
-                  className="form-input scheme-dark"
-                  id="date"
-                  onChange={(e) => setDate(e.target.value)}
-                  type="date"
-                  value={date}
-                />
-              </Field>
-              <Field
+              <TextField
+                error={fieldErrors?.properties?.date?.errors?.[0]}
+                id="date"
+                inputProps={{
+                  className: "scheme-dark",
+                  onChange: (e) => setDate(e.target.value),
+                  type: "date",
+                  value: date,
+                }}
+                label="Date"
+                required
+              />
+              <TextField
                 error={fieldErrors?.properties?.duration?.errors?.[0]}
                 id="duration"
+                inputProps={{
+                  min: 1,
+                  onChange: (e) => setDuration(e.target.value),
+                  placeholder: "e.g. 240",
+                  step: 1,
+                  type: "number",
+                  value: duration,
+                }}
                 label="Duration (minutes)"
                 required
-              >
-                <input
-                  className="form-input"
-                  id="duration"
-                  min={1}
-                  onChange={(e) => setDuration(e.target.value)}
-                  placeholder="e.g. 240"
-                  step={1}
-                  type="number"
-                  value={duration}
-                />
-              </Field>
+              />
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              <Field error={fieldErrors?.properties?.rating?.errors?.[0]} id="rating" label="Rating (0-5)" required>
-                <input
-                  className="form-input"
-                  id="rating"
-                  max={5}
-                  min={0}
-                  onChange={(e) => setRating(e.target.value)}
-                  placeholder="e.g. 4.5"
-                  step={0.5}
-                  type="number"
-                  value={rating}
-                />
-              </Field>
-              <Field
+              <TextField
+                error={fieldErrors?.properties?.rating?.errors?.[0]}
+                id="rating"
+                inputProps={{
+                  max: 5,
+                  min: 0,
+                  onChange: (e) => setRating(e.target.value),
+                  placeholder: "e.g. 4.5",
+                  step: 0.5,
+                  type: "number",
+                  value: rating,
+                }}
+                label="Rating (0-5)"
+                required
+              />
+              <TextField
                 error={fieldErrors?.properties?.difficulty?.errors?.[0]}
                 id="difficulty"
+                inputProps={{
+                  max: 10,
+                  min: 0,
+                  onChange: (e) => setDifficulty(e.target.value),
+                  placeholder: "e.g. 7.5",
+                  step: 0.5,
+                  type: "number",
+                  value: difficulty,
+                }}
                 label="Difficulty (0-10)"
                 required
-              >
-                <input
-                  className="form-input"
-                  id="difficulty"
-                  max={10}
-                  min={0}
-                  onChange={(e) => setDifficulty(e.target.value)}
-                  placeholder="e.g. 7.5"
-                  step={0.5}
-                  type="number"
-                  value={difficulty}
-                />
-              </Field>
+              />
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              <Field
+              <TextField
                 error={fieldErrors?.properties?.distance?.errors?.[0]}
                 id="distance"
+                inputProps={{
+                  min: 0,
+                  onChange: (e) => setDistance(e.target.value),
+                  placeholder: "e.g. 11.8",
+                  step: 0.1,
+                  type: "number",
+                  value: distance,
+                }}
                 label="Distance (km)"
                 required
-              >
-                <input
-                  className="form-input"
-                  id="distance"
-                  min={0}
-                  onChange={(e) => setDistance(e.target.value)}
-                  placeholder="e.g. 11.8"
-                  step={0.1}
-                  type="number"
-                  value={distance}
-                />
-              </Field>
-              <Field
+              />
+              <TextField
                 error={fieldErrors?.properties?.elevationGain?.errors?.[0]}
                 id="elevation-gain"
+                inputProps={{
+                  min: 0,
+                  onChange: (e) => setElevationGain(e.target.value),
+                  placeholder: "e.g. 370",
+                  step: 1,
+                  type: "number",
+                  value: elevationGain,
+                }}
                 label="Elevation gain (m)"
                 required
-              >
-                <input
-                  className="form-input"
-                  id="elevation-gain"
-                  min={0}
-                  onChange={(e) => setElevationGain(e.target.value)}
-                  placeholder="e.g. 370"
-                  step={1}
-                  type="number"
-                  value={elevationGain}
-                />
-              </Field>
+              />
             </div>
 
-            <Field
+            <TextField
               error={fieldErrors?.properties?.allTrailsUrl?.errors?.[0]}
               id="all-trails-url"
+              inputProps={{
+                onChange: (e) => setAllTrailsUrl(e.target.value),
+                placeholder: "https://www.alltrails.com/trail/…",
+                type: "url",
+                value: allTrailsUrl,
+              }}
               label="AllTrails URL"
               required
-            >
-              <input
-                className="form-input"
-                id="all-trails-url"
-                onChange={(e) => setAllTrailsUrl(e.target.value)}
-                placeholder="https://www.alltrails.com/trail/…"
-                type="url"
-                value={allTrailsUrl}
-              />
-            </Field>
+            />
 
-            <Field error={fieldErrors?.properties?.notes?.errors?.[0]} id="notes" label="Notes" required>
-              <textarea
-                className="form-input"
-                id="notes"
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="How was the hike?"
-                rows={3}
-                value={notes}
-              />
-            </Field>
+            <TextAreaField
+              error={fieldErrors?.properties?.notes?.errors?.[0]}
+              id="notes"
+              label="Notes"
+              required
+              textAreaProps={{
+                onChange: (e) => setNotes(e.target.value),
+                placeholder: "How was the hike?",
+                rows: 3,
+                value: notes,
+              }}
+            />
 
             {/* Photo field */}
             <PhotoField errors={fieldErrors?.properties?.photos} photos={photos} setPhotos={setPhotos} />
@@ -267,7 +261,7 @@ export default function HikeForm({ onCancel, onSubmit }: HikeFormProps) {
 
           {/* Footer */}
           <div aria-label="Footer" className="border-t border-forest-800 sticky bottom-0 bg-forest-900" role="region">
-            {submissionError && <FormError />}
+            {submissionError && <GenericError />}
 
             <div className="flex items-center justify-end gap-3 px-5 py-4 ">
               <button

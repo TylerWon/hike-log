@@ -8,7 +8,7 @@ import joffreLakes1 from "../../../assets/images/joffre_lakes_1.avif";
 import joffreLakes2 from "../../../assets/images/joffre_lakes_2.avif";
 import joffreLakes3 from "../../../assets/images/joffre_lakes_3.avif";
 import { createFileFromUrl } from "../../../utils/files";
-import { StatefulPhotoField } from "../../../utils/HikeForm/test-components";
+import { StatefulPhotoField } from "../../../utils/PhotoField/test-components";
 import { fillFieldInput, uploadPhotos } from "../../../utils/HikeForm/test-helpers";
 
 describe("PhotoField", async () => {

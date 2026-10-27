@@ -1,11 +1,9 @@
-import "../../assets/styles/form.css";
-
 import { useRef } from "react";
 
 import type { PhotoData, PhotoErrors } from "../../pages/HikeLog/HikeForm/types";
 
 import { readFileAsDataUrl } from "../../utils/file";
-import Field from "./Field";
+import TextField from "./TextField";
 
 interface PhotoFieldProps {
   errors?: PhotoErrors; // Errors should be in the same order as Photos
@@ -113,20 +111,18 @@ export default function PhotoField({ errors, photos, setPhotos }: PhotoFieldProp
                 />
               </div>
 
-              <Field
+              <TextField
                 error={errors?.items?.[idx]?.properties?.file?.errors?.[0]}
                 id={`caption-${idx + 1}`}
+                inputProps={{
+                  className: "py-1.5 text-xs",
+                  onChange: (e) => updateCaption(idx, e.target.value),
+                  placeholder: "A beautiful day in...",
+                  type: "text",
+                  value: photo.caption,
+                }}
                 label={`Caption ${idx + 1}`}
-              >
-                <input
-                  className="form-input py-1.5 text-xs"
-                  id={`caption-${idx + 1}`}
-                  onChange={(e) => updateCaption(idx, e.target.value)}
-                  placeholder="A beautiful day in..."
-                  type="text"
-                  value={photo.caption}
-                />
-              </Field>
+              />
 
               <div className="flex flex-col items-center gap-1 shrink-0">
                 <button
