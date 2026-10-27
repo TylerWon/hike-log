@@ -1,13 +1,17 @@
 @reference "../../index.css";
 
-.primary-button {
-  @apply font-mono text-xs text-sage-500 hover:text-sage-400 transition-colors rounded border border-sage-500 hover:border-sage-400;
-}
-
-.secondary-button {
+.borderless-button {
   @apply font-mono text-xs text-forest-600 hover:text-cream-100 transition-colors;
 }
 
-.danger-button {
-  @apply font-mono text-xs text-coral-500 hover:text-coral-400 transition-colors rounded border border-coral-700 hover:border-coral-500;
+.primary-button-danger {
+  @apply font-mono text-xs text-cream-100 transition-colors rounded border border-coral-600 bg-coral-600 hover:border-coral-500 hover:bg-coral-500;
+}
+
+.primary-button-default {
+  @apply font-mono text-xs text-cream-100 transition-colors rounded border border-sage-700 bg-sage-700 hover:border-sage-500 hover:bg-sage-500;
+}
+
+.secondary-button-default {
+  @apply font-mono text-xs text-sage-500 hover:text-sage-400 transition-colors rounded border border-sage-500 hover:border-sage-400;
 }

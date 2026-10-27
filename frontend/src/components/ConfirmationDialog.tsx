@@ -66,7 +66,7 @@ export default function ConfirmationDialog({
           <div className="flex items-center justify-end gap-2 px-5 py-4">
             <button
               aria-label="Cancel"
-              className="secondary-button px-4 py-2"
+              className="borderless-button px-4 py-2"
               disabled={acceptPending}
               onClick={handleCancel}
             >
@@ -75,8 +75,8 @@ export default function ConfirmationDialog({
             <button
               aria-label="Accept"
               className={classnames("px-5 py-2", {
-                "danger-button": actionType === "destructive",
-                "primary-button": actionType === "default",
+                "primary-button-danger": actionType === "destructive",
+                "primary-button-default": actionType === "default",
               })}
               disabled={acceptPending}
               onClick={() => mutation.mutate()}

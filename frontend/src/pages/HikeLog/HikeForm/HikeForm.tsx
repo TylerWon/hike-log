@@ -1,3 +1,4 @@
+import "../../../assets/styles/button.css";
 import "../../../assets/styles/dialog.css";
 
 import type { $ZodErrorTree } from "zod/v4/core";
@@ -266,7 +267,7 @@ export default function HikeForm({ onCancel, onSubmit }: HikeFormProps) {
             <div className="flex items-center justify-end gap-3 px-5 py-4 ">
               <button
                 aria-label="Cancel"
-                className="secondary-button px-4 py-2"
+                className="borderless-button px-4 py-2"
                 disabled={submissionPending}
                 onClick={handleCancel}
                 type="button"
@@ -275,7 +276,7 @@ export default function HikeForm({ onCancel, onSubmit }: HikeFormProps) {
               </button>
               <button
                 aria-label="Submit"
-                className="primary-button px-5 py-2"
+                className="primary-button-default px-5 py-2"
                 disabled={submissionPending}
                 type="submit"
               >

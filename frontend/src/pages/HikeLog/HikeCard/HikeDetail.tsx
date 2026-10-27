@@ -26,7 +26,7 @@ export default function HikeDetail({ hike }: HikeDetailProps) {
         </div>
 
         <a
-          className="primary-button inline-flex items-center gap-1.5 px-2.5 py-1"
+          className="secondary-button-default inline-flex items-center gap-1.5 px-2.5 py-1"
           href={hike.allTrailsUrl}
           rel="noopener noreferrer"
           target="_blank"
