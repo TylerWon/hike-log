@@ -2,7 +2,7 @@ import { describe, expect, test } from "vitest";
 import { render } from "vitest-browser-react";
 
 import { HIKE_MOCK_1, HIKE_MOCK_2 } from "../../../mocks/models/hike";
-import { HikeLogContentWrapper } from "../../../utils/HikeLog/test-components";
+import { HikeLogContentWrapper } from "../../../utils/HikeLogContent/test-components";
 
 describe("HikeLogContent", () => {
   test("displays title, stats overview, and body", async () => {

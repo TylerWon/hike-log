@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { render } from "vitest-browser-react";
 
-import { HikeLogContentWrapper } from "../../../utils/HikeLog/test-components";
+import { HikeLogContentWrapper } from "../../../utils/HikeLogContent/test-components";
 
 describe("HikeLogContent", () => {
   test("displays component", async () => {
