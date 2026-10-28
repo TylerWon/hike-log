@@ -1,4 +1,5 @@
 import "../../assets/styles/button.css";
+import "../../assets/styles/text.css";
 
 import { useRef } from "react";
 
@@ -67,7 +68,7 @@ export default function PhotoField({ errors, photos, setPhotos }: PhotoFieldProp
   return (
     <div aria-label="Photo field" className="border-t border-forest-800 pt-4" role="group">
       <div className="mb-3">
-        <p className="font-mono text-[10px] uppercase tracking-widest text-forest-700">Photos</p>
+        <p className="field-label">Photos</p>
         <input
           accept="image/*"
           aria-label="Hidden file input"

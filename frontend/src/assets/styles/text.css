@@ -1,7 +1,7 @@
 @reference "../../index.css";
 
 .field-label {
-  @apply text-[10px] font-mono uppercase tracking-widest text-forest-700;
+  @apply text-[10px] font-mono uppercase tracking-widest text-forest-600;
 }
 
 .stat-value {
