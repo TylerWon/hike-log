@@ -1,3 +1,5 @@
+import "../../assets/styles/button.css";
+
 import { useRef } from "react";
 
 import type { PhotoData, PhotoErrors } from "../../pages/HikeLog/HikeForm/types";
@@ -80,7 +82,7 @@ export default function PhotoField({ errors, photos, setPhotos }: PhotoFieldProp
       {photos.length === 0 ? (
         <button
           aria-label="Upload photos"
-          className="w-full border border-dashed border-forest-800 rounded-lg py-8 flex flex-col items-center gap-2 text-forest-700 hover:border-forest-700 hover:text-forest-600 transition-colors focus:outline-none"
+          className="dashed-border-button w-full py-8 flex flex-col items-center gap-2"
           onClick={openFileSelectDialog}
           type="button"
         >
@@ -189,7 +191,7 @@ export default function PhotoField({ errors, photos, setPhotos }: PhotoFieldProp
 
           <button
             aria-label="Add more photos"
-            className="font-mono w-full border border-dashed border-forest-800 rounded py-2.5 text-xs text-forest-700 hover:border-forest-700 hover:text-forest-600 transition-colors focus:outline-none flex items-center justify-center gap-1.5"
+            className="dashed-border-button w-full py-2.5 flex items-center justify-center gap-1.5"
             onClick={openFileSelectDialog}
             type="button"
           >

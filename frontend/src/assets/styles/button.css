@@ -4,6 +4,10 @@
   @apply font-mono text-xs text-forest-600 hover:text-cream-100 transition-colors;
 }
 
+.dashed-border-button {
+  @apply font-mono text-xs text-forest-700 hover:text-forest-600 rounded border border-dashed border-forest-800 hover:border-forest-700 transition-colors;
+}
+
 .primary-button-danger {
   @apply font-mono text-xs text-cream-100 transition-colors rounded border border-coral-600 bg-coral-600 hover:border-coral-500 hover:bg-coral-500;
 }
