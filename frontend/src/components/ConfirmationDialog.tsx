@@ -5,7 +5,7 @@ import { useMutation } from "@tanstack/react-query";
 
 import { classnames } from "../utils/classnames";
 import GenericError from "./GenericError";
-import TextWithSpinner from "./TextWithSpinner";
+import PendingButton from "./PendingButton";
 
 type ActionType = "default" | "destructive";
 
@@ -72,17 +72,20 @@ export default function ConfirmationDialog({
             >
               Cancel
             </button>
-            <button
-              aria-label="Accept"
-              className={classnames("px-5 py-2", {
-                "primary-button-danger": actionType === "destructive",
-                "primary-button-default": actionType === "default",
-              })}
-              disabled={acceptPending}
-              onClick={() => mutation.mutate()}
-            >
-              {acceptPending ? <TextWithSpinner text={acceptButtonPendingText} /> : acceptButtonText}
-            </button>
+            <PendingButton
+              buttonProps={{
+                "aria-label": "Accept",
+                className: classnames("px-5 py-2", {
+                  "primary-button-danger": actionType === "destructive",
+                  "primary-button-default": actionType === "default",
+                }),
+                disabled: acceptPending,
+                onClick: () => mutation.mutate(),
+              }}
+              pending={acceptPending}
+              pendingText={acceptButtonPendingText}
+              text={acceptButtonText}
+            />
           </div>
         </div>
       </div>

@@ -13,7 +13,7 @@ import PhotoField from "../../../components/form/PhotoField";
 import TextAreaField from "../../../components/form/TextAreaField";
 import TextField from "../../../components/form/TextField";
 import GenericError from "../../../components/GenericError";
-import TextWithSpinner from "../../../components/TextWithSpinner";
+import PendingButton from "../../../components/PendingButton";
 import { type HikeFormData, HikeFormDataSchema } from "../../../schemas/forms/hike";
 
 export interface HikeFormProps {
@@ -274,14 +274,17 @@ export default function HikeForm({ onCancel, onSubmit }: HikeFormProps) {
               >
                 Cancel
               </button>
-              <button
-                aria-label="Submit"
-                className="primary-button-default px-5 py-2"
-                disabled={submissionPending}
-                type="submit"
-              >
-                {submissionPending ? <TextWithSpinner text="Adding..." /> : "Submit"}
-              </button>
+              <PendingButton
+                buttonProps={{
+                  "aria-label": "Submit",
+                  className: "primary-button-default px-5 py-2",
+                  disabled: submissionPending,
+                  type: "submit",
+                }}
+                pending={submissionPending}
+                pendingText="Adding..."
+                text="Submit"
+              />
             </div>
           </div>
         </form>
