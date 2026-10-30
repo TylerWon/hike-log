@@ -32,7 +32,7 @@ export default function HikeForm({ onCancel, onSubmit }: HikeFormProps) {
   const [allTrailsUrl, setAllTrailsUrl] = useState<string>("");
   const [notes, setNotes] = useState<string>("");
   const [photos, setPhotos] = useState<PhotoData[]>([]);
-  const [fieldErrors, setFieldErrors] = useState<$ZodErrorTree<HikeFormData>>();
+  const [formErrors, setFormErrors] = useState<$ZodErrorTree<HikeFormData>>();
 
   const addHikeMutation = useMutation({
     mutationFn: onSubmit, // called when mutate() is invoked for this mutation
@@ -64,7 +64,7 @@ export default function HikeForm({ onCancel, onSubmit }: HikeFormProps) {
 
     const result = HikeFormDataSchema.safeParse(hike);
     if (!result.success) {
-      setFieldErrors(z.treeifyError(result.error));
+      setFormErrors(z.treeifyError(result.error));
       return null;
     }
 
@@ -124,7 +124,7 @@ export default function HikeForm({ onCancel, onSubmit }: HikeFormProps) {
         <form noValidate onSubmit={handleSubmit}>
           <div className="flex flex-col gap-4 px-5 py-5">
             <TextField
-              error={fieldErrors?.properties?.trailName?.errors?.[0]}
+              error={formErrors?.properties?.trailName?.errors?.[0]}
               id="trail-name"
               inputProps={{
                 autoFocus: true,
@@ -139,7 +139,7 @@ export default function HikeForm({ onCancel, onSubmit }: HikeFormProps) {
 
             <div className="grid grid-cols-2 gap-3">
               <TextField
-                error={fieldErrors?.properties?.date?.errors?.[0]}
+                error={formErrors?.properties?.date?.errors?.[0]}
                 id="date"
                 inputProps={{
                   className: "scheme-dark",
@@ -151,7 +151,7 @@ export default function HikeForm({ onCancel, onSubmit }: HikeFormProps) {
                 required
               />
               <TextField
-                error={fieldErrors?.properties?.duration?.errors?.[0]}
+                error={formErrors?.properties?.duration?.errors?.[0]}
                 id="duration"
                 inputProps={{
                   min: 1,
@@ -168,7 +168,7 @@ export default function HikeForm({ onCancel, onSubmit }: HikeFormProps) {
 
             <div className="grid grid-cols-2 gap-3">
               <TextField
-                error={fieldErrors?.properties?.rating?.errors?.[0]}
+                error={formErrors?.properties?.rating?.errors?.[0]}
                 id="rating"
                 inputProps={{
                   max: 5,
@@ -183,7 +183,7 @@ export default function HikeForm({ onCancel, onSubmit }: HikeFormProps) {
                 required
               />
               <TextField
-                error={fieldErrors?.properties?.difficulty?.errors?.[0]}
+                error={formErrors?.properties?.difficulty?.errors?.[0]}
                 id="difficulty"
                 inputProps={{
                   max: 10,
@@ -201,7 +201,7 @@ export default function HikeForm({ onCancel, onSubmit }: HikeFormProps) {
 
             <div className="grid grid-cols-2 gap-3">
               <TextField
-                error={fieldErrors?.properties?.distance?.errors?.[0]}
+                error={formErrors?.properties?.distance?.errors?.[0]}
                 id="distance"
                 inputProps={{
                   min: 0,
@@ -215,7 +215,7 @@ export default function HikeForm({ onCancel, onSubmit }: HikeFormProps) {
                 required
               />
               <TextField
-                error={fieldErrors?.properties?.elevationGain?.errors?.[0]}
+                error={formErrors?.properties?.elevationGain?.errors?.[0]}
                 id="elevation-gain"
                 inputProps={{
                   min: 0,
@@ -231,7 +231,7 @@ export default function HikeForm({ onCancel, onSubmit }: HikeFormProps) {
             </div>
 
             <TextField
-              error={fieldErrors?.properties?.allTrailsUrl?.errors?.[0]}
+              error={formErrors?.properties?.allTrailsUrl?.errors?.[0]}
               id="all-trails-url"
               inputProps={{
                 onChange: (e) => setAllTrailsUrl(e.target.value),
@@ -244,7 +244,7 @@ export default function HikeForm({ onCancel, onSubmit }: HikeFormProps) {
             />
 
             <TextAreaField
-              error={fieldErrors?.properties?.notes?.errors?.[0]}
+              error={formErrors?.properties?.notes?.errors?.[0]}
               id="notes"
               label="Notes"
               required
@@ -257,7 +257,7 @@ export default function HikeForm({ onCancel, onSubmit }: HikeFormProps) {
             />
 
             {/* Photo field */}
-            <PhotoField errors={fieldErrors?.properties?.photos} photos={photos} setPhotos={setPhotos} />
+            <PhotoField errors={formErrors?.properties?.photos} photos={photos} setPhotos={setPhotos} />
           </div>
 
           {/* Footer */}
