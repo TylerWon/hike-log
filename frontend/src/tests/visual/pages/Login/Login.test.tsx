@@ -2,9 +2,9 @@ import { describe, expect, test, vi } from "vitest";
 import { render } from "vitest-browser-react";
 
 import { login } from "../../../../api/auth/auth";
+import { clickButton } from "../../../utils/button";
 import { fillField } from "../../../utils/Field/test-helpers";
 import { LoginWrapper } from "../../../utils/Login/test-components";
-import { clickLoginButton } from "../../../utils/Login/test-helpers";
 
 vi.mock(import("../../../../api/auth/auth"), async (importOriginal) => {
   const actual = await importOriginal();
@@ -22,7 +22,7 @@ describe("Login", () => {
 
   test("displays field error when password is submitted with invalid value", async () => {
     const screen = await render(<LoginWrapper />);
-    await clickLoginButton(screen);
+    await clickButton(screen, "Login");
     await expect(screen.container).toMatchScreenshot();
   });
 
@@ -32,7 +32,8 @@ describe("Login", () => {
     const screen = await render(<LoginWrapper />);
 
     await fillField(screen, "Password", "admin");
-    await clickLoginButton(screen);
+    await clickButton(screen, "Login");
+
     await expect(screen.container).toMatchScreenshot();
   });
 
@@ -43,7 +44,8 @@ describe("Login", () => {
     const screen = await render(<LoginWrapper />);
 
     await fillField(screen, "Password", "admin");
-    await clickLoginButton(screen);
+    await clickButton(screen, "Login");
+
     await expect(screen.container).toMatchScreenshot();
   });
 });

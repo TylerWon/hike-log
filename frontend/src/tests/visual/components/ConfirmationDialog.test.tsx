@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, type Mock, test, vi } from "vitest";
 import { render } from "vitest-browser-react";
 
+import { clickButton } from "../../utils/button";
 import { ConfirmationDialogWrapper } from "../../utils/ConfirmationDialog/test-components";
-import { clickAcceptButton } from "../../utils/ConfirmationDialog/test-helpers";
 
 describe("ConfirmationDialog", () => {
   let mockOnAccept: Mock;
@@ -24,7 +24,7 @@ describe("ConfirmationDialog", () => {
 
     const screen = await render(<ConfirmationDialogWrapper onAccept={mockOnAccept} onCancel={mockOnCancel} />);
 
-    await clickAcceptButton(screen);
+    await clickButton(screen, "Accept");
 
     const component = screen.getByRole("region", { name: "Confirmation dialog backdrop" });
     await expect(component).toMatchScreenshot();
@@ -35,7 +35,7 @@ describe("ConfirmationDialog", () => {
 
     const screen = await render(<ConfirmationDialogWrapper onAccept={mockOnAccept} onCancel={mockOnCancel} />);
 
-    await clickAcceptButton(screen);
+    await clickButton(screen, "Accept");
 
     const component = screen.getByRole("region", { name: "Confirmation dialog backdrop" });
     await expect(component).toMatchScreenshot();

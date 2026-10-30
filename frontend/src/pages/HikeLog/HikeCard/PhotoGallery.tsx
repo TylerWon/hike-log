@@ -31,7 +31,7 @@ export default function PhotoGallery({ photos }: PhotoGalleryProps) {
       <div className="flex gap-2 overflow-x-auto scrollbar-thin">
         {photos.map((photo, i) => (
           <button
-            aria-label={`Photo ${i + 1} button`}
+            aria-label={`Open photo ${i + 1}`}
             className="w-[120px] h-[80px] shrink-0 rounded overflow-hidden bg-forest-800 cursor-pointer group/photo"
             key={i}
             onClick={() => setLightboxIndex(i)}
@@ -51,7 +51,7 @@ export default function PhotoGallery({ photos }: PhotoGalleryProps) {
         <div aria-label="Photo lightbox" className="dialog-backdrop" onClick={closeLightbox} role="region">
           {/* Close */}
           <button
-            aria-label="Close button"
+            aria-label="Close"
             className="absolute top-4 right-4 text-forest-600 hover:text-cream-100 transition-colors p-2 focus:outline-none"
             onClick={closeLightbox}
           >
@@ -92,7 +92,7 @@ export default function PhotoGallery({ photos }: PhotoGalleryProps) {
           {photos.length > 1 && (
             <>
               <button
-                aria-label="Previous photo button"
+                aria-label="Previous photo"
                 className="absolute left-4 top-1/2 -translate-y-1/2 text-forest-600 hover:text-cream-100 transition-colors p-3 focus:outline-none"
                 onClick={(e) => {
                   e.stopPropagation();
@@ -113,7 +113,7 @@ export default function PhotoGallery({ photos }: PhotoGalleryProps) {
                 </svg>
               </button>
               <button
-                aria-label="Next photo button"
+                aria-label="Next photo"
                 className="absolute right-4 top-1/2 -translate-y-1/2 text-forest-600 hover:text-cream-100 transition-colors p-3 focus:outline-none"
                 onClick={(e) => {
                   e.stopPropagation();

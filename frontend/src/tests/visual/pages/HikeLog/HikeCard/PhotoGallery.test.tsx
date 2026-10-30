@@ -1,15 +1,11 @@
 import { describe, expect, test } from "vitest";
-import { render, type RenderResult } from "vitest-browser-react";
+import { render } from "vitest-browser-react";
 
 import type { Photo } from "../../../../../schemas/models/photo";
 
 import PhotoGallery from "../../../../../pages/HikeLog/HikeCard/PhotoGallery";
 import { HIKE_MOCK_1 } from "../../../../mocks/models/hike";
-
-async function clickFirstPhotoInGallery(screen: RenderResult) {
-  const firstPhotoButton = screen.getByRole("button", { name: "Photo 1 button" });
-  await firstPhotoButton.click();
-}
+import { clickButton } from "../../../../utils/button";
 
 describe("PhotoGallery", () => {
   test("displays gallery of photos when photos are provided", async () => {
@@ -21,7 +17,7 @@ describe("PhotoGallery", () => {
   test("displays photo in a lightbox when it is clicked in the gallery", async () => {
     const screen = await render(<PhotoGallery photos={HIKE_MOCK_1.photos} />);
 
-    await clickFirstPhotoInGallery(screen);
+    await clickButton(screen, "Open photo 1");
 
     const component = screen.getByRole("region", { name: "Photo lightbox" });
     await expect(component).toMatchScreenshot();
@@ -32,7 +28,7 @@ describe("PhotoGallery", () => {
 
     const screen = await render(<PhotoGallery photos={photos} />);
 
-    await clickFirstPhotoInGallery(screen);
+    await clickButton(screen, "Open photo 1");
 
     const component = screen.getByRole("region", { name: "Photo lightbox" });
     await expect(component).toMatchScreenshot();
@@ -44,7 +40,7 @@ describe("PhotoGallery", () => {
 
     const screen = await render(<PhotoGallery photos={photos} />);
 
-    await clickFirstPhotoInGallery(screen);
+    await clickButton(screen, "Open photo 1");
 
     const component = screen.getByRole("region", { name: "Photo lightbox" });
     await expect(component).toMatchScreenshot();

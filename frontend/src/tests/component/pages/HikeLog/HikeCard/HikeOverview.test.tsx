@@ -1,14 +1,10 @@
 import { beforeEach, describe, expect, type Mock, test, vi } from "vitest";
-import { render, type RenderResult } from "vitest-browser-react";
+import { render } from "vitest-browser-react";
 
 import { formatDate, formatDuration } from "../../../../../utils/formatters";
 import { HIKE_MOCK_1 } from "../../../../mocks/models/hike";
+import { clickButton } from "../../../../utils/button";
 import { HikeOverviewWrapper } from "../../../../utils/HikeOverview/test-components";
-
-async function clickDeleteHikeButton(screen: RenderResult) {
-  const deleteHikeButton = screen.getByRole("button", { name: "Delete hike" });
-  await deleteHikeButton.click();
-}
 
 describe("HikeOverview", () => {
   let mockOnClick: Mock;
@@ -62,7 +58,7 @@ describe("HikeOverview", () => {
   test("opens delete confirmation dialog when delete hike button is clicked", async () => {
     const screen = await render(<HikeOverviewWrapper onClick={mockOnClick} onDelete={mockOnDelete} />);
 
-    await clickDeleteHikeButton(screen);
+    await clickButton(screen, "Delete hike");
 
     const deleteDialog = screen.getByRole("region", { name: "Confirmation dialog backdrop" });
     await expect.element(deleteDialog).toBeInTheDocument();
@@ -71,7 +67,7 @@ describe("HikeOverview", () => {
   test("closes delete confirmation dialog when dialog cancel button is clicked", async () => {
     const screen = await render(<HikeOverviewWrapper onClick={mockOnClick} onDelete={mockOnDelete} />);
 
-    await clickDeleteHikeButton(screen);
+    await clickButton(screen, "Delete hike");
 
     const deleteDialog = screen.getByRole("region", { name: "Confirmation dialog backdrop" });
     await expect.element(deleteDialog).toBeInTheDocument();
@@ -85,7 +81,7 @@ describe("HikeOverview", () => {
   test("invokes onDelete callback and closes confirmation dialog when dialog delete button is clicked", async () => {
     const screen = await render(<HikeOverviewWrapper onClick={mockOnClick} onDelete={mockOnDelete} />);
 
-    await clickDeleteHikeButton(screen);
+    await clickButton(screen, "Delete hike");
 
     const deleteDialog = screen.getByRole("region", { name: "Confirmation dialog backdrop" });
     await expect.element(deleteDialog).toBeInTheDocument();

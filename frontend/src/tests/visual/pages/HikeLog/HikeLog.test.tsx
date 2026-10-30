@@ -3,8 +3,8 @@ import { render } from "vitest-browser-react";
 
 import { fetchHikes } from "../../../../api/hikes";
 import { HIKE_MOCK_1, HIKE_MOCK_2 } from "../../../mocks/models/hike";
+import { clickButton } from "../../../utils/button";
 import { HikeLogWrapper } from "../../../utils/HikeLog/test-components";
-import { clickAddHikeButton } from "../../../utils/HikeLog/test-helpers";
 
 vi.mock(import("../../../../api/hikes"), async (importOriginal) => {
   const actual = await importOriginal();
@@ -38,7 +38,7 @@ describe("HikeLog", () => {
 
   test("displays add hike form when add hike button is clicked", async () => {
     const screen = await render(<HikeLogWrapper />);
-    await clickAddHikeButton(screen);
+    await clickButton(screen, "Add hike");
     await expect(screen.container).toMatchScreenshot();
   });
 });

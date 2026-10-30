@@ -3,10 +3,11 @@ import { render } from "vitest-browser-react";
 
 import joffreLakes1 from "../../../assets/images/joffre_lakes_1.avif";
 import joffreLakes2 from "../../../assets/images/joffre_lakes_2.avif";
+import { clickButton } from "../../../utils/button";
 import { fillField } from "../../../utils/Field/test-helpers";
 import { createFileFromUrl } from "../../../utils/files";
 import { HikeFormWrapper } from "../../../utils/HikeForm/test-components";
-import { clickSubmitButton, fillHikeForm } from "../../../utils/HikeForm/test-helpers";
+import { fillHikeForm } from "../../../utils/HikeForm/test-helpers";
 
 describe("HikeForm", () => {
   let mockOnCancel: Mock;
@@ -44,7 +45,7 @@ describe("HikeForm", () => {
     await fillField(screen, "Difficulty (0-10)", "11.5");
     await fillField(screen, "AllTrails URL", "abc");
 
-    await clickSubmitButton(screen);
+    await clickButton(screen, "Submit");
 
     const form = screen.getByRole("region", { name: "Hike form backdrop" });
     await expect(form).toMatchScreenshot();
@@ -57,7 +58,7 @@ describe("HikeForm", () => {
     const screen = await render(<HikeFormWrapper onCancel={mockOnCancel} onSubmit={mockOnSubmit} />);
 
     await fillHikeForm(screen);
-    await clickSubmitButton(screen);
+    await clickButton(screen, "Submit");
 
     const form = screen.getByRole("region", { name: "Hike form backdrop" });
     await expect(form).toMatchScreenshot();
@@ -69,7 +70,7 @@ describe("HikeForm", () => {
     const screen = await render(<HikeFormWrapper onCancel={mockOnCancel} onSubmit={mockOnSubmit} />);
 
     await fillHikeForm(screen);
-    await clickSubmitButton(screen);
+    await clickButton(screen, "Submit");
 
     const form = screen.getByRole("region", { name: "Hike form backdrop" });
     await expect(form).toMatchScreenshot();

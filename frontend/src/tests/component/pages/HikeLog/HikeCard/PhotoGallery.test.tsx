@@ -5,6 +5,7 @@ import type { Photo } from "../../../../../schemas/models/photo";
 
 import PhotoGallery from "../../../../../pages/HikeLog/HikeCard/PhotoGallery";
 import { HIKE_MOCK_1 } from "../../../../mocks/models/hike";
+import { clickButton } from "../../../../utils/button";
 
 /**
  * Checks that the gallery displays `photos`.
@@ -38,42 +39,22 @@ async function checkLightbox(screen: RenderResult, photos: Photo[], index: numbe
   const count = screen.getByText(`${index + 1} / ${photos.length}`);
   await expect.element(count).toBeInTheDocument();
 
-  const closeButton = screen.getByRole("button", { name: "Close button" });
+  const closeButton = screen.getByRole("button", { name: "Close" });
   await expect.element(closeButton).toBeInTheDocument();
 
   if (photos.length <= 1) {
-    const prevButton = screen.getByRole("button", { name: "Previous photo button" });
+    const prevButton = screen.getByRole("button", { name: "Previous photo" });
     await expect.element(prevButton).not.toBeInTheDocument();
 
-    const nextButton = screen.getByRole("button", { name: "Next photo button" });
+    const nextButton = screen.getByRole("button", { name: "Next photo" });
     await expect.element(nextButton).not.toBeInTheDocument();
   } else {
-    const prevButton = screen.getByRole("button", { name: "Previous photo button" });
+    const prevButton = screen.getByRole("button", { name: "Previous photo" });
     await expect.element(prevButton).toBeInTheDocument();
 
-    const nextButton = screen.getByRole("button", { name: "Next photo button" });
+    const nextButton = screen.getByRole("button", { name: "Next photo" });
     await expect.element(nextButton).toBeInTheDocument();
   }
-}
-
-async function clickCloseButtonInLightbox(screen: RenderResult) {
-  const closeButton = screen.getByRole("button", { name: "Close button" });
-  await closeButton.click();
-}
-
-async function clickFirstPhotoInGallery(screen: RenderResult) {
-  const firstPhotoButton = screen.getByRole("button", { name: "Photo 1 button" });
-  await firstPhotoButton.click();
-}
-
-async function clickNextButtonInLightbox(screen: RenderResult) {
-  const nextButton = screen.getByRole("button", { name: "Next photo button" });
-  await nextButton.click();
-}
-
-async function clickPrevButtonInLightbox(screen: RenderResult) {
-  const prevButton = screen.getByRole("button", { name: "Previous photo button" });
-  await prevButton.click();
 }
 
 describe("PhotoGallery", () => {
@@ -91,7 +72,7 @@ describe("PhotoGallery", () => {
     const screen = await render(<PhotoGallery photos={HIKE_MOCK_1.photos} />);
 
     await checkGallery(screen, HIKE_MOCK_1.photos);
-    await clickFirstPhotoInGallery(screen);
+    await clickButton(screen, "Open photo 1");
     await checkLightbox(screen, HIKE_MOCK_1.photos, 0);
   });
 
@@ -99,15 +80,15 @@ describe("PhotoGallery", () => {
     const screen = await render(<PhotoGallery photos={HIKE_MOCK_1.photos} />);
 
     await checkGallery(screen, HIKE_MOCK_1.photos);
-    await clickFirstPhotoInGallery(screen);
+    await clickButton(screen, "Open photo 1");
     await checkLightbox(screen, HIKE_MOCK_1.photos, 0);
-    await clickNextButtonInLightbox(screen);
+    await clickButton(screen, "Next photo");
     await checkLightbox(screen, HIKE_MOCK_1.photos, 1);
-    await clickNextButtonInLightbox(screen);
+    await clickButton(screen, "Next photo");
     await checkLightbox(screen, HIKE_MOCK_1.photos, 2);
-    await clickNextButtonInLightbox(screen);
+    await clickButton(screen, "Next photo");
     await checkLightbox(screen, HIKE_MOCK_1.photos, 0);
-    await clickPrevButtonInLightbox(screen);
+    await clickButton(screen, "Previous photo");
     await checkLightbox(screen, HIKE_MOCK_1.photos, 2);
   });
 
@@ -117,7 +98,7 @@ describe("PhotoGallery", () => {
     const screen = await render(<PhotoGallery photos={photos} />);
 
     await checkGallery(screen, photos);
-    await clickFirstPhotoInGallery(screen);
+    await clickButton(screen, "Open photo 1");
     await checkLightbox(screen, photos, 0);
   });
 
@@ -128,7 +109,7 @@ describe("PhotoGallery", () => {
     const screen = await render(<PhotoGallery photos={photos} />);
 
     await checkGallery(screen, photos);
-    await clickFirstPhotoInGallery(screen);
+    await clickButton(screen, "Open photo 1");
     await checkLightbox(screen, photos, 0);
   });
 
@@ -136,9 +117,9 @@ describe("PhotoGallery", () => {
     const screen = await render(<PhotoGallery photos={HIKE_MOCK_1.photos} />);
 
     await checkGallery(screen, HIKE_MOCK_1.photos);
-    await clickFirstPhotoInGallery(screen);
+    await clickButton(screen, "Open photo 1");
     await checkLightbox(screen, HIKE_MOCK_1.photos, 0);
-    await clickCloseButtonInLightbox(screen);
+    await clickButton(screen, "Close");
     const photo = screen.getByRole("img", { name: `Photo 1 lightbox` });
     await expect.element(photo).not.toBeInTheDocument();
   });

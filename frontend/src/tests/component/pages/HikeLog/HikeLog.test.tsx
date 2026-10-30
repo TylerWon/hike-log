@@ -7,9 +7,9 @@ import { deleteHike, fetchHikes } from "../../../../api/hikes";
 import { HikeCreationError, PhotoCreationError } from "../../../../pages/HikeLog/HikeLog/errors";
 import { submitHikeForm } from "../../../../pages/HikeLog/HikeLog/submit-hike-form";
 import { HIKE_MOCK_1, HIKE_MOCK_2 } from "../../../mocks/models/hike";
-import { clickSubmitButton, fillHikeForm } from "../../../utils/HikeForm/test-helpers";
+import { clickButton } from "../../../utils/button";
+import { fillHikeForm } from "../../../utils/HikeForm/test-helpers";
 import { HikeLogWrapper } from "../../../utils/HikeLog/test-components";
-import { clickAddHikeButton } from "../../../utils/HikeLog/test-helpers";
 import { checkStatLabels, checkStatValues } from "../../../utils/StatsOverview/test-helpers";
 
 vi.mock(import("../../../../pages/HikeLog/HikeLog/submit-hike-form"), async (importOriginal) => {
@@ -137,7 +137,7 @@ describe("HikeLog", () => {
 
       const screen = await render(<HikeLogWrapper />);
 
-      await clickAddHikeButton(screen);
+      await clickButton(screen, "Add hike");
 
       const form = screen.getByRole("dialog", { name: "Hike form" });
       await expect.element(form).toBeInTheDocument();
@@ -148,7 +148,7 @@ describe("HikeLog", () => {
 
       const screen = await render(<HikeLogWrapper />);
 
-      await clickAddHikeButton(screen);
+      await clickButton(screen, "Add hike");
 
       const form = screen.getByRole("dialog", { name: "Hike form" });
       await expect.element(form).toBeInTheDocument();
@@ -165,11 +165,11 @@ describe("HikeLog", () => {
 
       const screen = await render(<HikeLogWrapper />);
 
-      await clickAddHikeButton(screen);
+      await clickButton(screen, "Add hike");
 
       const form = screen.getByRole("dialog", { name: "Hike form" });
       await fillHikeForm(form);
-      await clickSubmitButton(form);
+      await clickButton(form, "Submit");
 
       const error = form.getByText("Something went wrong. Please try again.");
       await expect.element(error).toBeInTheDocument();
@@ -185,11 +185,11 @@ describe("HikeLog", () => {
 
       await checkCardsExist(screen, hikes, false);
 
-      await clickAddHikeButton(screen);
+      await clickButton(screen, "Add hike");
 
       const form = screen.getByRole("dialog", { name: "Hike form" });
       await fillHikeForm(form);
-      await clickSubmitButton(form);
+      await clickButton(form, "Submit");
 
       await expect.element(form).not.toBeInTheDocument();
 
@@ -211,11 +211,11 @@ describe("HikeLog", () => {
 
       await checkCardsExist(screen, hikes, false);
 
-      await clickAddHikeButton(screen);
+      await clickButton(screen, "Add hike");
 
       const form = screen.getByRole("dialog", { name: "Hike form" });
       await fillHikeForm(form);
-      await clickSubmitButton(form);
+      await clickButton(form, "Submit");
 
       await expect.element(form).not.toBeInTheDocument();
 

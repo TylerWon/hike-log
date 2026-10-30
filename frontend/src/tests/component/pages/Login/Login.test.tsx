@@ -3,9 +3,9 @@ import { render } from "vitest-browser-react";
 
 import { login } from "../../../../api/auth/auth";
 import { AuthError } from "../../../../api/auth/errors";
+import { clickButton } from "../../../utils/button";
 import { checkFieldError, checkNoFieldError, fillField } from "../../../utils/Field/test-helpers";
 import { LoginWrapper } from "../../../utils/Login/test-components";
-import { clickLoginButton } from "../../../utils/Login/test-helpers";
 
 vi.mock(import("../../../../api/auth/auth"), async (importOriginal) => {
   const actual = await importOriginal();
@@ -28,7 +28,7 @@ describe("Login", () => {
 
   test("displays field error when empty password is submitted", async () => {
     const screen = await render(<LoginWrapper />);
-    await clickLoginButton(screen);
+    await clickButton(screen, "Login");
     await checkFieldError(screen, "Password", "Required");
   });
 
@@ -38,7 +38,8 @@ describe("Login", () => {
     const screen = await render(<LoginWrapper />);
 
     await fillField(screen, "Password", "abc");
-    await clickLoginButton(screen);
+    await clickButton(screen, "Login");
+
     await checkFieldError(screen, "Password", "Incorrect password");
   });
 
@@ -48,7 +49,8 @@ describe("Login", () => {
     const screen = await render(<LoginWrapper />);
 
     await fillField(screen, "Password", "admin");
-    await clickLoginButton(screen);
+    await clickButton(screen, "Login");
+
     await checkNoFieldError(screen, "Password");
 
     const errorMessage = screen.getByText("Something went wrong. Please try again.");
@@ -62,7 +64,7 @@ describe("Login", () => {
     const screen = await render(<LoginWrapper />);
 
     await fillField(screen, "Password", "admin");
-    await clickLoginButton(screen);
+    await clickButton(screen, "Login");
 
     const button = screen.getByRole("button", { name: "Login" });
     await expect.element(button).toBeDisabled();
@@ -75,7 +77,8 @@ describe("Login", () => {
     const screen = await render(<LoginWrapper navigateFn={navigateMock} />);
 
     await fillField(screen, "Password", "admin");
-    await clickLoginButton(screen);
+    await clickButton(screen, "Login");
+
     expect(navigateMock).toHaveBeenCalledWith("/");
   });
 });

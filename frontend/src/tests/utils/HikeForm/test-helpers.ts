@@ -6,14 +6,6 @@ import { fillField } from "../Field/test-helpers";
 import { uploadPhotos } from "../PhotoField/test-helpers";
 
 /**
- * Clicks the HikeForm submit button.
- */
-export async function clickSubmitButton(screen: Locator | RenderResult) {
-  const submitButton = screen.getByRole("button", { name: "Submit" });
-  await submitButton.click();
-}
-
-/**
  * Fills every field in a HikeForm with a valid value. Photos can optionally be added.
  */
 export async function fillHikeForm(screen: Locator | RenderResult, photos: File[] = []) {

@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, type Mock, test, vi } from "vitest";
 import { render, type RenderResult } from "vitest-browser-react";
 
+import { clickButton } from "../../utils/button";
 import { ConfirmationDialogWrapper } from "../../utils/ConfirmationDialog/test-components";
-import { clickAcceptButton } from "../../utils/ConfirmationDialog/test-helpers";
 
 async function clickBackdrop(screen: RenderResult) {
   const backdrop = screen.getByRole("region", { name: "Confirmation dialog backdrop" });
@@ -39,7 +39,7 @@ describe("ConfirmationDialog", () => {
 
   test("invokes onAccept callback when accept button is clicked", async () => {
     const screen = await render(<ConfirmationDialogWrapper onAccept={mockOnAccept} onCancel={mockOnCancel} />);
-    await clickAcceptButton(screen);
+    await clickButton(screen, "Accept");
     expect(mockOnAccept).toHaveBeenCalledOnce();
   });
 
@@ -49,7 +49,7 @@ describe("ConfirmationDialog", () => {
 
     const screen = await render(<ConfirmationDialogWrapper onAccept={mockOnAccept} onCancel={mockOnCancel} />);
 
-    await clickAcceptButton(screen);
+    await clickButton(screen, "Accept");
 
     const cancelButton = screen.getByRole("button", { name: "Cancel" });
     await expect.element(cancelButton).toBeDisabled();
@@ -67,7 +67,7 @@ describe("ConfirmationDialog", () => {
 
     const screen = await render(<ConfirmationDialogWrapper onAccept={mockOnAccept} onCancel={mockOnCancel} />);
 
-    await clickAcceptButton(screen);
+    await clickButton(screen, "Accept");
 
     const error = screen.getByText("Something went wrong. Please try again.");
     await expect.element(error).toBeInTheDocument();
