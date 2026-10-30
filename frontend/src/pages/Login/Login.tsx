@@ -110,7 +110,6 @@ export default function Login({ navigateFn }: LoginProps) {
 
           <PendingButton
             buttonProps={{
-              "aria-label": "Login",
               className: "primary-button-default w-full px-4 py-2.5",
               disabled: loginPending,
               type: "submit",

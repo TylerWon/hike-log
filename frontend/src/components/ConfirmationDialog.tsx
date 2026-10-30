@@ -74,7 +74,6 @@ export default function ConfirmationDialog({
             </button>
             <PendingButton
               buttonProps={{
-                "aria-label": "Accept",
                 className: classnames("px-5 py-2", {
                   "primary-button-danger": actionType === "destructive",
                   "primary-button-default": actionType === "default",

@@ -24,7 +24,7 @@ describe("ConfirmationDialog", () => {
 
     const screen = await render(<ConfirmationDialogWrapper onAccept={mockOnAccept} onCancel={mockOnCancel} />);
 
-    await clickButton(screen, "Accept");
+    await clickButton(screen, "Add");
 
     const component = screen.getByRole("region", { name: "Confirmation dialog backdrop" });
     await expect(component).toMatchScreenshot();
@@ -35,7 +35,7 @@ describe("ConfirmationDialog", () => {
 
     const screen = await render(<ConfirmationDialogWrapper onAccept={mockOnAccept} onCancel={mockOnCancel} />);
 
-    await clickButton(screen, "Accept");
+    await clickButton(screen, "Add");
 
     const component = screen.getByRole("region", { name: "Confirmation dialog backdrop" });
     await expect(component).toMatchScreenshot();

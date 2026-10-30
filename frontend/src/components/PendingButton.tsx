@@ -9,7 +9,7 @@ interface PendingButtonProps {
 
 export default function PendingButton({ buttonProps, pending, pendingText, text }: PendingButtonProps) {
   return (
-    <button {...buttonProps}>
+    <button aria-label={text} {...buttonProps}>
       {pending ? (
         <div className="inline-flex items-center gap-2" role="group">
           <svg

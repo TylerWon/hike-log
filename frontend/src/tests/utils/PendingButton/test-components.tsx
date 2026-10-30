@@ -7,7 +7,6 @@ export function PendingButtonWrapper({ pending }: { pending: boolean }) {
   return (
     <PendingButton
       buttonProps={{
-        "aria-label": "Submit",
         className: "primary-button-default px-5 py-2",
         type: "submit",
       }}

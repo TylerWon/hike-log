@@ -276,7 +276,6 @@ export default function HikeForm({ onCancel, onSubmit }: HikeFormProps) {
               </button>
               <PendingButton
                 buttonProps={{
-                  "aria-label": "Submit",
                   className: "primary-button-default px-5 py-2",
                   disabled: submissionPending,
                   type: "submit",

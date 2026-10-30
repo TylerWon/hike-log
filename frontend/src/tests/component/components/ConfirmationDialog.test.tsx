@@ -33,13 +33,13 @@ describe("ConfirmationDialog", () => {
     const cancelButton = screen.getByRole("button", { name: "Cancel" });
     await expect.element(cancelButton).toBeInTheDocument();
 
-    const acceptButton = screen.getByRole("button", { name: "Accept" });
+    const acceptButton = screen.getByRole("button", { name: "Add" });
     await expect.element(acceptButton).toBeInTheDocument();
   });
 
   test("invokes onAccept callback when accept button is clicked", async () => {
     const screen = await render(<ConfirmationDialogWrapper onAccept={mockOnAccept} onCancel={mockOnCancel} />);
-    await clickButton(screen, "Accept");
+    await clickButton(screen, "Add");
     expect(mockOnAccept).toHaveBeenCalledOnce();
   });
 
@@ -49,12 +49,12 @@ describe("ConfirmationDialog", () => {
 
     const screen = await render(<ConfirmationDialogWrapper onAccept={mockOnAccept} onCancel={mockOnCancel} />);
 
-    await clickButton(screen, "Accept");
+    await clickButton(screen, "Add");
 
     const cancelButton = screen.getByRole("button", { name: "Cancel" });
     await expect.element(cancelButton).toBeDisabled();
 
-    const acceptButton = screen.getByRole("button", { name: "Accept" });
+    const acceptButton = screen.getByRole("button", { name: "Add" });
     await expect.element(acceptButton).toBeDisabled();
 
     await clickBackdrop(screen);
@@ -67,7 +67,7 @@ describe("ConfirmationDialog", () => {
 
     const screen = await render(<ConfirmationDialogWrapper onAccept={mockOnAccept} onCancel={mockOnCancel} />);
 
-    await clickButton(screen, "Accept");
+    await clickButton(screen, "Add");
 
     const error = screen.getByText("Something went wrong. Please try again.");
     await expect.element(error).toBeInTheDocument();
