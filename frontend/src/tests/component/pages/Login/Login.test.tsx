@@ -1,13 +1,13 @@
 import { describe, expect, test, vi } from "vitest";
 import { render } from "vitest-browser-react";
 
-import { login } from "../../../../api/auth/auth";
-import { AuthError } from "../../../../api/auth/errors";
+import { login } from "../../../../network/api/auth/auth";
+import { AuthError } from "../../../../network/api/auth/errors";
 import { clickButton } from "../../../utils/button";
 import { checkFieldError, checkNoFieldError, fillField } from "../../../utils/Field/test-helpers";
 import { LoginWrapper } from "../../../utils/Login/test-components";
 
-vi.mock(import("../../../../api/auth/auth"), async (importOriginal) => {
+vi.mock(import("../../../../network/api/auth/auth"), async (importOriginal) => {
   const actual = await importOriginal();
   return {
     ...actual,

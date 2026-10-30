@@ -6,7 +6,7 @@ import { useState } from "react";
 
 import type { HikeFormData } from "../../../schemas/forms/hike";
 
-import { deleteHike, fetchHikes } from "../../../api/hikes";
+import { deleteHike, fetchHikes } from "../../../network/api/hikes";
 import Toast from "../../../components/Toast";
 import { formatDistance, formatDuration, formatElevation } from "../../../utils/formatters";
 import HikeCard from "../HikeCard/HikeCard";

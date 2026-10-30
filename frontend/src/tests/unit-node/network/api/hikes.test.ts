@@ -6,16 +6,16 @@ import type {
   CreateHikeRequest,
   CreatePhotosRequest,
   CreatePresignedUrlsRequest,
-} from "../../../schemas/requests/hikes";
+} from "../../../../schemas/requests/hikes";
 
-import { createHike, createPhotos, createPresignedUrls, fetchHikes } from "../../../api/hikes";
+import { createHike, createPhotos, createPresignedUrls, fetchHikes } from "../../../../network/api/hikes";
 import {
   CREATE_HIKE_RESPONSE_MOCK,
   CREATE_PHOTOS_RESPONSE_MOCK_1,
   CREATE_PRESIGNED_URLS_RESPONSE_MOCK_1,
   LIST_HIKES_RESPONSE_MOCK,
-} from "../../mocks/api-responses/hikes";
-import { HIKE_MOCK_1, HIKE_MOCK_2 } from "../../mocks/models/hike";
+} from "../../../mocks/api-responses/hikes";
+import { HIKE_MOCK_1, HIKE_MOCK_2 } from "../../../mocks/models/hike";
 
 const API_URL = `${import.meta.env.VITE_API_URL}/hikes`;
 

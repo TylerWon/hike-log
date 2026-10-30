@@ -2,10 +2,10 @@ import { http, HttpResponse } from "msw";
 import { type SetupServer, setupServer } from "msw/node";
 import { afterEach, beforeEach, describe, expect, test } from "vitest";
 
-import type { LoginRequest } from "../../../schemas/requests/auth";
+import type { LoginRequest } from "../../../../schemas/requests/auth";
 
-import { login } from "../../../api/auth/auth";
-import { AuthError } from "../../../api/auth/errors";
+import { login } from "../../../../network/api/auth/auth";
+import { AuthError } from "../../../../network/api/auth/errors";
 
 const API_URL = `${import.meta.env.VITE_API_URL}/auth`;
 

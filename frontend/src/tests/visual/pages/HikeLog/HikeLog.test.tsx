@@ -1,12 +1,12 @@
 import { describe, expect, test, vi } from "vitest";
 import { render } from "vitest-browser-react";
 
-import { fetchHikes } from "../../../../api/hikes";
+import { fetchHikes } from "../../../../network/api/hikes";
 import { HIKE_MOCK_1, HIKE_MOCK_2 } from "../../../mocks/models/hike";
 import { clickButton } from "../../../utils/button";
 import { HikeLogWrapper } from "../../../utils/HikeLog/test-components";
 
-vi.mock(import("../../../../api/hikes"), async (importOriginal) => {
+vi.mock(import("../../../../network/api/hikes"), async (importOriginal) => {
   const actual = await importOriginal();
   return {
     ...actual,

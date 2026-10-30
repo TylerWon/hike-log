@@ -1,4 +1,4 @@
-import type { LoginRequest } from "../../schemas/requests/auth";
+import type { LoginRequest } from "../../../schemas/requests/auth";
 
 import { AuthError } from "./errors";
 

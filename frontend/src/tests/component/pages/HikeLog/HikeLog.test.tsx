@@ -3,7 +3,7 @@ import { render, type RenderResult } from "vitest-browser-react";
 
 import type { Hike } from "../../../../schemas/models/hike";
 
-import { deleteHike, fetchHikes } from "../../../../api/hikes";
+import { deleteHike, fetchHikes } from "../../../../network/api/hikes";
 import { HikeCreationError, PhotoCreationError } from "../../../../pages/HikeLog/HikeLog/errors";
 import { submitHikeForm } from "../../../../pages/HikeLog/HikeLog/submit-hike-form";
 import { HIKE_MOCK_1, HIKE_MOCK_2 } from "../../../mocks/models/hike";
@@ -20,7 +20,7 @@ vi.mock(import("../../../../pages/HikeLog/HikeLog/submit-hike-form"), async (imp
   };
 });
 
-vi.mock(import("../../../../api/hikes"), async (importOriginal) => {
+vi.mock(import("../../../../network/api/hikes"), async (importOriginal) => {
   const actual = await importOriginal();
   return {
     ...actual,

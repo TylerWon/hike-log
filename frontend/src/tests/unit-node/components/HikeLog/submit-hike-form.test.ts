@@ -3,8 +3,8 @@ import { describe, expect, test, vi } from "vitest";
 import type { HikeFormData } from "../../../../schemas/forms/hike";
 import type { PhotoFormData } from "../../../../schemas/forms/photo";
 
-import { createHike, createPhotos, createPresignedUrls } from "../../../../api/hikes";
-import { uploadPhotos } from "../../../../api/s3";
+import { createHike, createPhotos, createPresignedUrls } from "../../../../network/api/hikes";
+import { uploadPhotos } from "../../../../network/s3/s3";
 import { HikeCreationError, PhotoCreationError } from "../../../../pages/HikeLog/HikeLog/errors";
 import {
   createPhotosHelper,
@@ -22,7 +22,7 @@ import {
 } from "../../../mocks/api-responses/hikes";
 import { UPLOAD_PHOTOS_RESPONSE_MOCK_1, UPLOAD_PHOTOS_RESPONSE_MOCK_2 } from "../../../mocks/api-responses/s3";
 
-vi.mock(import("../../../../api/hikes"), async (importOriginal) => {
+vi.mock(import("../../../../network/api/hikes"), async (importOriginal) => {
   const actual = await importOriginal();
   return {
     ...actual,
@@ -32,7 +32,7 @@ vi.mock(import("../../../../api/hikes"), async (importOriginal) => {
   };
 });
 
-vi.mock(import("../../../../api/s3"), async (importOriginal) => {
+vi.mock(import("../../../../network/s3/s3"), async (importOriginal) => {
   const actual = await importOriginal();
   return {
     ...actual,

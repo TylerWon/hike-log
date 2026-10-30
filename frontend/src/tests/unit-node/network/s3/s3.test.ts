@@ -2,9 +2,9 @@ import { http, HttpResponse } from "msw";
 import { setupServer, type SetupServer } from "msw/node";
 import { afterEach, beforeEach, describe, expect, test } from "vitest";
 
-import type { UploadPhotosRequest } from "../../../schemas/requests/s3";
+import type { UploadPhotosRequest } from "../../../../schemas/requests/s3";
 
-import { uploadFile, uploadPhotos } from "../../../api/s3";
+import { uploadFile, uploadPhotos } from "../../../../network/s3/s3";
 
 describe("s3", () => {
   const presignedUrl1 =

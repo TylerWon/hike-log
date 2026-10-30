@@ -1,5 +1,5 @@
-import type { UploadPhotosRequest } from "../schemas/requests/s3";
-import type { UploadPhotosResponse } from "../schemas/responses/s3";
+import type { UploadPhotosRequest } from "../../schemas/requests/s3";
+import type { UploadPhotosResponse } from "../../schemas/responses/s3";
 
 /**
  * Uploads a file to S3 using the given presigned URL.
