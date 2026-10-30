@@ -47,7 +47,7 @@ describe("s3", () => {
 
     test("throws an error when the response is not 200", async () => {
       const handler = http.put(presignedUrlPath1, () => {
-        return HttpResponse.json("Internal Service Error", { status: 500 });
+        return HttpResponse.json({ error: "Internal service error" }, { status: 500 });
       });
       server.use(handler);
 
@@ -67,10 +67,10 @@ describe("s3", () => {
   describe("uploadPhotos", () => {
     test("returns upload status for each photo", async () => {
       const handler1 = http.put(presignedUrlPath1, () => {
-        return HttpResponse.json({ status: 200 });
+        return HttpResponse.json({}, { status: 200 });
       });
       const handler2 = http.put(presignedUrlPath2, () => {
-        return HttpResponse.json("Internal Service Error", { status: 500 });
+        return HttpResponse.json({ error: "Internal service error" }, { status: 500 });
       });
       server.use(handler1);
       server.use(handler2);

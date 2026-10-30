@@ -3,9 +3,10 @@ import { render } from "vitest-browser-react";
 
 import joffreLakes1 from "../../../assets/images/joffre_lakes_1.avif";
 import joffreLakes2 from "../../../assets/images/joffre_lakes_2.avif";
+import { fillField } from "../../../utils/Field/test-helpers";
 import { createFileFromUrl } from "../../../utils/files";
 import { HikeFormWrapper } from "../../../utils/HikeForm/test-components";
-import { clickSubmitButton, fillFieldInput, fillHikeForm } from "../../../utils/HikeForm/test-helpers";
+import { clickSubmitButton, fillHikeForm } from "../../../utils/HikeForm/test-helpers";
 
 describe("HikeForm", () => {
   let mockOnCancel: Mock;
@@ -39,9 +40,9 @@ describe("HikeForm", () => {
     const screen = await render(<HikeFormWrapper onCancel={mockOnCancel} onSubmit={mockOnSubmit} />);
 
     // Fill in some fields correctly, some incorrectly, and leave some empty
-    await fillFieldInput(screen, "Duration (minutes)", "240");
-    await fillFieldInput(screen, "Difficulty (0-10)", "11.5");
-    await fillFieldInput(screen, "AllTrails URL", "abc");
+    await fillField(screen, "Duration (minutes)", "240");
+    await fillField(screen, "Difficulty (0-10)", "11.5");
+    await fillField(screen, "AllTrails URL", "abc");
 
     await clickSubmitButton(screen);
 

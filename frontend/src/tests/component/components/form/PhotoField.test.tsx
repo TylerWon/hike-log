@@ -3,8 +3,9 @@ import { render } from "vitest-browser-react";
 
 import type { PhotoErrors } from "../../../../pages/HikeLog/HikeForm/types";
 
-import { checkFieldError, checkNoFieldError, fillFieldInput, uploadPhotos } from "../../../utils/HikeForm/test-helpers";
+import { checkFieldError, checkNoFieldError, fillField } from "../../../utils/Field/test-helpers";
 import { StatefulPhotoField } from "../../../utils/PhotoField/test-components";
+import { uploadPhotos } from "../../../utils/PhotoField/test-helpers";
 
 describe("PhotoField", () => {
   const photo1 = new File(["photo1"], "summit.png", { type: "image/png" });
@@ -69,7 +70,7 @@ describe("PhotoField", () => {
     const screen = await render(<StatefulPhotoField />);
 
     await uploadPhotos(screen, [photo1]);
-    await fillFieldInput(screen, "Caption 1", "TESTING");
+    await fillField(screen, "Caption 1", "TESTING");
 
     const captionInput = screen.getByLabelText("Caption 1");
     await expect.element(captionInput).toHaveValue("TESTING");
@@ -116,7 +117,7 @@ describe("PhotoField", () => {
     await uploadPhotos(screen, [photo1, photo2]);
 
     // Set caption on photo being moved so it can be used to determine if order changed later
-    await fillFieldInput(screen, "Caption 1", "Originally first photo");
+    await fillField(screen, "Caption 1", "Originally first photo");
 
     // Move first photo down
     const moveDownButton = screen.getByRole("button", { name: "Move down photo 1" });
@@ -132,8 +133,8 @@ describe("PhotoField", () => {
     await uploadPhotos(screen, [photo1, photo2, photo3]);
 
     // Set captions on photos not being deleted so they can be used to determine if order changed later
-    await fillFieldInput(screen, "Caption 2", "Originally second photo");
-    await fillFieldInput(screen, "Caption 3", "Originally third photo");
+    await fillField(screen, "Caption 2", "Originally second photo");
+    await fillField(screen, "Caption 3", "Originally third photo");
 
     // Remove first photo, photos shift up
     const removeButton = screen.getByRole("button", { name: "Remove photo 1" });

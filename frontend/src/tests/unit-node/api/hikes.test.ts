@@ -57,7 +57,7 @@ describe("hikes", () => {
 
     test("throws an error when the response is not 201", async () => {
       const handler = http.post(API_URL, () => {
-        return HttpResponse.json("Internal Service Error", { status: 500 });
+        return HttpResponse.json({ error: "Internal service error" }, { status: 500 });
       });
       server.use(handler);
 
@@ -66,7 +66,7 @@ describe("hikes", () => {
 
     test("throws an error when the response cannot be parsed", async () => {
       const handler = http.post(API_URL, () => {
-        return HttpResponse.json({ field: "value" }, { status: 201 });
+        return HttpResponse.json("Unparsable response", { status: 201 });
       });
       server.use(handler);
 
@@ -112,7 +112,7 @@ describe("hikes", () => {
 
     test("throws an error when the response is not 201", async () => {
       const handler = http.post(`${API_URL}/${hikeId}/photos`, () => {
-        return HttpResponse.json("Internal Service Error", { status: 500 });
+        return HttpResponse.json({ error: "Internal service error" }, { status: 500 });
       });
       server.use(handler);
 
@@ -121,7 +121,7 @@ describe("hikes", () => {
 
     test("throws an error when the response cannot be parsed", async () => {
       const handler = http.post(`${API_URL}/${hikeId}/photos`, () => {
-        return HttpResponse.json({ field: "value" }, { status: 201 });
+        return HttpResponse.json("Unparsable response", { status: 201 });
       });
       server.use(handler);
 
@@ -165,7 +165,7 @@ describe("hikes", () => {
 
     test("throws an error when the response is not 201", async () => {
       const handler = http.post(`${API_URL}/${hikeId}/photos/presigned-urls`, () => {
-        return HttpResponse.json("Internal Service Error", { status: 500 });
+        return HttpResponse.json({ error: "Internal service error" }, { status: 500 });
       });
       server.use(handler);
 
@@ -174,7 +174,7 @@ describe("hikes", () => {
 
     test("throws an error when the response cannot be parsed", async () => {
       const handler = http.post(`${API_URL}/${hikeId}/photos/presigned-urls`, () => {
-        return HttpResponse.json({ field: "value" }, { status: 201 });
+        return HttpResponse.json("Unparsable response", { status: 201 });
       });
       server.use(handler);
 
@@ -194,7 +194,7 @@ describe("hikes", () => {
   describe("fetchHikes", () => {
     test("returns an empty list when there are no hikes", async () => {
       const handler = http.get(API_URL, () => {
-        return HttpResponse.json([]);
+        return HttpResponse.json([], { status: 200 });
       });
       server.use(handler);
 
@@ -204,7 +204,7 @@ describe("hikes", () => {
 
     test("returns hikes when there are hikes", async () => {
       const handler = http.get(API_URL, () => {
-        return HttpResponse.json(LIST_HIKES_RESPONSE_MOCK);
+        return HttpResponse.json(LIST_HIKES_RESPONSE_MOCK, { status: 200 });
       });
       server.use(handler);
 
@@ -215,7 +215,7 @@ describe("hikes", () => {
 
     test("throws an error when the response is not 200", async () => {
       const handler = http.get(API_URL, () => {
-        return HttpResponse.json("Internal Service Error", { status: 500 });
+        return HttpResponse.json({ error: "Internal service error" }, { status: 500 });
       });
       server.use(handler);
 
@@ -224,7 +224,7 @@ describe("hikes", () => {
 
     test("throws an error when the response cannot be parsed", async () => {
       const handler = http.get(API_URL, () => {
-        return HttpResponse.json([{ field: "value" }]);
+        return HttpResponse.json("Unparsable response", { status: 200 });
       });
       server.use(handler);
 

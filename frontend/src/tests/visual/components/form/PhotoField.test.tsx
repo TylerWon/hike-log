@@ -7,9 +7,10 @@ import type { PhotoErrors } from "../../../../pages/HikeLog/HikeForm/types";
 import joffreLakes1 from "../../../assets/images/joffre_lakes_1.avif";
 import joffreLakes2 from "../../../assets/images/joffre_lakes_2.avif";
 import joffreLakes3 from "../../../assets/images/joffre_lakes_3.avif";
+import { fillField } from "../../../utils/Field/test-helpers";
 import { createFileFromUrl } from "../../../utils/files";
 import { StatefulPhotoField } from "../../../utils/PhotoField/test-components";
-import { fillFieldInput, uploadPhotos } from "../../../utils/HikeForm/test-helpers";
+import { uploadPhotos } from "../../../utils/PhotoField/test-helpers";
 
 describe("PhotoField", async () => {
   let photos: File[];
@@ -41,7 +42,7 @@ describe("PhotoField", async () => {
     const screen = await render(<StatefulPhotoField />);
 
     await uploadPhotos(screen, photos);
-    await fillFieldInput(screen, "Caption 1", "TESTING");
+    await fillField(screen, "Caption 1", "TESTING");
 
     const photoField = screen.getByRole("group", { name: "Photo field" });
     await expect(photoField).toMatchScreenshot();
