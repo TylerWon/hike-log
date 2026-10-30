@@ -72,8 +72,7 @@ describe("HikeOverview", () => {
     const deleteDialog = screen.getByRole("region", { name: "Confirmation dialog backdrop" });
     await expect.element(deleteDialog).toBeInTheDocument();
 
-    const cancelDeleteButton = deleteDialog.getByRole("button", { name: "Cancel" });
-    await cancelDeleteButton.click();
+    await clickButton(deleteDialog, "Cancel");
 
     await expect.element(deleteDialog).not.toBeInTheDocument();
   });
@@ -86,8 +85,7 @@ describe("HikeOverview", () => {
     const deleteDialog = screen.getByRole("region", { name: "Confirmation dialog backdrop" });
     await expect.element(deleteDialog).toBeInTheDocument();
 
-    const acceptDeleteButton = deleteDialog.getByRole("button", { name: "Accept" });
-    await acceptDeleteButton.click();
+    await clickButton(deleteDialog, "Delete");
 
     await expect.element(deleteDialog).not.toBeInTheDocument();
     expect(mockOnDelete).toHaveBeenCalledOnce();

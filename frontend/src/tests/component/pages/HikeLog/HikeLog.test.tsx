@@ -49,12 +49,10 @@ async function checkCardsExist(screen: RenderResult, hikes: Hike[], shouldExist:
 async function deleteCard(screen: RenderResult, trailName: string) {
   const card = screen.getByRole("region", { name: `${trailName} card` });
 
-  const deleteButton = card.getByRole("button", { name: "Delete hike" });
-  await deleteButton.click();
+  await clickButton(card, "Delete hike");
 
   const deleteDialog = card.getByRole("alertdialog", { name: "Confirmation dialog" });
-  const acceptDeleteButton = deleteDialog.getByRole("button", { name: "Accept" });
-  await acceptDeleteButton.click();
+  await clickButton(deleteDialog, "Delete");
 }
 
 /**
@@ -153,8 +151,7 @@ describe("HikeLog", () => {
       const form = screen.getByRole("dialog", { name: "Hike form" });
       await expect.element(form).toBeInTheDocument();
 
-      const closeButton = form.getByRole("button", { name: "Close" });
-      await closeButton.click();
+      await clickButton(screen, "Close");
 
       await expect.element(form).not.toBeInTheDocument();
     });

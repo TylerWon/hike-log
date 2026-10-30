@@ -2,6 +2,7 @@ import { describe, expect, test, vi } from "vitest";
 import { render } from "vitest-browser-react";
 
 import HikeLogError from "../../../../pages/HikeLog/HikeLogError";
+import { clickButton } from "../../../utils/button";
 
 describe("HikeLogError", () => {
   test("displays error message and refresh button", async () => {
@@ -18,8 +19,7 @@ describe("HikeLogError", () => {
     const onRetryMock = vi.fn();
     const screen = await render(<HikeLogError onRetry={onRetryMock} />);
 
-    const refreshButton = screen.getByRole("button", { name: "Retry button" });
-    await refreshButton.click();
+    await clickButton(screen, "Retry button");
 
     expect(onRetryMock).toHaveBeenCalledOnce();
   });

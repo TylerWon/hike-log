@@ -3,6 +3,7 @@ import { render } from "vitest-browser-react";
 
 import type { PhotoErrors } from "../../../../pages/HikeLog/HikeForm/types";
 
+import { clickButton } from "../../../utils/button";
 import { checkFieldError, checkNoFieldError, fillField } from "../../../utils/Field/test-helpers";
 import { StatefulPhotoField } from "../../../utils/PhotoField/test-components";
 import { uploadPhotos } from "../../../utils/PhotoField/test-helpers";
@@ -25,8 +26,7 @@ describe("PhotoField", () => {
     // Use click on file input as indication that file selector dialog will open
     const fileInputClickSpy = vi.spyOn(HTMLInputElement.prototype, "click").mockImplementation(() => {});
 
-    const uploadButton = screen.getByRole("button", { name: "Upload photos" });
-    await uploadButton.click();
+    await clickButton(screen, "Upload photos");
 
     expect(fileInputClickSpy).toHaveBeenCalledOnce();
   });
@@ -39,8 +39,7 @@ describe("PhotoField", () => {
     // Use click on file input as indication that file selector dialog will open
     const fileInputClickSpy = vi.spyOn(HTMLInputElement.prototype, "click").mockImplementation(() => {});
 
-    const addMorePhotosButton = screen.getByRole("button", { name: "Add more photos" });
-    await addMorePhotosButton.click();
+    await clickButton(screen, "Add more photos");
 
     expect(fileInputClickSpy).toHaveBeenCalledOnce();
   });
@@ -103,9 +102,7 @@ describe("PhotoField", () => {
     let captionInput = screen.getByLabelText("Caption 2");
     await captionInput.fill("Originally second photo");
 
-    // Move second photo up
-    const moveUpButton = screen.getByRole("button", { name: "Move up photo 2" });
-    await moveUpButton.click();
+    await clickButton(screen, "Move up photo 2");
 
     captionInput = screen.getByLabelText("Caption 1");
     await expect.element(captionInput).toHaveValue("Originally second photo");
@@ -119,9 +116,7 @@ describe("PhotoField", () => {
     // Set caption on photo being moved so it can be used to determine if order changed later
     await fillField(screen, "Caption 1", "Originally first photo");
 
-    // Move first photo down
-    const moveDownButton = screen.getByRole("button", { name: "Move down photo 1" });
-    await moveDownButton.click();
+    await clickButton(screen, "Move down photo 1");
 
     const captionInput = screen.getByLabelText("Caption 2");
     await expect.element(captionInput).toHaveValue("Originally first photo");
@@ -137,8 +132,7 @@ describe("PhotoField", () => {
     await fillField(screen, "Caption 3", "Originally third photo");
 
     // Remove first photo, photos shift up
-    const removeButton = screen.getByRole("button", { name: "Remove photo 1" });
-    await removeButton.click();
+    await clickButton(screen, "Remove photo 1");
 
     let captionInput = screen.getByLabelText("Caption 1");
     await expect.element(captionInput).toHaveValue("Originally second photo");
@@ -151,9 +145,7 @@ describe("PhotoField", () => {
     const screen = await render(<StatefulPhotoField />);
 
     await uploadPhotos(screen, [photo1]);
-
-    const removeButton = screen.getByRole("button", { name: "Remove photo 1" });
-    await removeButton.click();
+    await clickButton(screen, "Remove photo 1");
 
     const uploadButton = screen.getByRole("button", { name: "Upload photos" });
     await expect.element(uploadButton).toBeInTheDocument();

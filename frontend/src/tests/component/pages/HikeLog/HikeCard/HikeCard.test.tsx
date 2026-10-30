@@ -24,10 +24,7 @@ async function checkCard(screen: RenderResult, isExpanded: boolean) {
  * Clicks details section of a HikeCard.
  */
 async function clickDetails(screen: RenderResult) {
-  const details = screen.getByRole("region", {
-    includeHidden: true,
-    name: `${HIKE_MOCK_1.trailName} details`,
-  });
+  const details = screen.getByRole("region", { includeHidden: true, name: `${HIKE_MOCK_1.trailName} details` });
   await details.click();
 }
 

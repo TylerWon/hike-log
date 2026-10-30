@@ -2,6 +2,7 @@ import { describe, expect, test, vi } from "vitest";
 import { render } from "vitest-browser-react";
 
 import Toast from "../../../components/Toast";
+import { clickButton } from "../../utils/button";
 
 describe("Toast", () => {
   test("displays toast for 1 second then invokes onDismiss callback", async () => {
@@ -26,8 +27,7 @@ describe("Toast", () => {
     const toast = screen.getByRole("status", { name: "Toast" });
     await expect.element(toast).toBeInTheDocument();
 
-    const dismissButton = screen.getByRole("button", { name: "Dismiss" });
-    await dismissButton.click();
+    await clickButton(screen, "Dismiss");
 
     expect(onDismissMock).toHaveBeenCalledOnce();
   });

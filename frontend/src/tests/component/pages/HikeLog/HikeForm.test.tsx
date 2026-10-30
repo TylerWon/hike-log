@@ -33,19 +33,13 @@ describe("HikeForm", () => {
 
   test("invokes onCancel callback when close button is clicked", async () => {
     const screen = await render(<HikeFormWrapper onCancel={mockOnCancel} onSubmit={mockOnSubmit} />);
-
-    const closeButton = screen.getByRole("button", { name: "Close" });
-    await closeButton.click();
-
+    await clickButton(screen, "Close");
     expect(mockOnCancel).toHaveBeenCalledOnce();
   });
 
   test("invokes onCancel callback when cancel button is clicked", async () => {
     const screen = await render(<HikeFormWrapper onCancel={mockOnCancel} onSubmit={mockOnSubmit} />);
-
-    const closeButton = screen.getByRole("button", { name: "Cancel" });
-    await closeButton.click();
-
+    await clickButton(screen, "Cancel");
     expect(mockOnCancel).toHaveBeenCalledOnce();
   });
 
