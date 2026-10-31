@@ -1,21 +1,31 @@
 @reference "../../index.css";
 
 .borderless-button {
-  @apply font-mono text-xs text-forest-600 hover:text-cream-100 transition-colors;
+  @apply font-mono text-xs text-forest-600 transition-colors 
+  hover:text-cream-100 
+    disabled:cursor-not-allowed disabled:text-forest-800;
 }
 
 .dashed-border-button {
-  @apply font-mono text-xs text-forest-700 hover:text-forest-600 rounded border border-dashed border-forest-800 hover:border-forest-700 transition-colors;
+  @apply font-mono text-xs text-forest-700 rounded border border-dashed border-forest-800 transition-colors
+    hover:text-forest-600 hover:border-forest-700
+    disabled:cursor-not-allowed disabled:border-forest-850 disabled:text-forest-800;
 }
 
 .primary-button-danger {
-  @apply font-mono text-xs text-cream-100 transition-colors rounded border border-coral-600 bg-coral-600 hover:border-coral-500 hover:bg-coral-500;
+  @apply font-mono text-xs text-cream-100 rounded border border-coral-600 bg-coral-600 transition-colors
+  hover:border-coral-500 hover:bg-coral-500 
+    disabled:cursor-not-allowed disabled:border-coral-950 disabled:bg-coral-950 disabled:text-coral-700;
 }
 
 .primary-button-default {
-  @apply font-mono text-xs text-cream-100 transition-colors rounded border border-sage-700 bg-sage-700 hover:border-sage-500 hover:bg-sage-500;
+  @apply font-mono text-xs text-cream-100 rounded border border-sage-700 bg-sage-700 transition-colors 
+    hover:border-sage-500 hover:bg-sage-500 
+    disabled:cursor-not-allowed disabled:border-sage-950 disabled:bg-sage-950 disabled:text-forest-700;
 }
 
 .secondary-button-default {
-  @apply font-mono text-xs text-sage-500 hover:text-sage-400 transition-colors rounded border border-sage-500 hover:border-sage-400;
+  @apply font-mono text-xs text-sage-500 rounded border border-sage-500 transition-colors 
+    hover:text-sage-400 hover:border-sage-400 
+    disabled:cursor-not-allowed disabled:border-forest-800 disabled:text-forest-700;
 }

@@ -4,11 +4,11 @@ import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { type NavigateFunction, useNavigate } from "react-router";
 
-import { login } from "../../network/api/auth/auth";
-import { AuthError } from "../../network/api/auth/errors";
 import TextField from "../../components/form/TextField";
 import GenericError from "../../components/GenericError";
 import PendingButton from "../../components/PendingButton";
+import { login } from "../../network/api/auth/auth";
+import { AuthError } from "../../network/api/auth/errors";
 import { type LoginFormData, LoginFormDataSchema } from "../../schemas/forms/login";
 
 export interface LoginProps {
