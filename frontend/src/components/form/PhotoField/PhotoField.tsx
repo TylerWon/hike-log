@@ -1,12 +1,12 @@
-import "../../assets/styles/button.css";
-import "../../assets/styles/text.css";
+import "../../../assets/styles/button.css";
+import "../../../assets/styles/text.css";
 
 import { useRef } from "react";
 
-import type { PhotoData, PhotoErrors } from "../../pages/HikeLog/HikeForm/types";
+import type { PhotoData, PhotoErrors } from "./types";
 
-import { readFileAsDataUrl } from "../../utils/file";
-import TextField from "./TextField";
+import { readFileAsDataUrl } from "../../../utils/file";
+import TextField from "../TextField";
 
 interface PhotoFieldProps {
   errors?: PhotoErrors; // Errors should be in the same order as Photos

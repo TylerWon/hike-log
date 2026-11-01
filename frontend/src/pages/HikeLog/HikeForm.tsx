@@ -1,5 +1,5 @@
-import "../../../assets/styles/button.css";
-import "../../../assets/styles/dialog.css";
+import "../../assets/styles/button.css";
+import "../../assets/styles/dialog.css";
 
 import type { $ZodErrorTree } from "zod/v4/core";
 
@@ -7,14 +7,14 @@ import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import * as z from "zod";
 
-import type { PhotoData } from "./types";
+import type { PhotoData } from "../../components/form/PhotoField/types";
 
-import PhotoField from "../../../components/form/PhotoField";
-import TextAreaField from "../../../components/form/TextAreaField";
-import TextField from "../../../components/form/TextField";
-import GenericError from "../../../components/GenericError";
-import PendingButton from "../../../components/PendingButton";
-import { type HikeFormData, HikeFormDataSchema } from "../../../schemas/forms/hike";
+import PhotoField from "../../components/form/PhotoField/PhotoField";
+import TextAreaField from "../../components/form/TextAreaField";
+import TextField from "../../components/form/TextField";
+import GenericError from "../../components/GenericError";
+import PendingButton from "../../components/PendingButton";
+import { type HikeFormData, HikeFormDataSchema } from "../../schemas/forms/hike";
 
 export interface HikeFormProps {
   onCancel: () => void;

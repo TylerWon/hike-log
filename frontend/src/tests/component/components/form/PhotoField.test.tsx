@@ -1,7 +1,7 @@
 import { describe, expect, test, vi } from "vitest";
 import { render } from "vitest-browser-react";
 
-import type { PhotoErrors } from "../../../../pages/HikeLog/HikeForm/types";
+import type { PhotoErrors } from "../../../../components/form/PhotoField/types";
 
 import { clickButton } from "../../../utils/button";
 import { checkFieldError, checkNoFieldError, fillField } from "../../../utils/Field/test-helpers";

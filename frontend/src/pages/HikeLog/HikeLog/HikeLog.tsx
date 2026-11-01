@@ -11,7 +11,7 @@ import Toast from "../../../components/Toast";
 import { formatDistance, formatDuration, formatElevation } from "../../../utils/formatters";
 import HikeCard from "../HikeCard/HikeCard";
 import HikeCardSkeleton from "../HikeCardSkeleton";
-import HikeForm from "../HikeForm/HikeForm";
+import HikeForm from "../HikeForm";
 import HikeLogContent from "../HikeLogContent";
 import HikeLogError from "../HikeLogError";
 import StatValueSkeleton from "../StatValueSkeleton";

@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 
-import HikeForm, { type HikeFormProps } from "../../../pages/HikeLog/HikeForm/HikeForm";
+import HikeForm, { type HikeFormProps } from "../../../pages/HikeLog/HikeForm";
 
 /**
  * Wraps a HikeForm with a Tanstack Query client for testing.
