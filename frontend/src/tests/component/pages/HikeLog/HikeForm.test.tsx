@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, type Mock, test, vi } from "vitest";
 import { render, type RenderResult } from "vitest-browser-react";
 
-import { MAX_PHOTO_SIZE } from "../../../../schemas/forms/photo";
+import { MAX_PHOTO_SIZE } from "../../../../schemas/forms/hike";
 import { clickButton } from "../../../utils/button";
 import { checkFieldError, checkNoFieldError, fillField } from "../../../utils/Field/test-helpers";
 import { HikeFormWrapper } from "../../../utils/HikeForm/test-components";

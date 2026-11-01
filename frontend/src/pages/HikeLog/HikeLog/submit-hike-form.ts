@@ -1,5 +1,5 @@
 import type { HikeFormData } from "../../../schemas/forms/hike";
-import type { PhotoFormData } from "../../../schemas/forms/photo";
+import type { HikeFormPhotoData } from "../../../schemas/forms/hike";
 import type { CreatePhotosResponse, CreatePresignedUrlsResponse } from "../../../schemas/responses/hikes";
 import type { UploadPhotosResponse } from "../../../schemas/responses/s3";
 
@@ -40,7 +40,7 @@ export async function submitHikeForm(formData: HikeFormData): Promise<void> {
  *
  * Returns any errors encountered.
  */
-export async function uploadAndCreatePhotos(photos: PhotoFormData[], hikeId: number): Promise<Map<number, string>> {
+export async function uploadAndCreatePhotos(photos: HikeFormPhotoData[], hikeId: number): Promise<Map<number, string>> {
   const errors: Map<number, string> = new Map();
 
   try {
@@ -80,7 +80,7 @@ export async function uploadAndCreatePhotos(photos: PhotoFormData[], hikeId: num
  * Creates presigned PUT URLs for each provided photo. The URL can be used to upload the photo to S3.
  */
 export async function createPresignedUrlsHelper(
-  photos: PhotoFormData[],
+  photos: HikeFormPhotoData[],
   hikeId: number,
 ): Promise<CreatePresignedUrlsResponse> {
   const reqBody = [];
@@ -101,7 +101,7 @@ export async function createPresignedUrlsHelper(
  * Uploads photos to S3 using the provided presigned PUT URLs. Skips photos that failed to have a presigned URL created.
  */
 export async function uploadPhotosHelper(
-  photos: PhotoFormData[],
+  photos: HikeFormPhotoData[],
   createPresignedUrlsResponse: CreatePresignedUrlsResponse,
 ): Promise<UploadPhotosResponse> {
   const reqBody = [];
@@ -127,7 +127,7 @@ export async function uploadPhotosHelper(
  * be uploaded to S3.
  */
 export async function createPhotosHelper(
-  photos: PhotoFormData[],
+  photos: HikeFormPhotoData[],
   hikeId: number,
   createPresignedUrlsResponse: CreatePresignedUrlsResponse,
   uploadPhotosResponse: UploadPhotosResponse,

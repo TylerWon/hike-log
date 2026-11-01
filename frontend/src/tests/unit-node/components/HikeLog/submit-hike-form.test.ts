@@ -1,7 +1,7 @@
 import { describe, expect, test, vi } from "vitest";
 
 import type { HikeFormData } from "../../../../schemas/forms/hike";
-import type { PhotoFormData } from "../../../../schemas/forms/photo";
+import type { HikeFormPhotoData } from "../../../../schemas/forms/hike";
 
 import { createHike, createPhotos, createPresignedUrls } from "../../../../network/api/hikes";
 import { uploadPhotos } from "../../../../network/s3/s3";
@@ -41,7 +41,7 @@ vi.mock(import("../../../../network/s3/s3"), async (importOriginal) => {
 });
 
 describe("submit-hike-form", () => {
-  const photoFormData: PhotoFormData[] = [
+  const photoFormData: HikeFormPhotoData[] = [
     {
       caption: "Caption 1",
       displayOrder: 1,

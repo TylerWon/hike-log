@@ -1,6 +1,6 @@
 import type { $ZodErrorTree } from "zod/v4/core";
 
-import type { PhotoFormData } from "../../../schemas/forms/photo";
+import type { HikeFormPhotoData } from "../../../schemas/forms/hike";
 
 export interface PhotoData {
   caption: string;
@@ -10,5 +10,5 @@ export interface PhotoData {
 
 export interface PhotoErrors {
   errors: string[];
-  items?: $ZodErrorTree<PhotoFormData>[];
+  items?: $ZodErrorTree<HikeFormPhotoData>[];
 }
