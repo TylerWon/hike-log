@@ -11,8 +11,7 @@ import {
   type CreatePresignedUrlsResponse,
   CreatePresignedUrlsResponseSchema,
 } from "../../schemas/responses/hikes";
-
-const API_URL = `${import.meta.env.VITE_API_URL}/hikes`;
+import { apiFetch } from "./fetch";
 
 /**
  * Creates a Hike.
@@ -20,7 +19,7 @@ const API_URL = `${import.meta.env.VITE_API_URL}/hikes`;
  * Throws an error if the response is not 201 or cannot be parsed.
  */
 export async function createHike(reqBody: CreateHikeRequest): Promise<Hike> {
-  const response = await fetch(API_URL, {
+  const response = await apiFetch("/hikes", {
     body: JSON.stringify(reqBody),
     headers: {
       "Content-Type": "application/json",
@@ -47,7 +46,7 @@ export async function createHike(reqBody: CreateHikeRequest): Promise<Hike> {
  * Throws an error if the response is not 201 or cannot be parsed.
  */
 export async function createPhotos(hikeId: number, reqBody: CreatePhotosRequest): Promise<CreatePhotosResponse> {
-  const response = await fetch(`${API_URL}/${hikeId}/photos`, {
+  const response = await apiFetch(`/hikes/${hikeId}/photos`, {
     body: JSON.stringify(reqBody),
     headers: {
       "Content-Type": "application/json",
@@ -77,7 +76,7 @@ export async function createPresignedUrls(
   hikeId: number,
   reqBody: CreatePresignedUrlsRequest,
 ): Promise<CreatePresignedUrlsResponse> {
-  const response = await fetch(`${API_URL}/${hikeId}/photos/presigned-urls`, {
+  const response = await apiFetch(`/hikes/${hikeId}/photos/presigned-urls`, {
     body: JSON.stringify(reqBody),
     headers: {
       "Content-Type": "application/json",
@@ -104,7 +103,7 @@ export async function createPresignedUrls(
  * Throws an error if the response is not 200.
  */
 export async function deleteHike(hikeId: number): Promise<void> {
-  const response = await fetch(`${API_URL}/${hikeId}`, {
+  const response = await apiFetch(`/hikes/${hikeId}`, {
     method: "DELETE",
   });
 
@@ -119,7 +118,7 @@ export async function deleteHike(hikeId: number): Promise<void> {
  * Throws an error if the response is not 200 or cannot be parsed.
  */
 export async function fetchHikes(): Promise<Hike[]> {
-  const response = await fetch(API_URL);
+  const response = await apiFetch("/hikes");
 
   if (response.status !== 200) {
     throw new Error(`Failed to retrieve hikes: ${response.status} - ${response.statusText}`);

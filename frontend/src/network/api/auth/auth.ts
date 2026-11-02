@@ -1,8 +1,7 @@
 import type { LoginRequest } from "../../../schemas/requests/auth";
 
+import { apiFetch } from "../fetch";
 import { AuthError } from "./errors";
-
-const API_URL = `${import.meta.env.VITE_API_URL}/auth`;
 
 /**
  * Logs a user in to the admin account.
@@ -14,7 +13,7 @@ const API_URL = `${import.meta.env.VITE_API_URL}/auth`;
  * thrown.
  */
 export async function login(reqBody: LoginRequest) {
-  const response = await fetch(API_URL, {
+  const response = await apiFetch("/auth", {
     body: JSON.stringify(reqBody),
     headers: {
       "Content-Type": "application/json",
