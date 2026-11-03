@@ -10,10 +10,12 @@ import { HIKE_MOCK_1 } from "../../mocks/models/hike";
  * HikeOverview doesn't use TanStack Query but one of its child components, ConfirmationDialog, does.
  */
 export function HikeOverviewWrapper({
+  deleteEnabled = true,
   isExpanded = false,
   onClick,
   onDelete,
 }: {
+  deleteEnabled?: boolean;
   isExpanded?: boolean;
   onClick: () => void;
   onDelete: () => Promise<void>;
@@ -22,7 +24,14 @@ export function HikeOverviewWrapper({
 
   return (
     <QueryClientProvider client={queryClient}>
-      <HikeOverview hike={HIKE_MOCK_1} index={1} isExpanded={isExpanded} onClick={onClick} onDelete={onDelete} />
+      <HikeOverview
+        deleteEnabled={deleteEnabled}
+        hike={HIKE_MOCK_1}
+        index={1}
+        isExpanded={isExpanded}
+        onClick={onClick}
+        onDelete={onDelete}
+      />
     </QueryClientProvider>
   );
 }

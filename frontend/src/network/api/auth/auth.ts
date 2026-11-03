@@ -1,7 +1,29 @@
 import type { LoginRequest } from "../../../schemas/requests/auth";
 
+import { type CheckAuthResponse, CheckAuthResponseSchema } from "../../../schemas/responses/auth";
 import { apiFetch } from "../fetch";
 import { AuthError } from "./errors";
+
+/**
+ * Checks if the current user is authenticated.
+ *
+ * Throws an error if the response is not 200 or cannot be parsed.
+ */
+export async function checkAuth(): Promise<CheckAuthResponse> {
+  const response = await apiFetch("/auth");
+
+  if (response.status !== 200) {
+    throw new Error(`Failed to perform auth check: ${response.status} - ${response.statusText}`);
+  }
+
+  const responseJson = await response.json();
+  const result = CheckAuthResponseSchema.safeParse(responseJson);
+  if (!result.success) {
+    throw new Error(`Failed to parse auth response: ${result.error}`);
+  }
+
+  return result.data;
+}
 
 /**
  * Logs a user in to the admin account.

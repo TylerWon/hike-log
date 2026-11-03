@@ -34,4 +34,13 @@ describe("HikeOverview", () => {
     await userEvent.hover(component);
     await expect(component).toMatchScreenshot();
   });
+
+  test("hides delete button when it is not enabled", async () => {
+    const screen = await render(
+      <HikeOverviewWrapper deleteEnabled={false} onClick={mockOnClick} onDelete={mockOnDelete} />,
+    );
+    const component = screen.getByRole("region", { name: `${HIKE_MOCK_1.trailName} overview` });
+    await userEvent.hover(component);
+    await expect(component).toMatchScreenshot();
+  });
 });

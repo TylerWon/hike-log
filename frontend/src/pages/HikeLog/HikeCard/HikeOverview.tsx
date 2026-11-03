@@ -10,6 +10,7 @@ import StarRating from "./StarRating";
 import Thumbnail from "./Thumbnail";
 
 interface HikeOverviewProps {
+  deleteEnabled: boolean;
   hike: Hike;
   index: number;
   isExpanded: boolean;
@@ -17,7 +18,7 @@ interface HikeOverviewProps {
   onDelete: () => Promise<void>;
 }
 
-export default function HikeOverview({ hike, index, isExpanded, onClick, onDelete }: HikeOverviewProps) {
+export default function HikeOverview({ deleteEnabled, hike, index, isExpanded, onClick, onDelete }: HikeOverviewProps) {
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState<boolean>(false);
 
   const handleDeleteButtonClick = () => {
@@ -137,24 +138,26 @@ export default function HikeOverview({ hike, index, isExpanded, onClick, onDelet
               <path d="M4 6l4 4 4-4" />
             </svg>
           </button>
-          <button
-            aria-label="Delete hike"
-            className="text-forest-700 opacity-0 group-hover/hike-card:opacity-100 hover:text-coral-500 transition-all rounded focus:outline-none focus:opacity-100"
-            onClick={handleDeleteButtonClick}
-          >
-            <svg
-              fill="none"
-              height="13"
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="1.4"
-              viewBox="0 0 13 13"
-              width="13"
+          {deleteEnabled && (
+            <button
+              aria-label="Delete hike"
+              className="text-forest-700 opacity-0 group-hover/hike-card:opacity-100 hover:text-coral-500 transition-all rounded focus:outline-none focus:opacity-100"
+              onClick={handleDeleteButtonClick}
             >
-              <path d="M2 3.5h9M5 3.5V2.5h3v1M5.5 6v3.5M7.5 6v3.5M3 3.5l.5 7h6l.5-7" />
-            </svg>
-          </button>
+              <svg
+                fill="none"
+                height="13"
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="1.4"
+                viewBox="0 0 13 13"
+                width="13"
+              >
+                <path d="M2 3.5h9M5 3.5V2.5h3v1M5.5 6v3.5M7.5 6v3.5M3 3.5l.5 7h6l.5-7" />
+              </svg>
+            </button>
+          )}
         </div>
       </div>
 

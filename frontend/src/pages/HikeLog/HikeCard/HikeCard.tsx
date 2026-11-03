@@ -5,6 +5,7 @@ import HikeDetail from "./HikeDetail";
 import HikeOverview from "./HikeOverview";
 
 interface HikeCardProps {
+  deleteEnabled: boolean;
   hike: Hike;
   index: number;
   isExpanded: boolean;
@@ -12,7 +13,7 @@ interface HikeCardProps {
   onDelete: () => Promise<void>;
 }
 
-export default function HikeCard({ hike, index, isExpanded, onClick, onDelete }: HikeCardProps) {
+export default function HikeCard({ deleteEnabled, hike, index, isExpanded, onClick, onDelete }: HikeCardProps) {
   return (
     <div
       aria-label={`${hike.trailName} card`}
@@ -22,7 +23,14 @@ export default function HikeCard({ hike, index, isExpanded, onClick, onDelete }:
       )}
       role="region"
     >
-      <HikeOverview hike={hike} index={index} isExpanded={isExpanded} onClick={onClick} onDelete={onDelete} />
+      <HikeOverview
+        deleteEnabled={deleteEnabled}
+        hike={hike}
+        index={index}
+        isExpanded={isExpanded}
+        onClick={onClick}
+        onDelete={onDelete}
+      />
       {isExpanded && <HikeDetail hike={hike} />}
     </div>
   );

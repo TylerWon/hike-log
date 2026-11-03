@@ -15,7 +15,7 @@ describe("HikeOverview", () => {
     mockOnDelete = vi.fn();
   });
 
-  test("displays hike information", async () => {
+  test("displays hike information and controls", async () => {
     const screen = await render(<HikeOverviewWrapper onClick={mockOnClick} onDelete={mockOnDelete} />);
 
     const image = screen.getByRole("img", { name: "Joffre Lakes thumbnail" });
@@ -44,6 +44,12 @@ describe("HikeOverview", () => {
 
     const duration = screen.getByText(formatDuration(HIKE_MOCK_1.duration), { exact: true });
     await expect.element(duration).toBeInTheDocument();
+
+    const expandButton = screen.getByRole("button", { name: "Expand" });
+    await expect.element(expandButton).toBeInTheDocument();
+
+    const deleteButton = screen.getByRole("button", { name: "Delete hike" });
+    await expect.element(deleteButton).toBeInTheDocument();
   });
 
   test("invokes onClick callback when clicked", async () => {
@@ -89,5 +95,14 @@ describe("HikeOverview", () => {
 
     await expect.element(deleteDialog).not.toBeInTheDocument();
     expect(mockOnDelete).toHaveBeenCalledOnce();
+  });
+
+  test("hides delete hike button when it is not enabled", async () => {
+    const screen = await render(
+      <HikeOverviewWrapper deleteEnabled={false} onClick={mockOnClick} onDelete={mockOnDelete} />,
+    );
+
+    const deleteButton = screen.getByRole("button", { name: "Delete hike" });
+    await expect.element(deleteButton).not.toBeInTheDocument();
   });
 });

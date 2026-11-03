@@ -3,9 +3,11 @@ import { render, type RenderResult } from "vitest-browser-react";
 
 import type { Hike } from "../../../../schemas/models/hike";
 
+import { checkAuth } from "../../../../network/api/auth/auth";
 import { deleteHike, fetchHikes } from "../../../../network/api/hikes";
 import { HikeCreationError, PhotoCreationError } from "../../../../pages/HikeLog/HikeLog/errors";
 import { submitHikeForm } from "../../../../pages/HikeLog/HikeLog/submit-hike-form";
+import { CHECK_AUTH_RESPONSE_MOCK_1, CHECK_AUTH_RESPONSE_MOCK_2 } from "../../../mocks/api-responses/auth";
 import { HIKE_MOCK_1, HIKE_MOCK_2 } from "../../../mocks/models/hike";
 import { clickButton } from "../../../utils/button";
 import { fillHikeForm } from "../../../utils/HikeForm/test-helpers";
@@ -29,6 +31,14 @@ vi.mock(import("../../../../network/api/hikes"), async (importOriginal) => {
   };
 });
 
+vi.mock(import("../../../../network/api/auth/auth"), async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    checkAuth: vi.fn(),
+  };
+});
+
 /**
  * Checks that cards are displayed/not displayed for each of the given hikes.
  */
@@ -44,18 +54,6 @@ async function checkCardsExist(screen: RenderResult, hikes: Hike[], shouldExist:
 }
 
 /**
- * Deletes the card with the given trail name.
- */
-async function deleteCard(screen: RenderResult, trailName: string) {
-  const card = screen.getByRole("region", { name: `${trailName} card` });
-
-  await clickButton(card, "Delete hike");
-
-  const deleteDialog = card.getByRole("alertdialog", { name: "Confirmation dialog" });
-  await clickButton(deleteDialog, "Delete");
-}
-
-/**
  * Checks that the card with the given trail name is expanded/unexpanded.
  */
 async function checkCardExpanded(screen: RenderResult, trailName: string, isExpanded: boolean) {
@@ -68,6 +66,31 @@ async function checkCardExpanded(screen: RenderResult, trailName: string, isExpa
 }
 
 /**
+ * Checks that the HikeLog displays the correct components when a query fails.
+ */
+async function checkError(screen: RenderResult) {
+  const error = screen.getByRole("region", { name: "Hike log error" });
+  await expect.element(error).toBeInTheDocument();
+}
+
+/**
+ * Checks that the HikeLog displays the correct components while waiting for a query to finish.
+ */
+async function checkPending(screen: RenderResult) {
+  const title = screen.getByText("Hike Log");
+  await expect.element(title).toBeInTheDocument();
+
+  const statsOverview = screen.getByRole("region", { name: "Statistic overview" });
+  await checkStatLabels(statsOverview);
+
+  const statValueSkeletons = screen.getByRole("region", { name: "Statistic skeleton" });
+  expect(statValueSkeletons.length).toEqual(4);
+
+  const cardSkeletons = screen.getByRole("region", { name: "Hike card skeleton" });
+  expect(cardSkeletons.length).toEqual(5);
+}
+
+/**
  * Clicks the card with the given trail name.
  */
 async function clickCard(screen: RenderResult, trailName: string) {
@@ -76,37 +99,23 @@ async function clickCard(screen: RenderResult, trailName: string) {
   await card.click();
 }
 
+/**
+ * Deletes the card with the given trail name.
+ */
+async function deleteCard(screen: RenderResult, trailName: string) {
+  const card = screen.getByRole("region", { name: `${trailName} card` });
+
+  await clickButton(card, "Delete hike");
+
+  const deleteDialog = card.getByRole("alertdialog", { name: "Confirmation dialog" });
+  await clickButton(deleteDialog, "Delete");
+}
+
 describe("HikeLog", () => {
-  test("displays an error when there was an issue getting the hikes", async () => {
-    vi.mocked(fetchHikes).mockRejectedValue(new Error("Failed to retrieve hikes"));
-
-    const screen = await render(<HikeLogWrapper />);
-
-    const error = screen.getByRole("region", { name: "Hike log error" });
-    await expect.element(error).toBeInTheDocument();
-  });
-
-  test("displays title and skeletons of the overall stats and hike cards when hikes are loading", async () => {
-    vi.mocked(fetchHikes).mockImplementation(() => new Promise(() => {})); // never resolves
-
-    const screen = await render(<HikeLogWrapper />);
-
-    const title = screen.getByText("Hike Log");
-    await expect.element(title).toBeInTheDocument();
-
-    const statsOverview = screen.getByRole("region", { name: "Statistic overview" });
-    await checkStatLabels(statsOverview);
-
-    const statValueSkeletons = screen.getByRole("region", { name: "Statistic skeleton" });
-    expect(statValueSkeletons.length).toEqual(4);
-
-    const cardSkeletons = screen.getByRole("region", { name: "Hike card skeleton" });
-    expect(cardSkeletons.length).toEqual(5);
-  });
-
-  test("displays title, overall stats, hike cards, and button to add hike when hikes are loaded", async () => {
+  test("displays title, overall stats, hike cards, and button to add hike when hikes and auth are loaded", async () => {
     const hikes = [HIKE_MOCK_1, HIKE_MOCK_2];
     vi.mocked(fetchHikes).mockResolvedValue(hikes);
+    vi.mocked(checkAuth).mockResolvedValue(CHECK_AUTH_RESPONSE_MOCK_1);
 
     const screen = await render(<HikeLogWrapper />);
 
@@ -129,7 +138,68 @@ describe("HikeLog", () => {
     await expect.element(addHikeButton).toBeInTheDocument();
   });
 
+  test("hides add hike and delete hike buttons when user is unauthenticated", async () => {
+    const hikes = [HIKE_MOCK_1, HIKE_MOCK_2];
+    vi.mocked(fetchHikes).mockResolvedValue(hikes);
+    vi.mocked(checkAuth).mockResolvedValue(CHECK_AUTH_RESPONSE_MOCK_2); // mock unauthenticated response
+
+    const screen = await render(<HikeLogWrapper />);
+
+    const addHikeButton = screen.getByRole("button", { name: "Add hike" });
+    await expect.element(addHikeButton).not.toBeInTheDocument();
+
+    const card1 = screen.getByRole("region", { name: `${hikes[0].trailName} card` });
+    const deleteHikeButton = card1.getByRole("button", { name: "Delete hike" });
+    await expect.element(deleteHikeButton).not.toBeInTheDocument();
+  });
+
+  describe("Query error", () => {
+    test("displays an error when there is an issue getting the hikes", async () => {
+      vi.mocked(fetchHikes).mockRejectedValue(new Error("Failed to retrieve hikes"));
+      vi.mocked(checkAuth).mockResolvedValue(CHECK_AUTH_RESPONSE_MOCK_1);
+
+      const screen = await render(<HikeLogWrapper />);
+
+      await checkError(screen);
+    });
+
+    test("displays an error when there is an issue checking auth", async () => {
+      const hikes = [HIKE_MOCK_1, HIKE_MOCK_2];
+      vi.mocked(fetchHikes).mockResolvedValue(hikes);
+      vi.mocked(checkAuth).mockRejectedValue(new Error("Failed to perform auth check"));
+
+      const screen = await render(<HikeLogWrapper />);
+
+      await checkError(screen);
+    });
+  });
+
+  describe("Query pending", () => {
+    test("displays title and skeletons of the overall stats and hike cards when hikes are pending", async () => {
+      vi.mocked(fetchHikes).mockImplementation(() => new Promise(() => {})); // never resolves
+      vi.mocked(checkAuth).mockResolvedValue(CHECK_AUTH_RESPONSE_MOCK_1);
+
+      const screen = await render(<HikeLogWrapper />);
+
+      await checkPending(screen);
+    });
+
+    test("displays title and skeletons of the overall stats and hike cards when auth is pending", async () => {
+      const hikes = [HIKE_MOCK_1, HIKE_MOCK_2];
+      vi.mocked(fetchHikes).mockResolvedValue(hikes);
+      vi.mocked(checkAuth).mockImplementation(() => new Promise(() => {})); // never resolves
+
+      const screen = await render(<HikeLogWrapper />);
+
+      await checkPending(screen);
+    });
+  });
+
   describe("Add hike", () => {
+    beforeAll(() => {
+      vi.mocked(checkAuth).mockResolvedValue(CHECK_AUTH_RESPONSE_MOCK_1);
+    });
+
     test("displays add hike form when add hike button is clicked", async () => {
       vi.mocked(fetchHikes).mockResolvedValue([]);
 
@@ -223,12 +293,13 @@ describe("HikeLog", () => {
     });
   });
 
-  describe("Hike cards", () => {
+  describe("Hike card", () => {
     const hikes = [HIKE_MOCK_1, HIKE_MOCK_2];
 
     describe("Expand hike card", () => {
       beforeAll(() => {
         vi.mocked(fetchHikes).mockResolvedValue(hikes);
+        vi.mocked(checkAuth).mockResolvedValue(CHECK_AUTH_RESPONSE_MOCK_1);
       });
 
       test("expands hike card when clicked", async () => {

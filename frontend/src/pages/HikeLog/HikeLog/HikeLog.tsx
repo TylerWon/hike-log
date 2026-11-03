@@ -6,8 +6,9 @@ import { useState } from "react";
 
 import type { HikeFormData } from "../../../schemas/forms/hike";
 
-import { deleteHike, fetchHikes } from "../../../network/api/hikes";
 import Toast from "../../../components/Toast";
+import { checkAuth } from "../../../network/api/auth/auth";
+import { deleteHike, fetchHikes } from "../../../network/api/hikes";
 import { formatDistance, formatDuration, formatElevation } from "../../../utils/formatters";
 import HikeCard from "../HikeCard/HikeCard";
 import HikeCardSkeleton from "../HikeCardSkeleton";
@@ -19,6 +20,7 @@ import { PhotoCreationError } from "./errors";
 import { submitHikeForm } from "./submit-hike-form";
 
 const HIKES_QUERY_KEY = "hikes";
+const AUTH_QUERY_KEY = "auth";
 
 export default function HikeLog() {
   const queryClient = useQueryClient();
@@ -30,6 +32,12 @@ export default function HikeLog() {
   const hikes = useQuery({
     queryFn: fetchHikes, // called on component load
     queryKey: [HIKES_QUERY_KEY],
+    refetchOnWindowFocus: false,
+  });
+
+  const auth = useQuery({
+    queryFn: checkAuth, // called on component load
+    queryKey: [AUTH_QUERY_KEY],
     refetchOnWindowFocus: false,
   });
 
@@ -77,9 +85,12 @@ export default function HikeLog() {
   if (hikes.isError) {
     console.error("Failed to fetch hikes: ", hikes.error);
     return <HikeLogError />;
+  } else if (auth.isError) {
+    console.error("Failed to perform auth check: ", auth.error);
+    return <HikeLogError />;
   }
 
-  if (hikes.isPending) {
+  if (hikes.isPending || auth.isPending) {
     const overallStats = [
       { label: "Hikes", value: <StatValueSkeleton widthClass="w-8" /> },
       { label: "Distance", value: <StatValueSkeleton widthClass="w-20" /> },
@@ -115,6 +126,7 @@ export default function HikeLog() {
         {hikes.data.map((hike, i) => (
           <li key={i}>
             <HikeCard
+              deleteEnabled={auth.data.authenticated}
               hike={hike}
               index={i + 1}
               isExpanded={expandedCardId === hike.id}
@@ -123,25 +135,27 @@ export default function HikeLog() {
             />
           </li>
         ))}
-        <li className="mt-4 flex justify-center">
-          <button
-            aria-label="Add hike"
-            className="secondary-button-default px-3 py-1.5"
-            onClick={() => setShowHikeForm(true)}
-          >
-            <svg
-              fill="none"
-              height="11"
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeWidth="1.5"
-              viewBox="0 0 11 11"
-              width="11"
+        {auth.data.authenticated && (
+          <li className="mt-4 flex justify-center">
+            <button
+              aria-label="Add hike"
+              className="secondary-button-default px-3 py-1.5"
+              onClick={() => setShowHikeForm(true)}
             >
-              <path d="M5.5 1v9M1 5.5h9" />
-            </svg>
-          </button>
-        </li>
+              <svg
+                fill="none"
+                height="11"
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeWidth="1.5"
+                viewBox="0 0 11 11"
+                width="11"
+              >
+                <path d="M5.5 1v9M1 5.5h9" />
+              </svg>
+            </button>
+          </li>
+        )}
       </HikeLogContent>
       {showHikeForm && <HikeForm onCancel={handleHikeFormCancel} onSubmit={handleHikeFormSubmit} />}
       {toastMessage && <Toast message={toastMessage} onDismiss={() => setToastMessage(null)} />}
