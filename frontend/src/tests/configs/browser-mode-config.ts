@@ -39,6 +39,7 @@ export function defineBrowserModeTestConfig({ browser, name }: BrowserModeTestCo
         // Construct an absolute path to the test setup file. setupFiles paths are otherwise relative to each project
         // config which causes issues when defineBrowserModeProject() is used in different projects.
         setupFiles: [path.join(import.meta.dirname, "browser-mode-test-setup.ts")],
+        testTimeout: 5000,
       },
     }),
   );

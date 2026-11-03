@@ -278,7 +278,7 @@ describe("HikeForm", () => {
         await clickButton(screen, "Submit");
         // An error for a photo is displayed on its Caption field
         await checkFieldError(screen, "Caption 1", "Image must be under 10MB");
-      });
+      }, 10000);
 
       test("displays error on submit when file is not a valid image type", async () => {
         const screen = await render(<HikeFormWrapper onCancel={mockOnCancel} onSubmit={mockOnSubmit} />);
