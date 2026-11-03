@@ -14,7 +14,7 @@ import {
   CREATE_PHOTOS_RESPONSE_MOCK_1,
   CREATE_PRESIGNED_URLS_RESPONSE_MOCK_1,
   LIST_HIKES_RESPONSE_MOCK,
-} from "../../../mocks/api-responses/hikes";
+} from "../../../mocks/network/api/hikes";
 import { HIKE_MOCK_1, HIKE_MOCK_2 } from "../../../mocks/models/hike";
 
 const API_URL = `${import.meta.env.VITE_API_URL}/hikes`;

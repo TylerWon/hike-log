@@ -1,8 +1,8 @@
-import type { Hike } from "../../../schemas/models/hike";
-import type { CreatePhotosResponse, CreatePresignedUrlsResponse } from "../../../schemas/responses/hikes";
+import type { Hike } from "../../../../schemas/models/hike";
+import type { CreatePhotosResponse, CreatePresignedUrlsResponse } from "../../../../schemas/responses/hikes";
 
-import { HIKE_MOCK_1, HIKE_MOCK_2 } from "../models/hike";
-import { PHOTO_MOCK_1 } from "../models/photo";
+import { HIKE_MOCK_1, HIKE_MOCK_2 } from "../../models/hike";
+import { PHOTO_MOCK_1 } from "../../models/photo";
 
 export const LIST_HIKES_RESPONSE_MOCK: Hike[] = [HIKE_MOCK_1, HIKE_MOCK_2];
 

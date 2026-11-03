@@ -3,7 +3,7 @@ import { render } from "vitest-browser-react";
 
 import { checkAuth } from "../../../../network/api/auth/auth";
 import { fetchHikes } from "../../../../network/api/hikes";
-import { CHECK_AUTH_RESPONSE_MOCK_1, CHECK_AUTH_RESPONSE_MOCK_2 } from "../../../mocks/api-responses/auth";
+import { CHECK_AUTH_RESPONSE_MOCK_1, CHECK_AUTH_RESPONSE_MOCK_2 } from "../../../mocks/network/api/auth";
 import { HIKE_MOCK_1, HIKE_MOCK_2 } from "../../../mocks/models/hike";
 import { clickButton } from "../../../utils/button";
 import { HikeLogWrapper } from "../../../utils/HikeLog/test-components";

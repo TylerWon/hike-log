@@ -19,8 +19,8 @@ import {
   CREATE_PHOTOS_RESPONSE_MOCK_2,
   CREATE_PRESIGNED_URLS_RESPONSE_MOCK_1,
   CREATE_PRESIGNED_URLS_RESPONSE_MOCK_2,
-} from "../../../mocks/api-responses/hikes";
-import { UPLOAD_PHOTOS_RESPONSE_MOCK_1, UPLOAD_PHOTOS_RESPONSE_MOCK_2 } from "../../../mocks/api-responses/s3";
+} from "../../../mocks/network/api/hikes";
+import { UPLOAD_PHOTOS_RESPONSE_MOCK_1, UPLOAD_PHOTOS_RESPONSE_MOCK_2 } from "../../../mocks/network/s3/s3";
 
 vi.mock(import("../../../../network/api/hikes"), async (importOriginal) => {
   const actual = await importOriginal();

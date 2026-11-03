@@ -1,4 +1,4 @@
-import type { UploadPhotosResponse } from "../../../schemas/responses/s3";
+import type { UploadPhotosResponse } from "../../../../schemas/responses/s3";
 
 export const UPLOAD_PHOTOS_RESPONSE_MOCK_1: UploadPhotosResponse = [
   {

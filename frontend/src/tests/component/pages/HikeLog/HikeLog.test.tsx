@@ -7,7 +7,7 @@ import { checkAuth } from "../../../../network/api/auth/auth";
 import { deleteHike, fetchHikes } from "../../../../network/api/hikes";
 import { HikeCreationError, PhotoCreationError } from "../../../../pages/HikeLog/HikeLog/errors";
 import { submitHikeForm } from "../../../../pages/HikeLog/HikeLog/submit-hike-form";
-import { CHECK_AUTH_RESPONSE_MOCK_1, CHECK_AUTH_RESPONSE_MOCK_2 } from "../../../mocks/api-responses/auth";
+import { CHECK_AUTH_RESPONSE_MOCK_1, CHECK_AUTH_RESPONSE_MOCK_2 } from "../../../mocks/network/api/auth";
 import { HIKE_MOCK_1, HIKE_MOCK_2 } from "../../../mocks/models/hike";
 import { clickButton } from "../../../utils/button";
 import { fillHikeForm } from "../../../utils/HikeForm/test-helpers";
