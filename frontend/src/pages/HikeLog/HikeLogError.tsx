@@ -1,3 +1,5 @@
+import "../../assets/styles/button.css";
+
 interface HikeLogErrorProps {
   onRetry?: () => void; // Helpful for testing retry button
 }
@@ -41,7 +43,7 @@ export default function HikeLogError({ onRetry = () => window.location.reload() 
 
         <button
           aria-label="Retry button"
-          className="inline-flex items-center gap-2 px-5 py-2.5 font-mono text-[12px] text-sage-500 rounded border border-forest-700 hover:bg-forest-850 hover:border-sage-500 hover:text-sage-400 transition-all duration-150 cursor-pointer"
+          className="secondary-button-default inline-flex items-center gap-2 px-5 py-2.5"
           onClick={onRetry}
         >
           <svg fill="currentColor" height="24" viewBox="0 0 24 24" width="24">

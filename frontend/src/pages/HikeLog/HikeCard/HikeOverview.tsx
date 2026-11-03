@@ -122,7 +122,7 @@ export default function HikeOverview({ deleteEnabled, hike, index, isExpanded, o
         <div className="flex flex-col items-center justify-start gap-2">
           <button
             aria-label={isExpanded ? "Collapse" : "Expand"}
-            className="text-forest-700 focus:outline-none"
+            className="text-forest-700 focus:outline-none cursor-pointer"
             onClick={onClick}
           >
             <svg
@@ -141,7 +141,7 @@ export default function HikeOverview({ deleteEnabled, hike, index, isExpanded, o
           {deleteEnabled && (
             <button
               aria-label="Delete hike"
-              className="text-forest-700 opacity-0 group-hover/hike-card:opacity-100 hover:text-coral-500 transition-all rounded focus:outline-none focus:opacity-100"
+              className="text-forest-700 opacity-0 group-hover/hike-card:opacity-100 hover:text-coral-500 transition-all rounded focus:outline-none focus:opacity-100 cursor-pointer"
               onClick={handleDeleteButtonClick}
             >
               <svg
