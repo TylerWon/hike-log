@@ -19,7 +19,9 @@ export default function HikeCard({ deleteEnabled, hike, index, isExpanded, onCli
       aria-label={`${hike.trailName} card`}
       className={classnames(
         "border rounded-lg overflow-hidden transition-all duration-200",
-        isExpanded ? "bg-forest-850 border-forest-700" : "bg-forest-900 border-forest-800",
+        isExpanded
+          ? "bg-forest-850 border-forest-700"
+          : "bg-forest-900 border-forest-800 hover:bg-forest-850 hover:border-forest-700",
       )}
       role="region"
     >
