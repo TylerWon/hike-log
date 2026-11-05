@@ -2,12 +2,11 @@
 
 ## Installing/Uninstalling Packages
 
-Since the application runs in a container, it is easiest to install/uninstall the package from in the container:
-
 1. Start the services: `docker compose up`
-2. Open a terminal in the frontend container: `docker exec -it hike-log-frontend-1 sh`
+2. Open a terminal in the frontend container: `docker exec -it hike-log-frontend-1 bash`
 3. Install or uninstall your package
 4. Restart all the services: `docker compose stop && docker compose up`
+5. Install the new package on your machine to avoid compilation errors: `npm i`
 
 ## Linting and Formating
 
@@ -35,5 +34,10 @@ use a variation of this command: `npm run test:<test type>:<execution mode>`. He
 - Run component tests once: `npm run test:component:once`
 - Run visual tests in watch mode: `npm run test:visual:watch`
 
+To target specific test files to run, include the file name after `--`. For example: 
+`npm run test:unit:once -- HikeLog`. This runs all unit tests with `HikeLog` in their file name.
+
 After updating components, visual tests may fail due to a change in the appearance of the components. If the changes are 
 desired, run `npm run test:visual:update` to update the screenshots for the components so that the tests pass again.
+
+Tests should be run in the development container: `docker compose up` then `docker exec -it hike-log-frontend-1 bash`.

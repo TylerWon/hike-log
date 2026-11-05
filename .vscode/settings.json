@@ -6,6 +6,9 @@
     "[typescript]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
+    "[go]": {
+        "editor.defaultFormatter": "golang.go",
+    },
     "editor.codeActionsOnSave": {
         "source.fixAll.eslint": "always"
     },
