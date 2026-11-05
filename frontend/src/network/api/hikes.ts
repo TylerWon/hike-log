@@ -114,7 +114,9 @@ export async function deleteHike(hikeId: number): Promise<void> {
     method: "DELETE",
   });
 
-  if (response.status !== 200) {
+  if (response.status === 401) {
+    throw new AuthError(`Failed to delete hike: Unauthorized`);
+  } else if (response.status !== 200) {
     throw new Error(`Failed to delete hike: ${response.status} - ${response.statusText}`);
   }
 }

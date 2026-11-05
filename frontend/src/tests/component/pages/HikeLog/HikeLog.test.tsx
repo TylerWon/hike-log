@@ -364,6 +364,19 @@ describe("HikeLog", () => {
         await expect.element(card2).toBeInTheDocument();
       });
 
+      test("redirects to login page when delete fails because the user's session expired", async () => {
+        vi.mocked(fetchHikes).mockResolvedValue(hikes);
+        vi.mocked(deleteHike).mockRejectedValue(new AuthError("Unauthorized"));
+
+        const navigateMock = vi.fn();
+
+        const screen = await render(<HikeLogWrapper navigateProp={navigateMock} />);
+
+        await deleteCard(screen, hikes[0].trailName);
+
+        expect(navigateMock).toHaveBeenCalledWith("/login?reason=expired");
+      });
+
       test("removes hike card and updates overall stats when delete succeeds", async () => {
         // Mock fetchHikes twice since it is called on component load and again when delete succeeds
         vi.mocked(fetchHikes).mockResolvedValueOnce(hikes).mockResolvedValueOnce([hikes[1]]);

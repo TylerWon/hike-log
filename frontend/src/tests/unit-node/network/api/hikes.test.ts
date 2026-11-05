@@ -9,7 +9,7 @@ import type {
 } from "../../../../schemas/requests/hikes";
 
 import { AuthError } from "../../../../network/api/errors";
-import { createHike, createPhotos, createPresignedUrls, fetchHikes } from "../../../../network/api/hikes";
+import { createHike, createPhotos, createPresignedUrls, deleteHike, fetchHikes } from "../../../../network/api/hikes";
 import { HIKE_MOCK_1, HIKE_MOCK_2 } from "../../../mocks/models/hike";
 import {
   CREATE_HIKE_RESPONSE_MOCK,
@@ -216,6 +216,46 @@ describe("hikes", () => {
       server.use(handler);
 
       await expect(createPresignedUrls(hikeId, reqBody)).rejects.toThrow();
+    });
+  });
+
+  describe("deleteHike", () => {
+    const hikeId = 1;
+
+    test("returns void when delete is successful", async () => {
+      const handler = http.delete(`${API_URL}/${hikeId}`, () => {
+        return HttpResponse.json({}, { status: 200 });
+      });
+      server.use(handler);
+
+      await expect(deleteHike(hikeId)).resolves.toBeUndefined();
+    });
+
+    test("throws an AuthError when the response is 401", async () => {
+      const handler = http.delete(`${API_URL}/${hikeId}`, () => {
+        return HttpResponse.json({ error: "Unauthorized" }, { status: 401 });
+      });
+      server.use(handler);
+
+      await expect(deleteHike(hikeId)).rejects.toThrow(AuthError);
+    });
+
+    test("throws an error when the response is not 401 and 200", async () => {
+      const handler = http.delete(`${API_URL}/${hikeId}`, () => {
+        return HttpResponse.json({ error: "Internal service error" }, { status: 500 });
+      });
+      server.use(handler);
+
+      await expect(deleteHike(hikeId)).rejects.toThrow();
+    });
+
+    test("throws an error when there is a network error", async () => {
+      const handler = http.delete(`${API_URL}/${hikeId}`, () => {
+        return HttpResponse.error();
+      });
+      server.use(handler);
+
+      await expect(deleteHike(hikeId)).rejects.toThrow();
     });
   });
 

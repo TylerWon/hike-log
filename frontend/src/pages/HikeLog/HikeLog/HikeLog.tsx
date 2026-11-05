@@ -56,8 +56,18 @@ export default function HikeLog({ navigateProp }: HikeLogProps) {
   };
 
   const handleCardDelete = async (hikeId: number) => {
-    // Fail close on error
-    await deleteHike(hikeId);
+    try {
+      await deleteHike(hikeId);
+    } catch (e) {
+      if (e instanceof AuthError) {
+        // Redirect to login page if session expired
+        navigate("/login?reason=expired");
+        return;
+      } else {
+        // Fail close for other errors
+        throw e;
+      }
+    }
 
     if (hikeId === expandedCardId) {
       setExpandedCardId(null);
