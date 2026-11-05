@@ -3,15 +3,15 @@ package store
 import "github.com/TylerWon/hike-log/backend/models"
 
 type MockStore struct {
-	CreateRecordError   error
-	DeleteRecordError   error
+	CreateRecordError  error
+	DeleteRecordError  error
 	GetHikeByIDResult  *models.Hike
 	GetHikeByIDError   error
 	GetPhotoByIDResult *models.Photo
 	GetPhotoByIDError  error
 	ListHikesResult    []models.Hike
 	ListHikesError     error
-	UpdateRecordError   error
+	UpdateRecordError  error
 }
 
 func (m *MockStore) CloseConnection() error {
