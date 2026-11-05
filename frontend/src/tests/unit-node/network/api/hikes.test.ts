@@ -8,14 +8,15 @@ import type {
   CreatePresignedUrlsRequest,
 } from "../../../../schemas/requests/hikes";
 
+import { AuthError } from "../../../../network/api/errors";
 import { createHike, createPhotos, createPresignedUrls, fetchHikes } from "../../../../network/api/hikes";
+import { HIKE_MOCK_1, HIKE_MOCK_2 } from "../../../mocks/models/hike";
 import {
   CREATE_HIKE_RESPONSE_MOCK,
   CREATE_PHOTOS_RESPONSE_MOCK_1,
   CREATE_PRESIGNED_URLS_RESPONSE_MOCK_1,
   LIST_HIKES_RESPONSE_MOCK,
 } from "../../../mocks/network/api/hikes";
-import { HIKE_MOCK_1, HIKE_MOCK_2 } from "../../../mocks/models/hike";
 
 const API_URL = `${import.meta.env.VITE_API_URL}/hikes`;
 
@@ -55,7 +56,16 @@ describe("hikes", () => {
       expect(hike).toEqual(CREATE_HIKE_RESPONSE_MOCK);
     });
 
-    test("throws an error when the response is not 201", async () => {
+    test("throws an AuthError when the response is 401", async () => {
+      const handler = http.post(API_URL, () => {
+        return HttpResponse.json({ error: "Unauthorized" }, { status: 401 });
+      });
+      server.use(handler);
+
+      await expect(createHike(reqBody)).rejects.toThrow(AuthError);
+    });
+
+    test("throws an error when the response is not 401 and 201", async () => {
       const handler = http.post(API_URL, () => {
         return HttpResponse.json({ error: "Internal service error" }, { status: 500 });
       });
@@ -110,7 +120,16 @@ describe("hikes", () => {
       expect(photos).toEqual(CREATE_PHOTOS_RESPONSE_MOCK_1);
     });
 
-    test("throws an error when the response is not 201", async () => {
+    test("throws an AuthError when the response is 401", async () => {
+      const handler = http.post(`${API_URL}/${hikeId}/photos`, () => {
+        return HttpResponse.json({ error: "Unauthorized" }, { status: 401 });
+      });
+      server.use(handler);
+
+      await expect(createPhotos(hikeId, reqBody)).rejects.toThrow(AuthError);
+    });
+
+    test("throws an error when the response is not 401 and 201", async () => {
       const handler = http.post(`${API_URL}/${hikeId}/photos`, () => {
         return HttpResponse.json({ error: "Internal service error" }, { status: 500 });
       });
@@ -163,7 +182,16 @@ describe("hikes", () => {
       expect(presignedUrls).toEqual(CREATE_PRESIGNED_URLS_RESPONSE_MOCK_1);
     });
 
-    test("throws an error when the response is not 201", async () => {
+    test("throws an AuthError when the response is 401", async () => {
+      const handler = http.post(`${API_URL}/${hikeId}/photos/presigned-urls`, () => {
+        return HttpResponse.json({ error: "Unauthorized" }, { status: 401 });
+      });
+      server.use(handler);
+
+      await expect(createPresignedUrls(hikeId, reqBody)).rejects.toThrow(AuthError);
+    });
+
+    test("throws an error when the response is not 401 and 201", async () => {
       const handler = http.post(`${API_URL}/${hikeId}/photos/presigned-urls`, () => {
         return HttpResponse.json({ error: "Internal service error" }, { status: 500 });
       });

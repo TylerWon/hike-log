@@ -7,13 +7,13 @@ import Login, { type LoginProps } from "../../../pages/Login/Login";
 /**
  * Wraps a Login with a Tanstack Query client and react-router MemoryRouter for testing.
  */
-export function LoginWrapper({ navigateFn }: LoginProps) {
+export function LoginWrapper({ navigateProp, searchParamsProp }: LoginProps) {
   const [queryClient] = useState(() => new QueryClient());
 
   return (
     <QueryClientProvider client={queryClient}>
       <MemoryRouter>
-        <Login navigateFn={navigateFn} />
+        <Login navigateProp={navigateProp} searchParamsProp={searchParamsProp} />
       </MemoryRouter>
     </QueryClientProvider>
   );

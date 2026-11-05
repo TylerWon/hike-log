@@ -1,8 +1,8 @@
-import type { LoginRequest } from "../../../schemas/requests/auth";
+import type { LoginRequest } from "../../schemas/requests/auth";
 
-import { type CheckAuthResponse, CheckAuthResponseSchema } from "../../../schemas/responses/auth";
-import { apiFetch } from "../fetch";
+import { type CheckAuthResponse, CheckAuthResponseSchema } from "../../schemas/responses/auth";
 import { AuthError } from "./errors";
+import { apiFetch } from "./fetch";
 
 /**
  * Checks if the current user is authenticated.

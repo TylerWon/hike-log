@@ -1,12 +1,13 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
+import { MemoryRouter } from "react-router";
 
-import HikeLog from "../../../pages/HikeLog/HikeLog/HikeLog";
+import HikeLog, { type HikeLogProps } from "../../../pages/HikeLog/HikeLog/HikeLog";
 
 /**
- * Wraps a HikeLog with a TanStack Query client for testing.
+ * Wraps a HikeLog with a TanStack Query client and react-router MemoryRouter for testing.
  */
-export function HikeLogWrapper() {
+export function HikeLogWrapper({ navigateProp }: HikeLogProps) {
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -16,7 +17,9 @@ export function HikeLogWrapper() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <HikeLog />
+      <MemoryRouter>
+        <HikeLog navigateProp={navigateProp} />
+      </MemoryRouter>
     </QueryClientProvider>
   );
 }

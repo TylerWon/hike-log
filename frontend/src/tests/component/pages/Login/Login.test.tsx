@@ -1,13 +1,13 @@
 import { describe, expect, test, vi } from "vitest";
 import { render } from "vitest-browser-react";
 
-import { login } from "../../../../network/api/auth/auth";
-import { AuthError } from "../../../../network/api/auth/errors";
+import { login } from "../../../../network/api/auth";
+import { AuthError } from "../../../../network/api/errors";
 import { clickButton } from "../../../utils/button";
 import { checkFieldError, checkNoFieldError, fillField } from "../../../utils/Field/test-helpers";
 import { LoginWrapper } from "../../../utils/Login/test-components";
 
-vi.mock(import("../../../../network/api/auth/auth"), async (importOriginal) => {
+vi.mock(import("../../../../network/api/auth"), async (importOriginal) => {
   const actual = await importOriginal();
   return {
     ...actual,
@@ -24,6 +24,27 @@ describe("Login", () => {
 
     const button = screen.getByRole("button", { name: "Login" });
     await expect.element(button).toBeInTheDocument();
+
+    const toast = screen.getByRole("status", { name: "Toast" });
+    await expect.element(toast).not.toBeInTheDocument();
+  });
+
+  test("displays toast when valid reason is provided in search params", async () => {
+    const searchParams = new URLSearchParams({ reason: "expired" });
+
+    const screen = await render(<LoginWrapper searchParamsProp={searchParams} />);
+
+    const toast = screen.getByRole("status", { name: "Toast" });
+    await expect.element(toast).toBeInTheDocument();
+  });
+
+  test("does not display toast when invalid reason is provided in search params", async () => {
+    const searchParams = new URLSearchParams({ reason: "test" });
+
+    const screen = await render(<LoginWrapper searchParamsProp={searchParams} />);
+
+    const toast = screen.getByRole("status", { name: "Toast" });
+    await expect.element(toast).not.toBeInTheDocument();
   });
 
   test("displays field error when empty password is submitted", async () => {
@@ -74,7 +95,7 @@ describe("Login", () => {
     vi.mocked(login).mockResolvedValue(undefined);
     const navigateMock = vi.fn();
 
-    const screen = await render(<LoginWrapper navigateFn={navigateMock} />);
+    const screen = await render(<LoginWrapper navigateProp={navigateMock} />);
 
     await fillField(screen, "Password", "admin");
     await clickButton(screen, "Login");

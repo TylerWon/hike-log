@@ -4,8 +4,8 @@ import { afterEach, beforeEach, describe, expect, test } from "vitest";
 
 import type { LoginRequest } from "../../../../schemas/requests/auth";
 
-import { checkAuth, login } from "../../../../network/api/auth/auth";
-import { AuthError } from "../../../../network/api/auth/errors";
+import { checkAuth, login } from "../../../../network/api/auth";
+import { AuthError } from "../../../../network/api/errors";
 import { CHECK_AUTH_RESPONSE_MOCK_1 } from "../../../mocks/network/api/auth";
 
 const API_URL = `${import.meta.env.VITE_API_URL}/auth`;

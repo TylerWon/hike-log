@@ -3,6 +3,7 @@ import { describe, expect, test, vi } from "vitest";
 import type { HikeFormData } from "../../../../schemas/forms/hike";
 import type { HikeFormPhotoData } from "../../../../schemas/forms/hike";
 
+import { AuthError } from "../../../../network/api/errors";
 import { createHike, createPhotos, createPresignedUrls } from "../../../../network/api/hikes";
 import { uploadPhotos } from "../../../../network/s3/s3";
 import { HikeCreationError, PhotoCreationError } from "../../../../pages/HikeLog/HikeLog/errors";
@@ -41,7 +42,7 @@ vi.mock(import("../../../../network/s3/s3"), async (importOriginal) => {
 });
 
 describe("submit-hike-form", () => {
-  const photoFormData: HikeFormPhotoData[] = [
+  const hikeFormPhotoData: HikeFormPhotoData[] = [
     {
       caption: "Caption 1",
       displayOrder: 1,
@@ -58,7 +59,7 @@ describe("submit-hike-form", () => {
       file: new File(["photo"], "photo3.png", { type: "image/heic" }),
     },
   ];
-  const formData: HikeFormData = {
+  const hikeFormData: HikeFormData = {
     allTrailsUrl: "https://www.alltrails.com/trail/canada/british-columbia/joffre-lakes",
     date: "2026-05-17",
     difficulty: 5.5,
@@ -67,22 +68,34 @@ describe("submit-hike-form", () => {
     elevationGain: 370,
     notes:
       "Arrived at the trailhead at 7am and got one of the last parking spots. All three lakes are stunning but Upper Joffre is the showstopper — glacier calving ice directly into the teal water. Light snow made the upper section slippery.",
-    photos: photoFormData,
+    photos: hikeFormPhotoData,
     rating: 4.5,
     trailName: "Joffre Lakes",
   };
 
   describe("submitHikeForm", () => {
+    test("throws AuthError when hike fails to be created because of auth issue", async () => {
+      vi.mocked(createHike).mockRejectedValue(new AuthError("Unauthorized"));
+      await expect(submitHikeForm(hikeFormData)).rejects.toThrow(AuthError);
+    });
+
     test("throws HikeCreationError when hike fails to be created", async () => {
       vi.mocked(createHike).mockRejectedValue(new Error("Failed to create hike"));
-      await expect(submitHikeForm(formData)).rejects.toThrow(HikeCreationError);
+      await expect(submitHikeForm(hikeFormData)).rejects.toThrow(HikeCreationError);
+    });
+
+    test("throws AuthError when photos fail to be created because of auth issue", async () => {
+      vi.mocked(createHike).mockResolvedValue(CREATE_HIKE_RESPONSE_MOCK);
+      vi.mocked(createPresignedUrls).mockRejectedValue(new AuthError("Unauthorized"));
+
+      await expect(submitHikeForm(hikeFormData)).rejects.toThrow(AuthError);
     });
 
     test("throws PhotoCreationError when photos fail to be created", async () => {
       vi.mocked(createHike).mockResolvedValue(CREATE_HIKE_RESPONSE_MOCK);
       vi.mocked(createPresignedUrls).mockRejectedValue(new Error("Failed to create presigned URLs"));
 
-      await expect(submitHikeForm(formData)).rejects.toThrow(PhotoCreationError);
+      await expect(submitHikeForm(hikeFormData)).rejects.toThrow(PhotoCreationError);
     });
 
     test("returns successfully when hike and photo are created", async () => {
@@ -91,17 +104,17 @@ describe("submit-hike-form", () => {
       vi.mocked(uploadPhotos).mockResolvedValue(UPLOAD_PHOTOS_RESPONSE_MOCK_2);
       vi.mocked(createPhotos).mockResolvedValue(CREATE_PHOTOS_RESPONSE_MOCK_2);
 
-      await expect(submitHikeForm(formData)).resolves.toBeUndefined();
+      await expect(submitHikeForm(hikeFormData)).resolves.toBeUndefined();
     });
   });
 
   describe("uploadAndCreatePhotos", () => {
-    test("returns errors when presigned URLs fail to be created, photos fail to be uploaded to S3, and photos fail to be created", async () => {
+    test("returns errors when there are partial failures during creation and upload", async () => {
       vi.mocked(createPresignedUrls).mockResolvedValue(CREATE_PRESIGNED_URLS_RESPONSE_MOCK_1); // third photo fails
       vi.mocked(uploadPhotos).mockResolvedValue(UPLOAD_PHOTOS_RESPONSE_MOCK_1); // second photo fails
       vi.mocked(createPhotos).mockResolvedValue(CREATE_PHOTOS_RESPONSE_MOCK_1); // first photo fails
 
-      const errors = await uploadAndCreatePhotos(photoFormData, 1);
+      const errors = await uploadAndCreatePhotos(hikeFormPhotoData, 1);
       expect(errors).toEqual(
         new Map([
           [0, "Failed to create model for photo 0"],
@@ -111,11 +124,9 @@ describe("submit-hike-form", () => {
       );
     });
 
-    test("returns error when unexpected exception is thrown", async () => {
+    test("throws error when a step in the create and upload process fails", async () => {
       vi.mocked(createPresignedUrls).mockRejectedValue(new Error("Failed to create presigned URLs"));
-
-      const errors = await uploadAndCreatePhotos(photoFormData, 1);
-      expect(errors).toEqual(new Map([[0, "Failed to create photos: Error: Failed to create presigned URLs"]]));
+      await expect(uploadAndCreatePhotos(hikeFormPhotoData, 1)).rejects.toThrow();
     });
   });
 
@@ -123,18 +134,18 @@ describe("submit-hike-form", () => {
     test("creates presigned URLs", async () => {
       vi.mocked(createPresignedUrls).mockResolvedValue(CREATE_PRESIGNED_URLS_RESPONSE_MOCK_1);
 
-      const response = await createPresignedUrlsHelper(photoFormData, 1);
+      const response = await createPresignedUrlsHelper(hikeFormPhotoData, 1);
       expect(createPresignedUrls).toHaveBeenCalledWith(1, [
-        { contentLength: photoFormData[0].file.size, contentType: photoFormData[0].file.type, index: 0 },
-        { contentLength: photoFormData[1].file.size, contentType: photoFormData[1].file.type, index: 1 },
-        { contentLength: photoFormData[2].file.size, contentType: photoFormData[2].file.type, index: 2 },
+        { contentLength: hikeFormPhotoData[0].file.size, contentType: hikeFormPhotoData[0].file.type, index: 0 },
+        { contentLength: hikeFormPhotoData[1].file.size, contentType: hikeFormPhotoData[1].file.type, index: 1 },
+        { contentLength: hikeFormPhotoData[2].file.size, contentType: hikeFormPhotoData[2].file.type, index: 2 },
       ]);
       expect(response).toEqual(CREATE_PRESIGNED_URLS_RESPONSE_MOCK_1);
     });
 
     test("propogates error when presigned URLs cannot be created", async () => {
       vi.mocked(createPresignedUrls).mockRejectedValue(new Error("Failed to create presigned URLs"));
-      await expect(createPresignedUrlsHelper(photoFormData, 1)).rejects.toThrow();
+      await expect(createPresignedUrlsHelper(hikeFormPhotoData, 1)).rejects.toThrow();
     });
   });
 
@@ -142,7 +153,7 @@ describe("submit-hike-form", () => {
     test("uploads photos to S3, skipping ones without presigned URLs", async () => {
       vi.mocked(uploadPhotos).mockResolvedValue(UPLOAD_PHOTOS_RESPONSE_MOCK_1);
 
-      const response = await uploadPhotosHelper(photoFormData, CREATE_PRESIGNED_URLS_RESPONSE_MOCK_1);
+      const response = await uploadPhotosHelper(hikeFormPhotoData, CREATE_PRESIGNED_URLS_RESPONSE_MOCK_1);
 
       const [presignedUrlResponse1, presignedUrlResponse2] = CREATE_PRESIGNED_URLS_RESPONSE_MOCK_1;
       if (!presignedUrlResponse1.success || !presignedUrlResponse2.success) {
@@ -152,12 +163,12 @@ describe("submit-hike-form", () => {
       expect(uploadPhotos).toHaveBeenCalledWith([
         {
           index: 0,
-          photo: photoFormData[0].file,
+          photo: hikeFormPhotoData[0].file,
           presignedUrl: presignedUrlResponse1.result.presignedUrl,
         },
         {
           index: 1,
-          photo: photoFormData[1].file,
+          photo: hikeFormPhotoData[1].file,
           presignedUrl: presignedUrlResponse2.result.presignedUrl,
         },
       ]);
@@ -170,7 +181,7 @@ describe("submit-hike-form", () => {
       vi.mocked(createPhotos).mockResolvedValue(CREATE_PHOTOS_RESPONSE_MOCK_1);
 
       const response = await createPhotosHelper(
-        photoFormData,
+        hikeFormPhotoData,
         1,
         CREATE_PRESIGNED_URLS_RESPONSE_MOCK_1,
         UPLOAD_PHOTOS_RESPONSE_MOCK_1,
@@ -183,8 +194,8 @@ describe("submit-hike-form", () => {
       // Skips second photo because it failed to be uploaded to S3, third photo because presigned URL failed to be created
       expect(createPhotos).toHaveBeenCalledWith(1, [
         {
-          caption: photoFormData[0].caption,
-          displayOrder: photoFormData[0].displayOrder,
+          caption: hikeFormPhotoData[0].caption,
+          displayOrder: hikeFormPhotoData[0].displayOrder,
           index: 0,
           objectKey: presignedUrlResponse1.result.objectKey,
         },
@@ -195,7 +206,7 @@ describe("submit-hike-form", () => {
     test("propogates error when photos cannot be created", async () => {
       vi.mocked(createPhotos).mockRejectedValue(new Error("Failed to create photos"));
       await expect(
-        createPhotosHelper(photoFormData, 1, CREATE_PRESIGNED_URLS_RESPONSE_MOCK_1, UPLOAD_PHOTOS_RESPONSE_MOCK_1),
+        createPhotosHelper(hikeFormPhotoData, 1, CREATE_PRESIGNED_URLS_RESPONSE_MOCK_1, UPLOAD_PHOTOS_RESPONSE_MOCK_1),
       ).rejects.toThrow();
     });
   });

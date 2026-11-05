@@ -3,6 +3,7 @@ import type { HikeFormPhotoData } from "../../../schemas/forms/hike";
 import type { CreatePhotosResponse, CreatePresignedUrlsResponse } from "../../../schemas/responses/hikes";
 import type { UploadPhotosResponse } from "../../../schemas/responses/s3";
 
+import { AuthError } from "../../../network/api/errors";
 import { createHike, createPhotos, createPresignedUrls } from "../../../network/api/hikes";
 import { uploadPhotos } from "../../../network/s3/s3";
 import { HikeCreationError, PhotoCreationError } from "./errors";
@@ -19,6 +20,12 @@ export async function submitHikeForm(formData: HikeFormData): Promise<void> {
   try {
     hike = await createHike(hikeData);
   } catch (e) {
+    if (e instanceof AuthError) {
+      // Propogate AuthError up
+      throw e;
+    }
+
+    // Consolidate other errors into HikeCreationError then throw
     throw new HikeCreationError(`Failed to create hike: ${e}`);
   }
 
@@ -26,9 +33,19 @@ export async function submitHikeForm(formData: HikeFormData): Promise<void> {
     return;
   }
 
-  const errors = await uploadAndCreatePhotos(photos, hike.id);
-  if (errors.size > 0) {
-    throw new PhotoCreationError(`${Array.from(errors.values())}`);
+  try {
+    const partialErrors = await uploadAndCreatePhotos(photos, hike.id);
+    if (partialErrors.size > 0) {
+      throw new PhotoCreationError(`Failed to create some photos: ${Array.from(partialErrors.values())}`);
+    }
+  } catch (e) {
+    if (e instanceof AuthError) {
+      // Propogate AuthError up
+      throw e;
+    }
+
+    // Consolidate other errors into PhotoCreationError then throw
+    throw new PhotoCreationError(`Failed to create photos: ${e}`);
   }
 }
 
@@ -38,39 +55,36 @@ export async function submitHikeForm(formData: HikeFormData): Promise<void> {
  * Photo creation is a multi-step process that involves obtaining a S3 presigned PUT URL, using those URLs to upload the
  * photos to S3, and finally creating the Photo models in the backend.
  *
- * Returns any errors encountered.
+ * Returns errors when there are partial failures: creation steps complete, but some individual photos fail to be
+ * uploaded or created. If one of the creation steps outright fail, throws an error instead.
  */
 export async function uploadAndCreatePhotos(photos: HikeFormPhotoData[], hikeId: number): Promise<Map<number, string>> {
   const errors: Map<number, string> = new Map();
 
-  try {
-    const createPresignedUrlsResponse = await createPresignedUrlsHelper(photos, hikeId);
-    for (const response of createPresignedUrlsResponse) {
-      if (!errors.has(response.index) && !response.success) {
-        errors.set(response.index, `Failed to create presigned URL for photo ${response.index}`);
-      }
+  const createPresignedUrlsResponse = await createPresignedUrlsHelper(photos, hikeId);
+  for (const response of createPresignedUrlsResponse) {
+    if (!errors.has(response.index) && !response.success) {
+      errors.set(response.index, `Failed to create presigned URL for photo ${response.index}`);
     }
+  }
 
-    const uploadPhotosResponse = await uploadPhotosHelper(photos, createPresignedUrlsResponse);
-    for (const response of uploadPhotosResponse) {
-      if (!errors.has(response.index) && !response.success) {
-        errors.set(response.index, `Failed to upload photo ${response.index} to S3`);
-      }
+  const uploadPhotosResponse = await uploadPhotosHelper(photos, createPresignedUrlsResponse);
+  for (const response of uploadPhotosResponse) {
+    if (!errors.has(response.index) && !response.success) {
+      errors.set(response.index, `Failed to upload photo ${response.index} to S3`);
     }
+  }
 
-    const createPhotosResponse = await createPhotosHelper(
-      photos,
-      hikeId,
-      createPresignedUrlsResponse,
-      uploadPhotosResponse,
-    );
-    for (const response of createPhotosResponse) {
-      if (!errors.has(response.index) && !response.success) {
-        errors.set(response.index, `Failed to create model for photo ${response.index}`);
-      }
+  const createPhotosResponse = await createPhotosHelper(
+    photos,
+    hikeId,
+    createPresignedUrlsResponse,
+    uploadPhotosResponse,
+  );
+  for (const response of createPhotosResponse) {
+    if (!errors.has(response.index) && !response.success) {
+      errors.set(response.index, `Failed to create model for photo ${response.index}`);
     }
-  } catch (e) {
-    return new Map([[0, `Failed to create photos: ${e}`]]);
   }
 
   return errors;

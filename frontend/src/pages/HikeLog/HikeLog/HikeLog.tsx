@@ -3,11 +3,13 @@ import "../../../assets/styles/button.css";
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { type NavigateFunction, useNavigate } from "react-router";
 
 import type { HikeFormData } from "../../../schemas/forms/hike";
 
 import Toast from "../../../components/Toast";
-import { checkAuth } from "../../../network/api/auth/auth";
+import { checkAuth } from "../../../network/api/auth";
+import { AuthError } from "../../../network/api/errors";
 import { deleteHike, fetchHikes } from "../../../network/api/hikes";
 import { formatDistance, formatDuration, formatElevation } from "../../../utils/formatters";
 import HikeCard from "../HikeCard/HikeCard";
@@ -22,7 +24,15 @@ import { submitHikeForm } from "./submit-hike-form";
 const HIKES_QUERY_KEY = "hikes";
 const AUTH_QUERY_KEY = "auth";
 
-export default function HikeLog() {
+export interface HikeLogProps {
+  // Dependency injection for testing purposes
+  navigateProp?: NavigateFunction;
+}
+
+export default function HikeLog({ navigateProp }: HikeLogProps) {
+  let navigate = useNavigate();
+  navigate = navigateProp ?? navigate;
+
   const queryClient = useQueryClient();
 
   const [expandedCardId, setExpandedCardId] = useState<null | number>(null);
@@ -63,14 +73,17 @@ export default function HikeLog() {
     try {
       await submitHikeForm(formData);
     } catch (e) {
-      // Fail close for all errors besides photo ones
-      if (!(e instanceof PhotoCreationError)) {
+      if (e instanceof PhotoCreationError) {
+        // Fail open for photo errors
+        setToastMessage("New log entry created but some photos could not be created.");
+      } else if (e instanceof AuthError) {
+        // Redirect to login page if session expired
+        navigate("/login?reason=expired");
+        return;
+      } else {
+        // Fail close for other errors
         throw e;
       }
-
-      // Fail open for photo errors
-      console.warn(`Failed to create some photos: ${e}`);
-      setToastMessage("New log entry created but some photos could not be uploaded.");
     }
 
     await refreshLog();

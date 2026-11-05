@@ -1,12 +1,12 @@
 import { describe, expect, test, vi } from "vitest";
 import { render } from "vitest-browser-react";
 
-import { login } from "../../../../network/api/auth/auth";
+import { login } from "../../../../network/api/auth";
 import { clickButton } from "../../../utils/button";
 import { fillField } from "../../../utils/Field/test-helpers";
 import { LoginWrapper } from "../../../utils/Login/test-components";
 
-vi.mock(import("../../../../network/api/auth/auth"), async (importOriginal) => {
+vi.mock(import("../../../../network/api/auth"), async (importOriginal) => {
   const actual = await importOriginal();
   return {
     ...actual,
@@ -17,6 +17,12 @@ vi.mock(import("../../../../network/api/auth/auth"), async (importOriginal) => {
 describe("Login", () => {
   test("displays password field and login button", async () => {
     const screen = await render(<LoginWrapper />);
+    await expect(screen.container).toMatchScreenshot();
+  });
+
+  test("displays toast when valid reason is provided in search params", async () => {
+    const searchParams = new URLSearchParams({ reason: "expired" });
+    const screen = await render(<LoginWrapper searchParamsProp={searchParams} />);
     await expect(screen.container).toMatchScreenshot();
   });
 

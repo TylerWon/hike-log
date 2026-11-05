@@ -2,7 +2,7 @@ import { describe, test } from "vitest";
 import { render } from "vitest-browser-react";
 
 import StatsOverview from "../../../../pages/HikeLog/StatsOverview/StatsOverview";
-import { checkStatLabels, checkStatValues } from "../../../utils/StatsOverview/test-helpers";
+import { checkStatsOverviewLabels, checkStatsOverviewValues } from "../../../utils/StatsOverview/test-helpers";
 
 describe("StatsOverview", () => {
   test("displays label and value for each statistic provided", async () => {
@@ -15,7 +15,7 @@ describe("StatsOverview", () => {
 
     const screen = await render(<StatsOverview stats={stats} />);
 
-    await checkStatLabels(screen);
-    await checkStatValues(screen, 2, 25.6, 1223, 298);
+    await checkStatsOverviewLabels(screen);
+    await checkStatsOverviewValues(screen, 2, 25.6, 1223, 298);
   });
 });

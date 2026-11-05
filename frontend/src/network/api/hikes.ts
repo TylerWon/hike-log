@@ -11,6 +11,7 @@ import {
   type CreatePresignedUrlsResponse,
   CreatePresignedUrlsResponseSchema,
 } from "../../schemas/responses/hikes";
+import { AuthError } from "./errors";
 import { apiFetch } from "./fetch";
 
 /**
@@ -27,7 +28,9 @@ export async function createHike(reqBody: CreateHikeRequest): Promise<Hike> {
     method: "POST",
   });
 
-  if (response.status !== 201) {
+  if (response.status === 401) {
+    throw new AuthError(`Failed to create hike: Unauthorized`);
+  } else if (response.status !== 201) {
     throw new Error(`Failed to create hike: ${response.status} - ${response.statusText}`);
   }
 
@@ -54,7 +57,9 @@ export async function createPhotos(hikeId: number, reqBody: CreatePhotosRequest)
     method: "POST",
   });
 
-  if (response.status !== 201) {
+  if (response.status === 401) {
+    throw new AuthError(`Failed to create photos: Unauthorized`);
+  } else if (response.status !== 201) {
     throw new Error(`Failed to create photos: ${response.status} - ${response.statusText}`);
   }
 
@@ -84,7 +89,9 @@ export async function createPresignedUrls(
     method: "POST",
   });
 
-  if (response.status !== 201) {
+  if (response.status === 401) {
+    throw new AuthError(`Failed to create presigned URLs: Unauthorized`);
+  } else if (response.status !== 201) {
     throw new Error(`Failed to create presigned URLs: ${response.status} - ${response.statusText}`);
   }
 

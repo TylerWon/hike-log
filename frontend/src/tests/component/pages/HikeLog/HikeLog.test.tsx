@@ -3,16 +3,17 @@ import { render, type RenderResult } from "vitest-browser-react";
 
 import type { Hike } from "../../../../schemas/models/hike";
 
-import { checkAuth } from "../../../../network/api/auth/auth";
+import { checkAuth } from "../../../../network/api/auth";
+import { AuthError } from "../../../../network/api/errors";
 import { deleteHike, fetchHikes } from "../../../../network/api/hikes";
 import { HikeCreationError, PhotoCreationError } from "../../../../pages/HikeLog/HikeLog/errors";
 import { submitHikeForm } from "../../../../pages/HikeLog/HikeLog/submit-hike-form";
-import { CHECK_AUTH_RESPONSE_MOCK_1, CHECK_AUTH_RESPONSE_MOCK_2 } from "../../../mocks/network/api/auth";
 import { HIKE_MOCK_1, HIKE_MOCK_2 } from "../../../mocks/models/hike";
+import { CHECK_AUTH_RESPONSE_MOCK_1, CHECK_AUTH_RESPONSE_MOCK_2 } from "../../../mocks/network/api/auth";
 import { clickButton } from "../../../utils/button";
 import { fillHikeForm } from "../../../utils/HikeForm/test-helpers";
 import { HikeLogWrapper } from "../../../utils/HikeLog/test-components";
-import { checkStatLabels, checkStatValues } from "../../../utils/StatsOverview/test-helpers";
+import { checkStatsOverviewLabels, checkStatsOverviewValues } from "../../../utils/StatsOverview/test-helpers";
 
 vi.mock(import("../../../../pages/HikeLog/HikeLog/submit-hike-form"), async (importOriginal) => {
   const actual = await importOriginal();
@@ -31,7 +32,7 @@ vi.mock(import("../../../../network/api/hikes"), async (importOriginal) => {
   };
 });
 
-vi.mock(import("../../../../network/api/auth/auth"), async (importOriginal) => {
+vi.mock(import("../../../../network/api/auth"), async (importOriginal) => {
   const actual = await importOriginal();
   return {
     ...actual,
@@ -81,7 +82,7 @@ async function checkPending(screen: RenderResult) {
   await expect.element(title).toBeInTheDocument();
 
   const statsOverview = screen.getByRole("region", { name: "Statistic overview" });
-  await checkStatLabels(statsOverview);
+  await checkStatsOverviewLabels(statsOverview);
 
   const statValueSkeletons = screen.getByRole("region", { name: "Statistic skeleton" });
   expect(statValueSkeletons.length).toEqual(4);
@@ -123,8 +124,8 @@ describe("HikeLog", () => {
     await expect.element(title).toBeInTheDocument();
 
     const statsOverview = screen.getByRole("region", { name: "Statistic overview" });
-    await checkStatLabels(statsOverview);
-    await checkStatValues(
+    await checkStatsOverviewLabels(statsOverview);
+    await checkStatsOverviewValues(
       statsOverview,
       hikes.length,
       hikes[0].distance + hikes[1].distance,
@@ -226,7 +227,7 @@ describe("HikeLog", () => {
       await expect.element(form).not.toBeInTheDocument();
     });
 
-    test("displays error in add hike form when form submission fails", async () => {
+    test("displays error in add hike form when submission fails because hike cannot be created", async () => {
       vi.mocked(fetchHikes).mockResolvedValue([]);
       vi.mocked(submitHikeForm).mockRejectedValue(new HikeCreationError("Failed to create hike"));
 
@@ -242,7 +243,7 @@ describe("HikeLog", () => {
       await expect.element(error).toBeInTheDocument();
     });
 
-    test("closes add hike form, displays hike card for new hike, updates overall stats, and displays warning when form submission partially fails", async () => {
+    test("closes add hike form, displays hike card for new hike, updates overall stats, and displays warning when submission succeeds but some photos cannot be created", async () => {
       const hikes = [HIKE_MOCK_1];
       // Mock fetchHikes twice since it is called on component load and again when submission succeeds
       vi.mocked(fetchHikes).mockResolvedValueOnce([]).mockResolvedValueOnce(hikes);
@@ -263,16 +264,34 @@ describe("HikeLog", () => {
       await checkCardsExist(screen, hikes, true);
 
       const statsOverview = screen.getByRole("region", { name: "Statistic overview" });
-      await checkStatValues(statsOverview, 1, hikes[0].distance, hikes[0].elevationGain, hikes[0].duration);
+      await checkStatsOverviewValues(statsOverview, 1, hikes[0].distance, hikes[0].elevationGain, hikes[0].duration);
 
       const warning = screen.getByRole("status", { name: "Toast" });
       await expect.element(warning).toBeInTheDocument();
+    });
+
+    test("redirects to login page when submission fails because the user's session expired", async () => {
+      vi.mocked(fetchHikes).mockResolvedValue([]);
+      vi.mocked(submitHikeForm).mockRejectedValue(new AuthError("Unauthorized"));
+
+      const navigateMock = vi.fn();
+
+      const screen = await render(<HikeLogWrapper navigateProp={navigateMock} />);
+
+      await clickButton(screen, "Add hike");
+
+      const form = screen.getByRole("dialog", { name: "Hike form" });
+      await fillHikeForm(form);
+      await clickButton(form, "Submit");
+
+      expect(navigateMock).toHaveBeenCalledWith("/login?reason=expired");
     });
 
     test("closes add hike form, displays hike card for new hike, and updates overall stats when form submission succeeds", async () => {
       const hikes = [HIKE_MOCK_1];
       // Mock fetchHikes twice since it is called on component load and again when submission succeeds
       vi.mocked(fetchHikes).mockResolvedValueOnce([]).mockResolvedValueOnce(hikes);
+      vi.mocked(submitHikeForm).mockResolvedValue();
 
       const screen = await render(<HikeLogWrapper />);
 
@@ -289,7 +308,7 @@ describe("HikeLog", () => {
       await checkCardsExist(screen, hikes, true);
 
       const statsOverview = screen.getByRole("region", { name: "Statistic overview" });
-      await checkStatValues(statsOverview, 1, hikes[0].distance, hikes[0].elevationGain, hikes[0].duration);
+      await checkStatsOverviewValues(statsOverview, 1, hikes[0].distance, hikes[0].elevationGain, hikes[0].duration);
     });
   });
 
@@ -361,7 +380,7 @@ describe("HikeLog", () => {
         await expect.element(card2).toBeInTheDocument();
 
         const statsOverview = screen.getByRole("region", { name: "Statistic overview" });
-        await checkStatValues(statsOverview, 1, hikes[1].distance, hikes[1].elevationGain, hikes[1].duration);
+        await checkStatsOverviewValues(statsOverview, 1, hikes[1].distance, hikes[1].elevationGain, hikes[1].duration);
       });
 
       test("removes expanded hike card and leaves remaining cards unexpanded when delete succeeds", async () => {

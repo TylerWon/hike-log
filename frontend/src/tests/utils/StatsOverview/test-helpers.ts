@@ -5,7 +5,7 @@ import { expect } from "vitest";
 
 import { formatDistance, formatDuration, formatElevation } from "../../../utils/formatters";
 
-export async function checkStatLabels(screen: Locator | RenderResult) {
+export async function checkStatsOverviewLabels(screen: Locator | RenderResult) {
   const hikesStatLabel = screen.getByText("Hikes");
   await expect.element(hikesStatLabel).toBeInTheDocument();
 
@@ -19,7 +19,7 @@ export async function checkStatLabels(screen: Locator | RenderResult) {
   await expect.element(timeStatLabel).toBeInTheDocument();
 }
 
-export async function checkStatValues(
+export async function checkStatsOverviewValues(
   screen: Locator | RenderResult,
   hikes: number,
   distance: number,
