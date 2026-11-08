@@ -16,14 +16,14 @@ func (suite *utilsTestSuite) TestCreatePhotoObjectKey_ReturnsKeyWithExpectedForm
 	hikeId := uint(42)
 	objectKey := CreatePhotoObjectKey(hikeId)
 
-	suite.Regexp(fmt.Sprintf(`^hikes/%d/photos/[0-9a-f-]{36}$`, hikeId), objectKey)
+	suite.Require().Regexp(fmt.Sprintf(`^hikes/%d/photos/[0-9a-f-]{36}$`, hikeId), objectKey)
 }
 
 func (suite *utilsTestSuite) TestCreatePhotoObjectKey_ReturnsUniqueKeys() {
 	key1 := CreatePhotoObjectKey(1)
 	key2 := CreatePhotoObjectKey(1)
 
-	suite.NotEqual(key1, key2)
+	suite.Require().NotEqual(key1, key2)
 }
 
 func (suite *utilsTestSuite) TestCreatePhotoObjectURL_ReturnsPathStyleURLInLocalEnvironment() {
@@ -32,7 +32,7 @@ func (suite *utilsTestSuite) TestCreatePhotoObjectURL_ReturnsPathStyleURLInLocal
 	bucketName := os.Getenv("AWS_S3_BUCKET_NAME")
 
 	url := CreatePhotoObjectURL(objectKey, "local")
-	suite.Equal(fmt.Sprintf("%s/%s/%s", awsEndpointURL, bucketName, objectKey), url)
+	suite.Require().Equal(fmt.Sprintf("%s/%s/%s", awsEndpointURL, bucketName, objectKey), url)
 }
 
 func (suite *utilsTestSuite) TestCreatePhotoObjectURL_ReturnsVirtualHostStyleURLInNonLocalEnvironment() {
@@ -41,7 +41,7 @@ func (suite *utilsTestSuite) TestCreatePhotoObjectURL_ReturnsVirtualHostStyleURL
 	bucketName := os.Getenv("AWS_S3_BUCKET_NAME")
 
 	url := CreatePhotoObjectURL(objectKey, "production")
-	suite.Equal(fmt.Sprintf("https://%s.s3.%s.amazonaws.com/%s", bucketName, awsRegion, objectKey), url)
+	suite.Require().Equal(fmt.Sprintf("https://%s.s3.%s.amazonaws.com/%s", bucketName, awsRegion, objectKey), url)
 }
 
 func (suite *utilsTestSuite) TestGetPhotoObjectKey_ReturnsObjectKeyFromPathStyleURLInLocalEnvironment() {
@@ -49,7 +49,7 @@ func (suite *utilsTestSuite) TestGetPhotoObjectKey_ReturnsObjectKeyFromPathStyle
 
 	objectURL := CreatePhotoObjectURL(objectKey, "local")
 	actual := GetPhotoObjectKey(objectURL, "local")
-	suite.Equal(objectKey, actual)
+	suite.Require().Equal(objectKey, actual)
 }
 
 func (suite *utilsTestSuite) TestGetPhotoObjectKey_ReturnsObjectKeyFromVirtualHostStyleURLInNonLocalEnvironment() {
@@ -57,7 +57,7 @@ func (suite *utilsTestSuite) TestGetPhotoObjectKey_ReturnsObjectKeyFromVirtualHo
 
 	objectURL := CreatePhotoObjectURL(objectKey, "production")
 	actual := GetPhotoObjectKey(objectURL, "production")
-	suite.Equal(objectKey, actual)
+	suite.Require().Equal(objectKey, actual)
 }
 
 func TestUtilsTestSuite(t *testing.T) {

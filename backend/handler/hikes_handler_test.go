@@ -72,7 +72,7 @@ func (suite *hikesHandlerTestSuite) TestCreateHike_Returns401ErrorWhenUnauthoriz
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
 	res := testutils.SendRequest(suite.router, http.MethodPost, "/hikes", reqBody) // Missing session cookie
 
-	suite.Equal(http.StatusUnauthorized, res.Code)
+	suite.Require().Equal(http.StatusUnauthorized, res.Code)
 }
 
 func (suite *hikesHandlerTestSuite) TestCreateHike_Returns400ErrorWhenRequestBodyHasInvalidFields() {
@@ -96,7 +96,7 @@ func (suite *hikesHandlerTestSuite) TestCreateHike_Returns400ErrorWhenRequestBod
 		testutils.CreateSessionCookie(suite.auth),
 	)
 
-	suite.Equal(http.StatusBadRequest, res.Code)
+	suite.Require().Equal(http.StatusBadRequest, res.Code)
 }
 
 func (suite *hikesHandlerTestSuite) TestCreateHike_Returns400ErrorWhenRequestBodyIsMissingFields() {
@@ -118,7 +118,7 @@ func (suite *hikesHandlerTestSuite) TestCreateHike_Returns400ErrorWhenRequestBod
 		testutils.CreateSessionCookie(suite.auth),
 	)
 
-	suite.Equal(http.StatusBadRequest, res.Code)
+	suite.Require().Equal(http.StatusBadRequest, res.Code)
 }
 
 func (suite *hikesHandlerTestSuite) TestCreateHike_Returns500ErrorWhenDBErrors() {
@@ -146,7 +146,7 @@ func (suite *hikesHandlerTestSuite) TestCreateHike_Returns500ErrorWhenDBErrors()
 		testutils.CreateSessionCookie(suite.auth),
 	)
 
-	suite.Equal(http.StatusInternalServerError, res.Code)
+	suite.Require().Equal(http.StatusInternalServerError, res.Code)
 }
 
 func (suite *hikesHandlerTestSuite) TestCreateHike_CreatesAndReturnsHike() {
@@ -170,11 +170,11 @@ func (suite *hikesHandlerTestSuite) TestCreateHike_CreatesAndReturnsHike() {
 		testutils.CreateSessionCookie(suite.auth),
 	)
 
-	suite.Equal(http.StatusCreated, res.Code)
+	suite.Require().Equal(http.StatusCreated, res.Code)
 
 	var response models.Hike
 	err := json.Unmarshal(res.Body.Bytes(), &response)
-	suite.NoError(err)
+	suite.Require().NoError(err)
 
 	expected := models.Hike{
 		ID:            response.ID,
@@ -189,7 +189,7 @@ func (suite *hikesHandlerTestSuite) TestCreateHike_CreatesAndReturnsHike() {
 		AllTrailsUrl:  "https://www.alltrails.com/",
 		Photos:        []models.Photo{},
 	}
-	suite.Equal(expected, response)
+	suite.Require().Equal(expected, response)
 }
 
 func (suite *hikesHandlerTestSuite) TestCreatePhotos_Returns401ErrorWhenUnauthorized() {
@@ -197,11 +197,11 @@ func (suite *hikesHandlerTestSuite) TestCreatePhotos_Returns401ErrorWhenUnauthor
 
 	objectKey1 := s3.CreatePhotoObjectKey(hikes[0].ID)
 	_, err := suite.s3Client.PutObject(context.TODO(), objectKey1, strings.NewReader("content"), "image/png")
-	suite.NoError(err)
+	suite.Require().NoError(err)
 
 	objectKey2 := s3.CreatePhotoObjectKey(hikes[0].ID)
 	_, err = suite.s3Client.PutObject(context.TODO(), objectKey2, strings.NewReader("content"), "image/jpeg")
-	suite.NoError(err)
+	suite.Require().NoError(err)
 
 	body := [](map[string]any){
 		{
@@ -225,7 +225,7 @@ func (suite *hikesHandlerTestSuite) TestCreatePhotos_Returns401ErrorWhenUnauthor
 		reqBody,
 	) // Missing session cookie
 
-	suite.Equal(http.StatusUnauthorized, res.Code)
+	suite.Require().Equal(http.StatusUnauthorized, res.Code)
 }
 
 func (suite *hikesHandlerTestSuite) TestCreatePhotos_Returns400ErrorWhenHikeIDIsInvalid() {
@@ -246,7 +246,7 @@ func (suite *hikesHandlerTestSuite) TestCreatePhotos_Returns400ErrorWhenHikeIDIs
 		testutils.CreateSessionCookie(suite.auth),
 	)
 
-	suite.Equal(http.StatusBadRequest, res.Code)
+	suite.Require().Equal(http.StatusBadRequest, res.Code)
 }
 
 func (suite *hikesHandlerTestSuite) TestCreatePhotos_Returns404ErrorWhenHikeDoesNotExist() {
@@ -267,7 +267,7 @@ func (suite *hikesHandlerTestSuite) TestCreatePhotos_Returns404ErrorWhenHikeDoes
 		testutils.CreateSessionCookie(suite.auth),
 	)
 
-	suite.Equal(http.StatusNotFound, res.Code)
+	suite.Require().Equal(http.StatusNotFound, res.Code)
 }
 
 func (suite *hikesHandlerTestSuite) TestCreatePhotos_Returns400ErrorWhenRequestItemIsMissingFields() {
@@ -295,7 +295,7 @@ func (suite *hikesHandlerTestSuite) TestCreatePhotos_Returns400ErrorWhenRequestI
 		testutils.CreateSessionCookie(suite.auth),
 	)
 
-	suite.Equal(http.StatusBadRequest, res.Code)
+	suite.Require().Equal(http.StatusBadRequest, res.Code)
 }
 
 func (suite *hikesHandlerTestSuite) TestCreatePhotos_Returns400ErrorWhenObjectKeyIsInvalid() {
@@ -318,7 +318,7 @@ func (suite *hikesHandlerTestSuite) TestCreatePhotos_Returns400ErrorWhenObjectKe
 		testutils.CreateSessionCookie(suite.auth),
 	)
 
-	suite.Equal(http.StatusBadRequest, res.Code)
+	suite.Require().Equal(http.StatusBadRequest, res.Code)
 }
 
 func (suite *hikesHandlerTestSuite) TestCreatePhotos_Returns400ErrorWhenPathAndObjectKeyHikeIDMismatch() {
@@ -341,7 +341,7 @@ func (suite *hikesHandlerTestSuite) TestCreatePhotos_Returns400ErrorWhenPathAndO
 		testutils.CreateSessionCookie(suite.auth),
 	)
 
-	suite.Equal(http.StatusBadRequest, res.Code)
+	suite.Require().Equal(http.StatusBadRequest, res.Code)
 }
 
 func (suite *hikesHandlerTestSuite) TestCreatePhotos_ReturnsPartialErrorWhenPhotoDoesNotExistInS3() {
@@ -364,15 +364,15 @@ func (suite *hikesHandlerTestSuite) TestCreatePhotos_ReturnsPartialErrorWhenPhot
 		testutils.CreateSessionCookie(suite.auth),
 	)
 
-	suite.Equal(http.StatusCreated, res.Code)
+	suite.Require().Equal(http.StatusCreated, res.Code)
 
 	var response handler.CreatePhotosResponse
 	err := json.Unmarshal(res.Body.Bytes(), &response)
-	suite.NoError(err)
+	suite.Require().NoError(err)
 
-	suite.Len(response, 1)
-	suite.Equal(uint(0), response[0].Index)
-	suite.False(response[0].Success)
+	suite.Require().Len(response, 1)
+	suite.Require().Equal(uint(0), response[0].Index)
+	suite.Require().False(response[0].Success)
 }
 
 func (suite *hikesHandlerTestSuite) TestCreatePhotos_ReturnsPartialErrorWhenS3Errors() {
@@ -402,15 +402,15 @@ func (suite *hikesHandlerTestSuite) TestCreatePhotos_ReturnsPartialErrorWhenS3Er
 		testutils.CreateSessionCookie(suite.auth),
 	)
 
-	suite.Equal(http.StatusCreated, res.Code)
+	suite.Require().Equal(http.StatusCreated, res.Code)
 
 	var response handler.CreatePhotosResponse
 	err := json.Unmarshal(res.Body.Bytes(), &response)
-	suite.NoError(err)
+	suite.Require().NoError(err)
 
-	suite.Len(response, 1)
-	suite.Equal(uint(2), response[0].Index)
-	suite.False(response[0].Success)
+	suite.Require().Len(response, 1)
+	suite.Require().Equal(uint(2), response[0].Index)
+	suite.Require().False(response[0].Success)
 }
 
 func (suite *hikesHandlerTestSuite) TestCreatePhotos_ReturnsPartialErrorWhenDBErrors() {
@@ -441,15 +441,15 @@ func (suite *hikesHandlerTestSuite) TestCreatePhotos_ReturnsPartialErrorWhenDBEr
 		testutils.CreateSessionCookie(suite.auth),
 	)
 
-	suite.Equal(http.StatusCreated, res.Code)
+	suite.Require().Equal(http.StatusCreated, res.Code)
 
 	var response handler.CreatePhotosResponse
 	err := json.Unmarshal(res.Body.Bytes(), &response)
-	suite.NoError(err)
+	suite.Require().NoError(err)
 
-	suite.Len(response, 1)
-	suite.Equal(uint(4), response[0].Index)
-	suite.False(response[0].Success)
+	suite.Require().Len(response, 1)
+	suite.Require().Equal(uint(4), response[0].Index)
+	suite.Require().False(response[0].Success)
 }
 
 func (suite *hikesHandlerTestSuite) TestCreatePhotos_CreatesPhotos() {
@@ -457,11 +457,11 @@ func (suite *hikesHandlerTestSuite) TestCreatePhotos_CreatesPhotos() {
 
 	objectKey1 := s3.CreatePhotoObjectKey(hikes[0].ID)
 	_, err := suite.s3Client.PutObject(context.TODO(), objectKey1, strings.NewReader("content"), "image/png")
-	suite.NoError(err)
+	suite.Require().NoError(err)
 
 	objectKey2 := s3.CreatePhotoObjectKey(hikes[0].ID)
 	_, err = suite.s3Client.PutObject(context.TODO(), objectKey2, strings.NewReader("content"), "image/jpeg")
-	suite.NoError(err)
+	suite.Require().NoError(err)
 
 	body := [](map[string]any){
 		{
@@ -486,19 +486,19 @@ func (suite *hikesHandlerTestSuite) TestCreatePhotos_CreatesPhotos() {
 		testutils.CreateSessionCookie(suite.auth),
 	)
 
-	suite.Equal(http.StatusCreated, res.Code)
+	suite.Require().Equal(http.StatusCreated, res.Code)
 
 	var response handler.CreatePhotosResponse
 	err = json.Unmarshal(res.Body.Bytes(), &response)
-	suite.NoError(err)
+	suite.Require().NoError(err)
 
-	suite.Len(response, 2)
+	suite.Require().Len(response, 2)
 	objectKeys := []string{objectKey1, objectKey2}
 	for idx, item := range response {
-		suite.Equal(uint(idx), item.Index)
-		suite.True(item.Success)
-		suite.Empty(item.Error)
-		suite.NotEmpty(item.Result)
+		suite.Require().Equal(uint(idx), item.Index)
+		suite.Require().True(item.Success)
+		suite.Require().Empty(item.Error)
+		suite.Require().NotEmpty(item.Result)
 
 		actual := item.Result
 		expected := models.Photo{
@@ -508,14 +508,14 @@ func (suite *hikesHandlerTestSuite) TestCreatePhotos_CreatesPhotos() {
 			DisplayOrder: uint(idx + 1),
 			HikeID:       hikes[0].ID,
 		}
-		suite.Equal(expected, *actual)
+		suite.Require().Equal(expected, *actual)
 	}
 
 	_, err = suite.s3Client.DeleteObject(context.TODO(), objectKey1)
-	suite.NoError(err)
+	suite.Require().NoError(err)
 
 	_, err = suite.s3Client.DeleteObject(context.TODO(), objectKey2)
-	suite.NoError(err)
+	suite.Require().NoError(err)
 }
 
 func (suite *hikesHandlerTestSuite) TestCreatePresignedURLs_Returns401ErrorWhenUnauthorized() {
@@ -541,7 +541,7 @@ func (suite *hikesHandlerTestSuite) TestCreatePresignedURLs_Returns401ErrorWhenU
 		reqBody,
 	) // Missing session cookie
 
-	suite.Equal(http.StatusUnauthorized, res.Code)
+	suite.Require().Equal(http.StatusUnauthorized, res.Code)
 }
 
 func (suite *hikesHandlerTestSuite) TestCreatePresignedURLs_Returns400ErrorWhenHikeIDIsInvalid() {
@@ -560,7 +560,7 @@ func (suite *hikesHandlerTestSuite) TestCreatePresignedURLs_Returns400ErrorWhenH
 		reqBody,
 		testutils.CreateSessionCookie(suite.auth),
 	)
-	suite.Equal(http.StatusBadRequest, res.Code)
+	suite.Require().Equal(http.StatusBadRequest, res.Code)
 }
 
 func (suite *hikesHandlerTestSuite) TestCreatePresignedURLs_Returns404ErrorWhenHikeDoesNotExist() {
@@ -579,7 +579,7 @@ func (suite *hikesHandlerTestSuite) TestCreatePresignedURLs_Returns404ErrorWhenH
 		reqBody,
 		testutils.CreateSessionCookie(suite.auth),
 	)
-	suite.Equal(http.StatusNotFound, res.Code)
+	suite.Require().Equal(http.StatusNotFound, res.Code)
 }
 
 func (suite *hikesHandlerTestSuite) TestCreatePresignedURLs_Returns400ErrorWhenRequestItemIsMissingFields() {
@@ -599,7 +599,7 @@ func (suite *hikesHandlerTestSuite) TestCreatePresignedURLs_Returns400ErrorWhenR
 		reqBody,
 		testutils.CreateSessionCookie(suite.auth),
 	)
-	suite.Equal(http.StatusBadRequest, res.Code)
+	suite.Require().Equal(http.StatusBadRequest, res.Code)
 }
 
 func (suite *hikesHandlerTestSuite) TestCreatePresignedURLs_Returns400ErrorWhenRequestItemHasAnInvalidImageType() {
@@ -620,7 +620,7 @@ func (suite *hikesHandlerTestSuite) TestCreatePresignedURLs_Returns400ErrorWhenR
 		reqBody,
 		testutils.CreateSessionCookie(suite.auth),
 	)
-	suite.Equal(http.StatusBadRequest, res.Code)
+	suite.Require().Equal(http.StatusBadRequest, res.Code)
 }
 
 func (suite *hikesHandlerTestSuite) TestCreatePresignedURLs_Returns400ErrorWhenContentLengthIsOutsideBounds() {
@@ -641,7 +641,7 @@ func (suite *hikesHandlerTestSuite) TestCreatePresignedURLs_Returns400ErrorWhenC
 		reqBody,
 		testutils.CreateSessionCookie(suite.auth),
 	)
-	suite.Equal(http.StatusBadRequest, res.Code)
+	suite.Require().Equal(http.StatusBadRequest, res.Code)
 
 	body = [](map[string]any){
 		{
@@ -658,7 +658,7 @@ func (suite *hikesHandlerTestSuite) TestCreatePresignedURLs_Returns400ErrorWhenC
 		reqBody,
 		testutils.CreateSessionCookie(suite.auth),
 	)
-	suite.Equal(http.StatusBadRequest, res.Code)
+	suite.Require().Equal(http.StatusBadRequest, res.Code)
 }
 
 func (suite *hikesHandlerTestSuite) TestCreatePresignedURLs_Returns500ErrorWhenDBErrors() {
@@ -686,7 +686,7 @@ func (suite *hikesHandlerTestSuite) TestCreatePresignedURLs_Returns500ErrorWhenD
 		reqBody,
 		testutils.CreateSessionCookie(suite.auth),
 	)
-	suite.Equal(http.StatusInternalServerError, res.Code)
+	suite.Require().Equal(http.StatusInternalServerError, res.Code)
 }
 
 func (suite *hikesHandlerTestSuite) TestCreatePresignedURLs_ReturnsPartialErrorWhenS3Errors() {
@@ -715,19 +715,19 @@ func (suite *hikesHandlerTestSuite) TestCreatePresignedURLs_ReturnsPartialErrorW
 		testutils.CreateSessionCookie(suite.auth),
 	)
 
-	suite.Equal(http.StatusCreated, res.Code)
+	suite.Require().Equal(http.StatusCreated, res.Code)
 
 	var response handler.CreatePresignedURLsResponse
 	err := json.Unmarshal(res.Body.Bytes(), &response)
-	suite.NoError(err)
+	suite.Require().NoError(err)
 
-	suite.Equal(1, len(response))
+	suite.Require().Equal(1, len(response))
 
 	item := response[0]
-	suite.Equal(uint(2), item.Index)
-	suite.False(item.Success)
-	suite.Empty(item.Result)
-	suite.NotEmpty(item.Error)
+	suite.Require().Equal(uint(2), item.Index)
+	suite.Require().False(item.Success)
+	suite.Require().Empty(item.Result)
+	suite.Require().NotEmpty(item.Error)
 }
 
 func (suite *hikesHandlerTestSuite) TestCreatePresignedURLs_ReturnsPresignedURLs() {
@@ -754,24 +754,24 @@ func (suite *hikesHandlerTestSuite) TestCreatePresignedURLs_ReturnsPresignedURLs
 		testutils.CreateSessionCookie(suite.auth),
 	)
 
-	suite.Equal(http.StatusCreated, res.Code)
+	suite.Require().Equal(http.StatusCreated, res.Code)
 
 	var response handler.CreatePresignedURLsResponse
 	err := json.Unmarshal(res.Body.Bytes(), &response)
-	suite.NoError(err)
+	suite.Require().NoError(err)
 
-	suite.Equal(2, len(response))
+	suite.Require().Equal(2, len(response))
 	for idx, item := range response {
-		suite.Equal(uint(idx), item.Index)
-		suite.True(item.Success)
-		suite.Empty(item.Error)
-		suite.NotEmpty(item.Result)
+		suite.Require().Equal(uint(idx), item.Index)
+		suite.Require().True(item.Success)
+		suite.Require().Empty(item.Error)
+		suite.Require().NotEmpty(item.Result)
 
 		result := item.Result
-		suite.Regexp(fmt.Sprintf("^hikes/%d/photos/[0-9a-f-]{36}$", hikes[0].ID), result.ObjectKey)
+		suite.Require().Regexp(fmt.Sprintf("^hikes/%d/photos/[0-9a-f-]{36}$", hikes[0].ID), result.ObjectKey)
 		parsedPresignedURL, err := url.Parse(result.PresignedURL)
-		suite.NoError(err)
-		suite.Contains(parsedPresignedURL.Path, result.ObjectKey)
+		suite.Require().NoError(err)
+		suite.Require().Contains(parsedPresignedURL.Path, result.ObjectKey)
 	}
 }
 
@@ -786,10 +786,10 @@ func (suite *hikesHandlerTestSuite) TestDeleteHike_Returns401ErrorWhenUnauthoriz
 		strings.NewReader("content"),
 		"image/png",
 	)
-	suite.NoError(err)
+	suite.Require().NoError(err)
 
 	res := testutils.SendRequest(suite.router, http.MethodDelete, fmt.Sprintf("/hikes/%d", hike.ID), nil) // Missing session cookie
-	suite.Equal(http.StatusUnauthorized, res.Code)
+	suite.Require().Equal(http.StatusUnauthorized, res.Code)
 
 	suite.s3Client.DeleteObject(context.TODO(), objectKey)
 }
@@ -802,7 +802,7 @@ func (suite *hikesHandlerTestSuite) TestDeleteHike_Returns400ErrorWhenHikeIDIsIn
 		nil,
 		testutils.CreateSessionCookie(suite.auth),
 	)
-	suite.Equal(http.StatusBadRequest, res.Code)
+	suite.Require().Equal(http.StatusBadRequest, res.Code)
 }
 
 func (suite *hikesHandlerTestSuite) TestDeleteHike_Returns404ErrorWhenHikeDoesNotExist() {
@@ -813,7 +813,7 @@ func (suite *hikesHandlerTestSuite) TestDeleteHike_Returns404ErrorWhenHikeDoesNo
 		nil,
 		testutils.CreateSessionCookie(suite.auth),
 	)
-	suite.Equal(http.StatusNotFound, res.Code)
+	suite.Require().Equal(http.StatusNotFound, res.Code)
 }
 
 func (suite *hikesHandlerTestSuite) TestDeleteHike_Returns500ErrorWhenDBErrors() {
@@ -830,7 +830,7 @@ func (suite *hikesHandlerTestSuite) TestDeleteHike_Returns500ErrorWhenDBErrors()
 		nil,
 		testutils.CreateSessionCookie(suite.auth),
 	)
-	suite.Equal(http.StatusInternalServerError, res.Code)
+	suite.Require().Equal(http.StatusInternalServerError, res.Code)
 }
 
 func (suite *hikesHandlerTestSuite) TestDeleteHike_DeletesHikeAndPhotosWhenS3Errors() {
@@ -852,7 +852,7 @@ func (suite *hikesHandlerTestSuite) TestDeleteHike_DeletesHikeAndPhotosWhenS3Err
 		strings.NewReader("content"),
 		"image/png",
 	)
-	suite.NoError(err)
+	suite.Require().NoError(err)
 
 	res := testutils.SendRequest(
 		router,
@@ -861,17 +861,17 @@ func (suite *hikesHandlerTestSuite) TestDeleteHike_DeletesHikeAndPhotosWhenS3Err
 		nil,
 		testutils.CreateSessionCookie(suite.auth),
 	)
-	suite.Equal(http.StatusOK, res.Code)
+	suite.Require().Equal(http.StatusOK, res.Code)
 
 	_, err = suite.store.GetHikeByID(hike.ID)
-	suite.Error(err)
+	suite.Require().Error(err)
 
 	_, err = suite.store.GetPhotoByID(photo.ID)
-	suite.Error(err)
+	suite.Require().Error(err)
 
 	exists, err := suite.s3Client.DoesObjectExist(context.TODO(), objectKey)
-	suite.NoError(err)
-	suite.True(exists)
+	suite.Require().NoError(err)
+	suite.Require().True(exists)
 
 	suite.s3Client.DeleteObject(context.TODO(), objectKey)
 }
@@ -887,7 +887,7 @@ func (suite *hikesHandlerTestSuite) TestDeleteHike_DeletesHikeAndPhotosAndS3Obje
 		strings.NewReader("content"),
 		"image/png",
 	)
-	suite.NoError(err)
+	suite.Require().NoError(err)
 
 	res := testutils.SendRequest(
 		suite.router,
@@ -896,17 +896,17 @@ func (suite *hikesHandlerTestSuite) TestDeleteHike_DeletesHikeAndPhotosAndS3Obje
 		nil,
 		testutils.CreateSessionCookie(suite.auth),
 	)
-	suite.Equal(http.StatusOK, res.Code)
+	suite.Require().Equal(http.StatusOK, res.Code)
 
 	_, err = suite.store.GetHikeByID(hike.ID)
-	suite.Error(err)
+	suite.Require().Error(err)
 
 	_, err = suite.store.GetPhotoByID(photo.ID)
-	suite.Error(err)
+	suite.Require().Error(err)
 
 	exists, err := suite.s3Client.DoesObjectExist(context.TODO(), objectKey)
-	suite.NoError(err)
-	suite.True(exists)
+	suite.Require().NoError(err)
+	suite.Require().True(exists)
 
 	suite.s3Client.DeleteObject(context.TODO(), objectKey)
 }
@@ -924,19 +924,19 @@ func (suite *hikesHandlerTestSuite) TestListHike_Returns500ErrorWhenDBErrors() {
 
 	res := testutils.SendRequest(router, http.MethodGet, "/hikes", nil)
 
-	suite.Equal(http.StatusInternalServerError, res.Code)
+	suite.Require().Equal(http.StatusInternalServerError, res.Code)
 }
 
 func (suite *hikesHandlerTestSuite) TestListHike_ReturnsNothingWhenThereAreNoHikes() {
 	res := testutils.SendRequest(suite.router, http.MethodGet, "/hikes", nil)
 
-	suite.Equal(http.StatusOK, res.Code)
+	suite.Require().Equal(http.StatusOK, res.Code)
 
 	var hikes []models.Hike
 	err := json.Unmarshal(res.Body.Bytes(), &hikes)
-	suite.NoError(err)
+	suite.Require().NoError(err)
 
-	suite.Len(hikes, 0)
+	suite.Require().Len(hikes, 0)
 }
 
 func (suite *hikesHandlerTestSuite) TestListHike_ReturnsHikes() {
@@ -944,15 +944,15 @@ func (suite *hikesHandlerTestSuite) TestListHike_ReturnsHikes() {
 
 	res := testutils.SendRequest(suite.router, http.MethodGet, "/hikes", nil)
 
-	suite.Equal(http.StatusOK, res.Code)
+	suite.Require().Equal(http.StatusOK, res.Code)
 
 	var response []models.Hike
 	err := json.Unmarshal(res.Body.Bytes(), &response)
-	suite.NoError(err)
+	suite.Require().NoError(err)
 
-	suite.Len(response, 2)
-	suite.Equal(hikes[1], response[0])
-	suite.Equal(hikes[0], response[1])
+	suite.Require().Len(response, 2)
+	suite.Require().Equal(hikes[1], response[0])
+	suite.Require().Equal(hikes[0], response[1])
 }
 
 func (suite *hikesHandlerTestSuite) TestUpdateHike_Returns401ErrorWhenUnauthorized() {
@@ -972,7 +972,7 @@ func (suite *hikesHandlerTestSuite) TestUpdateHike_Returns401ErrorWhenUnauthoriz
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
 	res := testutils.SendRequest(suite.router, http.MethodPut, fmt.Sprintf("/hikes/%d", hike.ID), reqBody) // Missing session cookie
 
-	suite.Equal(http.StatusUnauthorized, res.Code)
+	suite.Require().Equal(http.StatusUnauthorized, res.Code)
 }
 
 func (suite *hikesHandlerTestSuite) TestUpdateHike_Returns400ErrorWhenHikeIDIsInvalid() {
@@ -983,7 +983,7 @@ func (suite *hikesHandlerTestSuite) TestUpdateHike_Returns400ErrorWhenHikeIDIsIn
 		nil,
 		testutils.CreateSessionCookie(suite.auth),
 	)
-	suite.Equal(http.StatusBadRequest, res.Code)
+	suite.Require().Equal(http.StatusBadRequest, res.Code)
 }
 
 func (suite *hikesHandlerTestSuite) TestUpdateHike_Returns404ErrorWhenHikeDoesNotExist() {
@@ -994,7 +994,7 @@ func (suite *hikesHandlerTestSuite) TestUpdateHike_Returns404ErrorWhenHikeDoesNo
 		nil,
 		testutils.CreateSessionCookie(suite.auth),
 	)
-	suite.Equal(http.StatusNotFound, res.Code)
+	suite.Require().Equal(http.StatusNotFound, res.Code)
 }
 
 func (suite *hikesHandlerTestSuite) TestUpdateHike_Returns400ErrorWhenRequestBodyHasInvalidFields() {
@@ -1020,7 +1020,7 @@ func (suite *hikesHandlerTestSuite) TestUpdateHike_Returns400ErrorWhenRequestBod
 		testutils.CreateSessionCookie(suite.auth),
 	)
 
-	suite.Equal(http.StatusBadRequest, res.Code)
+	suite.Require().Equal(http.StatusBadRequest, res.Code)
 }
 
 func (suite *hikesHandlerTestSuite) TestUpdateHike_Returns400ErrorWhenRequestBodyIsMissingFields() {
@@ -1044,7 +1044,7 @@ func (suite *hikesHandlerTestSuite) TestUpdateHike_Returns400ErrorWhenRequestBod
 		testutils.CreateSessionCookie(suite.auth),
 	)
 
-	suite.Equal(http.StatusBadRequest, res.Code)
+	suite.Require().Equal(http.StatusBadRequest, res.Code)
 }
 
 func (suite *hikesHandlerTestSuite) TestUpdateHike_Returns500ErrorWhenDBErrors() {
@@ -1077,7 +1077,7 @@ func (suite *hikesHandlerTestSuite) TestUpdateHike_Returns500ErrorWhenDBErrors()
 		testutils.CreateSessionCookie(suite.auth),
 	)
 
-	suite.Equal(http.StatusInternalServerError, res.Code)
+	suite.Require().Equal(http.StatusInternalServerError, res.Code)
 }
 
 func (suite *hikesHandlerTestSuite) TestUpdateHike_UpdatesHike() {
@@ -1103,10 +1103,10 @@ func (suite *hikesHandlerTestSuite) TestUpdateHike_UpdatesHike() {
 		testutils.CreateSessionCookie(suite.auth),
 	)
 
-	suite.Equal(http.StatusOK, res.Code)
+	suite.Require().Equal(http.StatusOK, res.Code)
 
 	updated, err := suite.store.GetHikeByID(hike.ID)
-	suite.NoError(err)
+	suite.Require().NoError(err)
 
 	expected := models.Hike{
 		ID:            hike.ID,
@@ -1120,5 +1120,5 @@ func (suite *hikesHandlerTestSuite) TestUpdateHike_UpdatesHike() {
 		Duration:      60,
 		AllTrailsUrl:  "https://www.alltrails.com/updated",
 	}
-	suite.Equal(expected, *updated)
+	suite.Require().Equal(expected, *updated)
 }

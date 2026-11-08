@@ -41,33 +41,33 @@ func (suite *storeTestSuite) TestCreateRecord_ReturnsErrorWhenDBErrors() {
 	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, false, false)[0]
 	err := store.CreateRecord(&hike)
 
-	suite.Error(err)
+	suite.Require().Error(err)
 }
 
 func (suite *storeTestSuite) TestCreateRecord_CreatesModel() {
 	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, false, false)[0]
 	err := suite.store.CreateRecord(&hike)
 
-	suite.NoError(err)
+	suite.Require().NoError(err)
 
 	result, err := suite.store.GetHikeByID(hike.ID)
-	suite.NoError(err)
-	suite.Equal(hike, *result)
+	suite.Require().NoError(err)
+	suite.Require().Equal(hike, *result)
 }
 
 func (suite *storeTestSuite) TestCreateRecord_CreatesModels() {
 	hikes := testutils.ConstructHikes(suite.T(), 2, suite.store, false, false)
 	err := suite.store.CreateRecord(hikes)
 
-	suite.NoError(err)
+	suite.Require().NoError(err)
 
 	result, err := suite.store.GetHikeByID(hikes[0].ID)
-	suite.NoError(err)
-	suite.Equal(hikes[0], *result)
+	suite.Require().NoError(err)
+	suite.Require().Equal(hikes[0], *result)
 
 	result, err = suite.store.GetHikeByID(hikes[1].ID)
-	suite.NoError(err)
-	suite.Equal(hikes[1], *result)
+	suite.Require().NoError(err)
+	suite.Require().Equal(hikes[1], *result)
 }
 
 func (suite *storeTestSuite) TestDeleteRecord_ReturnsErrorWhenDBErrors() {
@@ -78,37 +78,37 @@ func (suite *storeTestSuite) TestDeleteRecord_ReturnsErrorWhenDBErrors() {
 
 	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)[0]
 	err := store.DeleteRecord(&hike)
-	suite.Error(err)
+	suite.Require().Error(err)
 }
 
 func (suite *storeTestSuite) TestDeleteRecord_NoErrorWhenHikeDoesNotExist() {
 	err := suite.store.DeleteRecord(&models.Hike{ID: 1})
-	suite.NoError(err)
+	suite.Require().NoError(err)
 }
 
 func (suite *storeTestSuite) TestDeleteRecord_DeletesModel() {
 	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)[0]
 	err := suite.store.DeleteRecord(&hike)
-	suite.NoError(err)
+	suite.Require().NoError(err)
 
 	_, err = suite.store.GetHikeByID(hike.ID)
-	suite.Error(err)
+	suite.Require().Error(err)
 }
 
 func (suite *storeTestSuite) TestDeleteRecord_DeletesModels() {
 	hikes := testutils.ConstructHikes(suite.T(), 2, suite.store, false, true)
 	err := suite.store.DeleteRecord(&hikes)
-	suite.NoError(err)
+	suite.Require().NoError(err)
 
 	_, err = suite.store.GetHikeByID(hikes[0].ID)
-	suite.Error(err)
+	suite.Require().Error(err)
 	_, err = suite.store.GetHikeByID(hikes[1].ID)
-	suite.Error(err)
+	suite.Require().Error(err)
 }
 
 func (suite *storeTestSuite) TestGetHikeByID_ReturnsErrorWhenHikeDoesNotExist() {
 	_, err := suite.store.GetHikeByID(1)
-	suite.Error(err)
+	suite.Require().Error(err)
 }
 
 func (suite *storeTestSuite) TestGetHikeByID_ReturnsErrorWhenDBErrors() {
@@ -120,20 +120,20 @@ func (suite *storeTestSuite) TestGetHikeByID_ReturnsErrorWhenDBErrors() {
 	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)[0]
 	_, err := store.GetHikeByID(hike.ID)
 
-	suite.Error(err)
+	suite.Require().Error(err)
 }
 
 func (suite *storeTestSuite) TestGetHikeByID_ReturnsHike() {
 	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)[0]
 	result, err := suite.store.GetHikeByID(hike.ID)
 
-	suite.NoError(err)
-	suite.Equal(hike, *result)
+	suite.Require().NoError(err)
+	suite.Require().Equal(hike, *result)
 }
 
 func (suite *storeTestSuite) TestGetPhotoByID_ReturnsErrorWhenPhotoDoesNotExist() {
 	_, err := suite.store.GetPhotoByID(1)
-	suite.Error(err)
+	suite.Require().Error(err)
 }
 
 func (suite *storeTestSuite) TestGetPhotoByID_ReturnsErrorWhenDBErrors() {
@@ -146,7 +146,7 @@ func (suite *storeTestSuite) TestGetPhotoByID_ReturnsErrorWhenDBErrors() {
 	photo := hike.Photos[0]
 	_, err := store.GetPhotoByID(photo.ID)
 
-	suite.Error(err)
+	suite.Require().Error(err)
 }
 
 func (suite *storeTestSuite) TestGetPhotoByID_ReturnsPhoto() {
@@ -154,8 +154,8 @@ func (suite *storeTestSuite) TestGetPhotoByID_ReturnsPhoto() {
 	photo := hike.Photos[0]
 	result, err := suite.store.GetPhotoByID(photo.ID)
 
-	suite.NoError(err)
-	suite.Equal(hike.Photos[0], *result)
+	suite.Require().NoError(err)
+	suite.Require().Equal(hike.Photos[0], *result)
 }
 
 func (suite *storeTestSuite) TestListHikes_ReturnsErrorWhenDBErrors() {
@@ -167,16 +167,16 @@ func (suite *storeTestSuite) TestListHikes_ReturnsErrorWhenDBErrors() {
 	testutils.ConstructHikes(suite.T(), 2, suite.store, true, true)
 	_, err := store.ListHikes()
 
-	suite.Error(err)
+	suite.Require().Error(err)
 }
 
 func (suite *storeTestSuite) TestListHikes_ReturnsHikes() {
 	hikes := testutils.ConstructHikes(suite.T(), 2, suite.store, true, true)
 	result, err := suite.store.ListHikes()
 
-	suite.NoError(err)
-	suite.Equal(hikes[1], result[0])
-	suite.Equal(hikes[0], result[1])
+	suite.Require().NoError(err)
+	suite.Require().Equal(hikes[1], result[0])
+	suite.Require().Equal(hikes[0], result[1])
 }
 
 func (suite *storeTestSuite) TestUpdateRecord_ReturnsErrorWhenDBErrors() {
@@ -190,12 +190,12 @@ func (suite *storeTestSuite) TestUpdateRecord_ReturnsErrorWhenDBErrors() {
 	hike.Difficulty = 5
 	hike.TrailName = "Other trail name"
 	err := store.UpdateRecord(&hike)
-	suite.Error(err)
+	suite.Require().Error(err)
 }
 
 func (suite *storeTestSuite) TestUpdateRecord_NoErrorWhenHikeDoesNotExist() {
 	err := suite.store.UpdateRecord(&models.Hike{ID: 1})
-	suite.NoError(err)
+	suite.Require().NoError(err)
 }
 
 func (suite *storeTestSuite) TestUpdateRecord_UpdatesModel() {
@@ -204,11 +204,11 @@ func (suite *storeTestSuite) TestUpdateRecord_UpdatesModel() {
 	hike.Difficulty = 5
 	hike.TrailName = "Other trail name"
 	err := suite.store.UpdateRecord(&hike)
-	suite.NoError(err)
+	suite.Require().NoError(err)
 
 	updated, err := suite.store.GetHikeByID(hike.ID)
-	suite.NoError(err)
-	suite.Equal(hike, *updated)
+	suite.Require().NoError(err)
+	suite.Require().Equal(hike, *updated)
 }
 
 func TestStoreTestSuite(t *testing.T) {

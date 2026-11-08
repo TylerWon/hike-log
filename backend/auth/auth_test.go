@@ -25,26 +25,26 @@ func (suite *authTestSuite) TestCreateSessionCookieValue_ReturnsValue() {
 	value := suite.auth.CreateSessionCookieValue()
 
 	parts := strings.Split(value, ".")
-	suite.Len(parts, 2)
+	suite.Require().Len(parts, 2)
 
 	expiryStr := parts[0]
 	expiryInt, err := strconv.ParseInt(expiryStr, 10, 64)
-	suite.NoError(err)
-	suite.InDelta(time.Now().Add(24*time.Hour).Unix(), expiryInt, 5)
+	suite.Require().NoError(err)
+	suite.Require().InDelta(time.Now().Add(24*time.Hour).Unix(), expiryInt, 5)
 
 	signature := parts[1]
-	suite.Equal(suite.auth.GenerateHmacSha256Signature(expiryStr), signature)
+	suite.Require().Equal(suite.auth.GenerateHmacSha256Signature(expiryStr), signature)
 }
 
 func (suite *authTestSuite) TestGenerateHmacSha256Signature_ReturnsSignature() {
 	signature := suite.auth.GenerateHmacSha256Signature("abc")
-	suite.Equal("545003ead8123a7a230d5e79249e903768f4a407ebebbd6b88db6c519b5fb222", signature)
+	suite.Require().Equal("545003ead8123a7a230d5e79249e903768f4a407ebebbd6b88db6c519b5fb222", signature)
 }
 
 func (suite *authTestSuite) TestGenerateHmacSha256Signature_ReturnsDifferentSignaturesForDifferentPayloads() {
 	signature1 := suite.auth.GenerateHmacSha256Signature("abc")
 	signature2 := suite.auth.GenerateHmacSha256Signature("cba")
-	suite.NotEqual(signature1, signature2)
+	suite.Require().NotEqual(signature1, signature2)
 }
 
 func (suite *authTestSuite) TestGenerateHmacSha256Signature_ReturnsDifferentSignaturesForDifferentSecrets() {
@@ -57,7 +57,7 @@ func (suite *authTestSuite) TestGenerateHmacSha256Signature_ReturnsDifferentSign
 	signature1 := auth1.GenerateHmacSha256Signature(payload)
 	signature2 := auth2.GenerateHmacSha256Signature(payload)
 
-	suite.NotEqual(signature1, signature2)
+	suite.Require().NotEqual(signature1, signature2)
 }
 
 func (suite *authTestSuite) TestIsAuthenticated_ReturnsFalseWhenCookieIsMissing() {
@@ -65,8 +65,8 @@ func (suite *authTestSuite) TestIsAuthenticated_ReturnsFalseWhenCookieIsMissing(
 
 	res, err := suite.auth.IsAuthenticated(c)
 
-	suite.False(res)
-	suite.Error(err)
+	suite.Require().False(res)
+	suite.Require().Error(err)
 }
 
 func (suite *authTestSuite) TestIsAuthenticated_ReturnsFalseWhenCookieValueIsInvalid() {
@@ -77,8 +77,8 @@ func (suite *authTestSuite) TestIsAuthenticated_ReturnsFalseWhenCookieValueIsInv
 
 	res, err := suite.auth.IsAuthenticated(c)
 
-	suite.False(res)
-	suite.Error(err)
+	suite.Require().False(res)
+	suite.Require().Error(err)
 }
 
 func (suite *authTestSuite) TestIsAuthenticated_ReturnsFalseWhenExpiryTimeIsNotAnInteger() {
@@ -91,8 +91,8 @@ func (suite *authTestSuite) TestIsAuthenticated_ReturnsFalseWhenExpiryTimeIsNotA
 
 	res, err := suite.auth.IsAuthenticated(c)
 
-	suite.False(res)
-	suite.Error(err)
+	suite.Require().False(res)
+	suite.Require().Error(err)
 }
 
 func (suite *authTestSuite) TestIsAuthenticated_ReturnsFalseWhenCookieIsExpired() {
@@ -105,8 +105,8 @@ func (suite *authTestSuite) TestIsAuthenticated_ReturnsFalseWhenCookieIsExpired(
 
 	res, err := suite.auth.IsAuthenticated(c)
 
-	suite.False(res)
-	suite.Error(err)
+	suite.Require().False(res)
+	suite.Require().Error(err)
 }
 
 func (suite *authTestSuite) TestIsAuthenticated_ReturnsFalseWhenSignatureIsInvalid() {
@@ -119,8 +119,8 @@ func (suite *authTestSuite) TestIsAuthenticated_ReturnsFalseWhenSignatureIsInval
 
 	res, err := suite.auth.IsAuthenticated(c)
 
-	suite.False(res)
-	suite.Error(err)
+	suite.Require().False(res)
+	suite.Require().Error(err)
 }
 
 func (suite *authTestSuite) TestIsAuthenticated_ReturnsTrue() {
@@ -128,8 +128,8 @@ func (suite *authTestSuite) TestIsAuthenticated_ReturnsTrue() {
 
 	res, err := suite.auth.IsAuthenticated(c)
 
-	suite.True(res)
-	suite.NoError(err)
+	suite.Require().True(res)
+	suite.Require().NoError(err)
 }
 
 func (suite *authTestSuite) TestSetSessionCookie_SetsCookie() {
@@ -139,16 +139,16 @@ func (suite *authTestSuite) TestSetSessionCookie_SetsCookie() {
 
 	raw := c.Writer.Header().Get("Set-Cookie")
 	sessionCookie, err := http.ParseSetCookie(raw)
-	suite.NoError(err)
+	suite.Require().NoError(err)
 
-	suite.Equal(http.SameSiteLaxMode, sessionCookie.SameSite)
-	suite.Equal(auth.SESSION_COOKIE_NAME, sessionCookie.Name)
-	suite.NotEmpty(sessionCookie.Value)
-	suite.Equal(auth.ONE_DAY_IN_SECONDS, sessionCookie.MaxAge)
-	suite.Equal("/", sessionCookie.Path)
-	suite.Empty(sessionCookie.Domain)
-	suite.True(sessionCookie.Secure)
-	suite.True(sessionCookie.HttpOnly)
+	suite.Require().Equal(http.SameSiteLaxMode, sessionCookie.SameSite)
+	suite.Require().Equal(auth.SESSION_COOKIE_NAME, sessionCookie.Name)
+	suite.Require().NotEmpty(sessionCookie.Value)
+	suite.Require().Equal(auth.ONE_DAY_IN_SECONDS, sessionCookie.MaxAge)
+	suite.Require().Equal("/", sessionCookie.Path)
+	suite.Require().Empty(sessionCookie.Domain)
+	suite.Require().True(sessionCookie.Secure)
+	suite.Require().True(sessionCookie.HttpOnly)
 }
 
 func TestAuthTestSuite(t *testing.T) {

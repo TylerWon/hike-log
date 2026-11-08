@@ -60,10 +60,10 @@ func (suite *photosHandlerTestSuite) TestDeletePhoto_Returns401ErrorWhenUnauthor
 		strings.NewReader("content"),
 		"image/png",
 	)
-	suite.NoError(err)
+	suite.Require().NoError(err)
 
 	res := testutils.SendRequest(suite.router, http.MethodDelete, fmt.Sprintf("/photos/%d", photo.ID), nil) // Missing session cookie
-	suite.Equal(http.StatusUnauthorized, res.Code)
+	suite.Require().Equal(http.StatusUnauthorized, res.Code)
 
 	suite.s3Client.DeleteObject(context.TODO(), objectKey)
 }
@@ -76,7 +76,7 @@ func (suite *photosHandlerTestSuite) TestDeletePhoto_Returns400ErrorWhenPhotoIDI
 		nil,
 		testutils.CreateSessionCookie(suite.auth),
 	)
-	suite.Equal(http.StatusBadRequest, res.Code)
+	suite.Require().Equal(http.StatusBadRequest, res.Code)
 }
 
 func (suite *photosHandlerTestSuite) TestDeletePhoto_Returns404ErrorWhenPhotoDoesNotExist() {
@@ -87,7 +87,7 @@ func (suite *photosHandlerTestSuite) TestDeletePhoto_Returns404ErrorWhenPhotoDoe
 		nil,
 		testutils.CreateSessionCookie(suite.auth),
 	)
-	suite.Equal(http.StatusNotFound, res.Code)
+	suite.Require().Equal(http.StatusNotFound, res.Code)
 }
 
 func (suite *photosHandlerTestSuite) TestDeletePhoto_Returns500ErrorWhenDBErrors() {
@@ -104,7 +104,7 @@ func (suite *photosHandlerTestSuite) TestDeletePhoto_Returns500ErrorWhenDBErrors
 		nil,
 		testutils.CreateSessionCookie(suite.auth),
 	)
-	suite.Equal(http.StatusInternalServerError, res.Code)
+	suite.Require().Equal(http.StatusInternalServerError, res.Code)
 }
 
 func (suite *photosHandlerTestSuite) TestDeletePhoto_DeletesPhotoWhenS3Errors() {
@@ -123,7 +123,7 @@ func (suite *photosHandlerTestSuite) TestDeletePhoto_DeletesPhotoWhenS3Errors() 
 		strings.NewReader("content"),
 		"image/png",
 	)
-	suite.NoError(err)
+	suite.Require().NoError(err)
 
 	res := testutils.SendRequest(
 		router,
@@ -132,14 +132,14 @@ func (suite *photosHandlerTestSuite) TestDeletePhoto_DeletesPhotoWhenS3Errors() 
 		nil,
 		testutils.CreateSessionCookie(suite.auth),
 	)
-	suite.Equal(http.StatusOK, res.Code)
+	suite.Require().Equal(http.StatusOK, res.Code)
 
 	_, err = suite.store.GetPhotoByID(photo.ID)
-	suite.Error(err)
+	suite.Require().Error(err)
 
 	exists, err := suite.s3Client.DoesObjectExist(context.TODO(), objectKey)
-	suite.NoError(err)
-	suite.True(exists)
+	suite.Require().NoError(err)
+	suite.Require().True(exists)
 
 	suite.s3Client.DeleteObject(context.TODO(), objectKey)
 }
@@ -153,7 +153,7 @@ func (suite *photosHandlerTestSuite) TestDeletePhoto_DeletesPhotoAndS3Object() {
 		strings.NewReader("content"),
 		"image/png",
 	)
-	suite.NoError(err)
+	suite.Require().NoError(err)
 
 	res := testutils.SendRequest(
 		suite.router,
@@ -162,14 +162,14 @@ func (suite *photosHandlerTestSuite) TestDeletePhoto_DeletesPhotoAndS3Object() {
 		nil,
 		testutils.CreateSessionCookie(suite.auth),
 	)
-	suite.Equal(http.StatusOK, res.Code)
+	suite.Require().Equal(http.StatusOK, res.Code)
 
 	_, err = suite.store.GetPhotoByID(photo.ID)
-	suite.Error(err)
+	suite.Require().Error(err)
 
 	exists, err := suite.s3Client.DoesObjectExist(context.TODO(), objectKey)
-	suite.NoError(err)
-	suite.False(exists)
+	suite.Require().NoError(err)
+	suite.Require().False(exists)
 }
 
 func (suite *photosHandlerTestSuite) TestUpdatePhoto_Returns401ErrorWhenUnauthorized() {
@@ -182,7 +182,7 @@ func (suite *photosHandlerTestSuite) TestUpdatePhoto_Returns401ErrorWhenUnauthor
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
 	res := testutils.SendRequest(suite.router, http.MethodPut, fmt.Sprintf("/photos/%d", photo.ID), reqBody) // Missing session cookie
 
-	suite.Equal(http.StatusUnauthorized, res.Code)
+	suite.Require().Equal(http.StatusUnauthorized, res.Code)
 }
 
 func (suite *photosHandlerTestSuite) TestUpdatePhoto_Returns400ErrorWhenPhotoIDIsInvalid() {
@@ -193,7 +193,7 @@ func (suite *photosHandlerTestSuite) TestUpdatePhoto_Returns400ErrorWhenPhotoIDI
 		nil,
 		testutils.CreateSessionCookie(suite.auth),
 	)
-	suite.Equal(http.StatusBadRequest, res.Code)
+	suite.Require().Equal(http.StatusBadRequest, res.Code)
 }
 
 func (suite *photosHandlerTestSuite) TestUpdatePhoto_Returns404ErrorWhenPhotoDoesNotExist() {
@@ -209,7 +209,7 @@ func (suite *photosHandlerTestSuite) TestUpdatePhoto_Returns404ErrorWhenPhotoDoe
 		reqBody,
 		testutils.CreateSessionCookie(suite.auth),
 	)
-	suite.Equal(http.StatusNotFound, res.Code)
+	suite.Require().Equal(http.StatusNotFound, res.Code)
 }
 
 func (suite *photosHandlerTestSuite) TestUpdatePhoto_Returns400ErrorWhenRequestBodyHasInvalidFields() {
@@ -228,7 +228,7 @@ func (suite *photosHandlerTestSuite) TestUpdatePhoto_Returns400ErrorWhenRequestB
 		testutils.CreateSessionCookie(suite.auth),
 	)
 
-	suite.Equal(http.StatusBadRequest, res.Code)
+	suite.Require().Equal(http.StatusBadRequest, res.Code)
 }
 
 func (suite *photosHandlerTestSuite) TestUpdatePhoto_Returns400ErrorWhenRequestBodyIsMissingFields() {
@@ -246,7 +246,7 @@ func (suite *photosHandlerTestSuite) TestUpdatePhoto_Returns400ErrorWhenRequestB
 		testutils.CreateSessionCookie(suite.auth),
 	)
 
-	suite.Equal(http.StatusBadRequest, res.Code)
+	suite.Require().Equal(http.StatusBadRequest, res.Code)
 }
 
 func (suite *photosHandlerTestSuite) TestUpdatePhoto_Returns500ErrorWhenDBErrors() {
@@ -272,7 +272,7 @@ func (suite *photosHandlerTestSuite) TestUpdatePhoto_Returns500ErrorWhenDBErrors
 		testutils.CreateSessionCookie(suite.auth),
 	)
 
-	suite.Equal(http.StatusInternalServerError, res.Code)
+	suite.Require().Equal(http.StatusInternalServerError, res.Code)
 }
 
 func (suite *photosHandlerTestSuite) TestUpdatePhoto_UpdatesPhoto() {
@@ -291,10 +291,10 @@ func (suite *photosHandlerTestSuite) TestUpdatePhoto_UpdatesPhoto() {
 		testutils.CreateSessionCookie(suite.auth),
 	)
 
-	suite.Equal(http.StatusOK, res.Code)
+	suite.Require().Equal(http.StatusOK, res.Code)
 
 	updated, err := suite.store.GetPhotoByID(photo.ID)
-	suite.NoError(err)
+	suite.Require().NoError(err)
 
 	expected := models.Photo{
 		ID:           photo.ID,
@@ -303,7 +303,7 @@ func (suite *photosHandlerTestSuite) TestUpdatePhoto_UpdatesPhoto() {
 		DisplayOrder: 2,
 		HikeID:       photo.HikeID,
 	}
-	suite.Equal(expected, *updated)
+	suite.Require().Equal(expected, *updated)
 }
 
 func (suite *photosHandlerTestSuite) TestUpdatePhoto_UpdatesPhotoWhenOptionalFieldMissing() {
@@ -321,10 +321,10 @@ func (suite *photosHandlerTestSuite) TestUpdatePhoto_UpdatesPhotoWhenOptionalFie
 		testutils.CreateSessionCookie(suite.auth),
 	)
 
-	suite.Equal(http.StatusOK, res.Code)
+	suite.Require().Equal(http.StatusOK, res.Code)
 
 	updated, err := suite.store.GetPhotoByID(photo.ID)
-	suite.NoError(err)
+	suite.Require().NoError(err)
 
 	expected := models.Photo{
 		ID:           photo.ID,
@@ -333,5 +333,5 @@ func (suite *photosHandlerTestSuite) TestUpdatePhoto_UpdatesPhotoWhenOptionalFie
 		DisplayOrder: 2,
 		HikeID:       photo.HikeID,
 	}
-	suite.Equal(expected, *updated)
+	suite.Require().Equal(expected, *updated)
 }

@@ -27,8 +27,8 @@ func (suite *middlewareTestSuite) TestRequireAuth_Returns401ErrorAndAbortsWhenUn
 	suite.middleware.RequireAuth(c)
 
 	res := c.Writer
-	suite.Equal(http.StatusUnauthorized, res.Status())
-	suite.True(c.IsAborted())
+	suite.Require().Equal(http.StatusUnauthorized, res.Status())
+	suite.Require().True(c.IsAborted())
 }
 
 func (suite *middlewareTestSuite) TestRequireAuth_PassesWhenAuthenticated() {
@@ -36,7 +36,7 @@ func (suite *middlewareTestSuite) TestRequireAuth_PassesWhenAuthenticated() {
 
 	suite.middleware.RequireAuth(c)
 
-	suite.False(c.IsAborted())
+	suite.Require().False(c.IsAborted())
 }
 
 func TestAuthTestSuite(t *testing.T) {

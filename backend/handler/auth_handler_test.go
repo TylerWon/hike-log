@@ -30,13 +30,13 @@ func TestAuthTestSuite(t *testing.T) {
 func (suite *authHandlerTestSuite) TestCheckAuth_ReturnsUnauthenticated() {
 	res := testutils.SendRequest(suite.router, http.MethodGet, "/auth", nil) // Session cookie missing
 
-	suite.Equal(http.StatusOK, res.Code)
+	suite.Require().Equal(http.StatusOK, res.Code)
 
 	var response handler.CheckAuthResponse
 	err := json.Unmarshal(res.Body.Bytes(), &response)
-	suite.NoError(err)
+	suite.Require().NoError(err)
 
-	suite.False(response.Authenticated)
+	suite.Require().False(response.Authenticated)
 }
 
 func (suite *authHandlerTestSuite) TestCheckAuth_ReturnsAuthenticated() {
@@ -48,13 +48,13 @@ func (suite *authHandlerTestSuite) TestCheckAuth_ReturnsAuthenticated() {
 		testutils.CreateSessionCookie(suite.auth),
 	)
 
-	suite.Equal(http.StatusOK, res.Code)
+	suite.Require().Equal(http.StatusOK, res.Code)
 
 	var response handler.CheckAuthResponse
 	err := json.Unmarshal(res.Body.Bytes(), &response)
-	suite.NoError(err)
+	suite.Require().NoError(err)
 
-	suite.True(response.Authenticated)
+	suite.Require().True(response.Authenticated)
 }
 
 func (suite *authHandlerTestSuite) TestLogin_Returns400ErrorWhenRequestBodyHasInvalidField() {
@@ -64,12 +64,12 @@ func (suite *authHandlerTestSuite) TestLogin_Returns400ErrorWhenRequestBodyHasIn
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
 	res := testutils.SendRequest(suite.router, http.MethodPost, "/auth", reqBody)
 
-	suite.Equal(http.StatusBadRequest, res.Code)
+	suite.Require().Equal(http.StatusBadRequest, res.Code)
 }
 
 func (suite *authHandlerTestSuite) TestLogin_Returns400ErrorWhenRequestBodyIsMissingField() {
 	res := testutils.SendRequest(suite.router, http.MethodPost, "/auth", nil)
-	suite.Equal(http.StatusBadRequest, res.Code)
+	suite.Require().Equal(http.StatusBadRequest, res.Code)
 }
 
 func (suite *authHandlerTestSuite) TestLogin_Returns401ErrorWhenPasswordIsIncorrect() {
@@ -79,7 +79,7 @@ func (suite *authHandlerTestSuite) TestLogin_Returns401ErrorWhenPasswordIsIncorr
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
 	res := testutils.SendRequest(suite.router, http.MethodPost, "/auth", reqBody)
 
-	suite.Equal(http.StatusUnauthorized, res.Code)
+	suite.Require().Equal(http.StatusUnauthorized, res.Code)
 }
 
 func (suite *authHandlerTestSuite) TestLogin_SetsSessionCookie() {
@@ -89,9 +89,9 @@ func (suite *authHandlerTestSuite) TestLogin_SetsSessionCookie() {
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
 	res := testutils.SendRequest(suite.router, http.MethodPost, "/auth", reqBody)
 
-	suite.Equal(http.StatusOK, res.Code)
+	suite.Require().Equal(http.StatusOK, res.Code)
 
 	cookies := res.Result().Cookies()
-	suite.Len(cookies, 1)
-	suite.Equal(auth.SESSION_COOKIE_NAME, cookies[0].Name)
+	suite.Require().Len(cookies, 1)
+	suite.Require().Equal(auth.SESSION_COOKIE_NAME, cookies[0].Name)
 }
