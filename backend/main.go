@@ -37,7 +37,7 @@ func main() {
 	}
 
 	middleware := middleware.New(auth)
-	handler := handler.New(store, s3Client, auth)
+	handler := handler.NewHandler(store, s3Client, auth)
 	router := router.New(handler, middleware)
 
 	router.Run()

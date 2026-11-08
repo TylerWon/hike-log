@@ -7,8 +7,24 @@ import (
 
 	"github.com/TylerWon/hike-log/backend/models"
 	"github.com/TylerWon/hike-log/backend/s3"
+	"github.com/TylerWon/hike-log/backend/store"
 	"github.com/gin-gonic/gin"
 )
+
+// PhotosHandler handles photo API routes.
+type PhotosHandler struct {
+	s3Client s3.S3Client
+	store    store.Store
+}
+
+// Creates a new PhotosHandler.
+func NewPhotosHandler(store store.Store, s3Client s3.S3Client) *PhotosHandler {
+	_, err := registerCustomValidators()
+	if err != nil {
+		log.Fatal("Error while registering custom validators: ", err)
+	}
+	return &PhotosHandler{s3Client: s3Client, store: store}
+}
 
 /*
 Deletes a Photo.
@@ -22,7 +38,7 @@ Returns:
  2. 404 Not Found and an error message when the Photo does not exist
  3. 500 Internal Server Error and an error message when there is an unexpected error
 */
-func (h *Handler) DeletePhoto(c *gin.Context) {
+func (h *PhotosHandler) DeletePhoto(c *gin.Context) {
 	var params photoIDPathParam
 	if err := c.ShouldBindUri(&params); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -65,7 +81,7 @@ Returns:
  2. 404 Not Found and an error message when the Photo does not exist
  3. 500 Internal Server Error and an error message when there is an unexpected error
 */
-func (h *Handler) UpdatePhoto(c *gin.Context) {
+func (h *PhotosHandler) UpdatePhoto(c *gin.Context) {
 	var params photoIDPathParam
 	if err := c.ShouldBindUri(&params); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

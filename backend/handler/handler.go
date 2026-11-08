@@ -12,25 +12,24 @@ import (
 	"gorm.io/gorm"
 )
 
-// A Handler handles the request-response lifecycle for API routes.
+// Handler handles the request-response lifecycle for API routes.
 type Handler struct {
-	auth     auth.Auth
-	s3Client s3.S3Client
-	store    store.Store
+	Auth   *AuthHandler
+	Hikes  *HikesHandler
+	Photos *PhotosHandler
 }
 
-// Creates a new Handler
-func New(store store.Store, s3Client s3.S3Client, auth auth.Auth) *Handler {
-	_, err := registerCustomValidators()
-	if err != nil {
-		log.Fatal("Error while registering custom validators: ", err)
+// Creates a new Handler.
+func NewHandler(store store.Store, s3Client s3.S3Client, auth auth.Auth) *Handler {
+	return &Handler{
+		Auth:   NewAuthHandler(auth),
+		Hikes:  NewHikesHandler(store, s3Client),
+		Photos: NewPhotosHandler(store, s3Client),
 	}
-
-	return &Handler{auth, s3Client, store}
 }
 
-// Returns a 200 OK. Used for application health checks.
-func (h *Handler) HealthCheck(c *gin.Context) {
+// Returns a 200 OK for application health checks.
+func HealthCheck(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"health": "ok"})
 }
 

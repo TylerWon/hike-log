@@ -7,8 +7,32 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Creates a router to use during testing.
-func NewRouter(handler *handler.Handler, middleware *middleware.Middleware) *gin.Engine {
+// Creates a full application router to use during testing.
+func NewRouter(h *handler.Handler, m *middleware.Middleware) *gin.Engine {
 	gin.SetMode(gin.TestMode)
-	return router.New(handler, middleware)
+	return router.New(h, m)
+}
+
+// Creates a test router with only auth routes.
+func NewAuthRouter(h *handler.AuthHandler) *gin.Engine {
+	gin.SetMode(gin.TestMode)
+	r := gin.New()
+	router.RegisterAuthRoutes(r.Group(""), h)
+	return r
+}
+
+// Creates a test router with only hike routes.
+func NewHikesRouter(h *handler.HikesHandler, m *middleware.Middleware) *gin.Engine {
+	gin.SetMode(gin.TestMode)
+	r := gin.New()
+	router.RegisterHikesRoutes(r.Group(""), h, m)
+	return r
+}
+
+// Creates a test router with only photo routes.
+func NewPhotosRouter(h *handler.PhotosHandler, m *middleware.Middleware) *gin.Engine {
+	gin.SetMode(gin.TestMode)
+	r := gin.New()
+	router.RegisterPhotosRoutes(r.Group(""), h, m)
+	return r
 }

@@ -3,14 +3,32 @@ package handler_test
 import (
 	"encoding/json"
 	"net/http"
+	"testing"
 
 	"github.com/TylerWon/hike-log/backend/auth"
 	"github.com/TylerWon/hike-log/backend/handler"
 	"github.com/TylerWon/hike-log/backend/testutils"
+	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/suite"
 )
 
-func (suite *handlerTestSuite) TestCheckAuth_ReturnsUnauthenticated() {
-	res := testutils.SendRequest(suite.router, http.MethodGet, "/api/v1/auth", nil) // Session cookie missing
+type authTestSuite struct {
+	suite.Suite
+	auth   auth.Auth
+	router *gin.Engine
+}
+
+func (suite *authTestSuite) SetupSuite() {
+	suite.auth = testutils.NewAuth(suite.T(), testutils.ADMIN_PASSWORD_HASH, testutils.SESSION_SECRET)
+	suite.router = testutils.NewAuthRouter(handler.NewAuthHandler(suite.auth))
+}
+
+func TestAuthTestSuite(t *testing.T) {
+	suite.Run(t, new(authTestSuite))
+}
+
+func (suite *authTestSuite) TestCheckAuth_ReturnsUnauthenticated() {
+	res := testutils.SendRequest(suite.router, http.MethodGet, "/auth", nil) // Session cookie missing
 
 	suite.Equal(http.StatusOK, res.Code)
 
@@ -21,11 +39,11 @@ func (suite *handlerTestSuite) TestCheckAuth_ReturnsUnauthenticated() {
 	suite.False(response.Authenticated)
 }
 
-func (suite *handlerTestSuite) TestCheckAuth_ReturnsAuthenticated() {
+func (suite *authTestSuite) TestCheckAuth_ReturnsAuthenticated() {
 	res := testutils.SendRequest(
 		suite.router,
 		http.MethodGet,
-		"/api/v1/auth",
+		"/auth",
 		nil,
 		testutils.CreateSessionCookie(suite.auth),
 	)
@@ -39,37 +57,37 @@ func (suite *handlerTestSuite) TestCheckAuth_ReturnsAuthenticated() {
 	suite.True(response.Authenticated)
 }
 
-func (suite *handlerTestSuite) TestLogin_Returns400ErrorWhenRequestBodyHasInvalidField() {
+func (suite *authTestSuite) TestLogin_Returns400ErrorWhenRequestBodyHasInvalidField() {
 	body := map[string]any{
 		"password": 123, // number instead of string
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(suite.router, http.MethodPost, "/api/v1/auth", reqBody)
+	res := testutils.SendRequest(suite.router, http.MethodPost, "/auth", reqBody)
 
 	suite.Equal(http.StatusBadRequest, res.Code)
 }
 
-func (suite *handlerTestSuite) TestLogin_Returns400ErrorWhenRequestBodyIsMissingField() {
-	res := testutils.SendRequest(suite.router, http.MethodPost, "/api/v1/auth", nil)
+func (suite *authTestSuite) TestLogin_Returns400ErrorWhenRequestBodyIsMissingField() {
+	res := testutils.SendRequest(suite.router, http.MethodPost, "/auth", nil)
 	suite.Equal(http.StatusBadRequest, res.Code)
 }
 
-func (suite *handlerTestSuite) TestLogin_Returns401ErrorWhenPasswordIsIncorrect() {
+func (suite *authTestSuite) TestLogin_Returns401ErrorWhenPasswordIsIncorrect() {
 	body := map[string]any{
 		"password": "incorrect password",
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(suite.router, http.MethodPost, "/api/v1/auth", reqBody)
+	res := testutils.SendRequest(suite.router, http.MethodPost, "/auth", reqBody)
 
 	suite.Equal(http.StatusUnauthorized, res.Code)
 }
 
-func (suite *handlerTestSuite) TestLogin_SetsSessionCookie() {
+func (suite *authTestSuite) TestLogin_SetsSessionCookie() {
 	body := map[string]any{
 		"password": testutils.ADMIN_PASSWORD,
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(suite.router, http.MethodPost, "/api/v1/auth", reqBody)
+	res := testutils.SendRequest(suite.router, http.MethodPost, "/auth", reqBody)
 
 	suite.Equal(http.StatusOK, res.Code)
 

@@ -11,8 +11,24 @@ import (
 	"github.com/TylerWon/hike-log/backend/models"
 	"github.com/TylerWon/hike-log/backend/models/types"
 	"github.com/TylerWon/hike-log/backend/s3"
+	"github.com/TylerWon/hike-log/backend/store"
 	"github.com/gin-gonic/gin"
 )
+
+// HikesHandler handles hike API routes.
+type HikesHandler struct {
+	s3Client s3.S3Client
+	store    store.Store
+}
+
+// Creates a new HikesHandler.
+func NewHikesHandler(store store.Store, s3Client s3.S3Client) *HikesHandler {
+	_, err := registerCustomValidators()
+	if err != nil {
+		log.Fatal("Error while registering custom validators: ", err)
+	}
+	return &HikesHandler{s3Client: s3Client, store: store}
+}
 
 /*
 Creates a Hike.
@@ -24,7 +40,7 @@ Returns:
  2. 400 Bad Request and an error message when input is bad
  3. 500 Internal Server Error and an error message when there is an unexpected error
 */
-func (h *Handler) CreateHike(c *gin.Context) {
+func (h *HikesHandler) CreateHike(c *gin.Context) {
 	var req createHikeRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -68,7 +84,7 @@ Returns:
  3. 404 Not Found and an error message when the Hike does not exist
  4. 500 Internal Server Error and an error message when there is an unexpected error
 */
-func (h *Handler) CreatePhotos(c *gin.Context) {
+func (h *HikesHandler) CreatePhotos(c *gin.Context) {
 	var params hikeIDPathParam
 	if err := c.ShouldBindUri(&params); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -158,7 +174,7 @@ Returns:
  3. 404 Not Found and an error message when the Hike does not exist
  4. 500 Internal Server Error and an error message when there is an unexpected error
 */
-func (h *Handler) CreatePresignedURLs(c *gin.Context) {
+func (h *HikesHandler) CreatePresignedURLs(c *gin.Context) {
 	var params hikeIDPathParam
 	if err := c.ShouldBindUri(&params); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -223,7 +239,7 @@ Returns:
  2. 404 Not Found and an error message when the Hike does not exist
  3. 500 Internal Server Error and an error message when there is an unexpected error
 */
-func (h *Handler) DeleteHike(c *gin.Context) {
+func (h *HikesHandler) DeleteHike(c *gin.Context) {
 	var params hikeIDPathParam
 	if err := c.ShouldBindUri(&params); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -278,7 +294,7 @@ Returns:
  1. 200 OK and a list of [models.Hike] when successful
  2. 500 Internal Server Error and an error message when there is an unexpected error
 */
-func (h *Handler) ListHikes(c *gin.Context) {
+func (h *HikesHandler) ListHikes(c *gin.Context) {
 	hikes, err := h.store.ListHikes()
 	if err != nil {
 		log.Println("Failed to list hikes: ", err)
@@ -301,7 +317,7 @@ Returns:
  2. 404 Not Found and an error message when the Hike does not exist
  3. 500 Internal Server Error and an error message when there is an unexpected error
 */
-func (h *Handler) UpdateHike(c *gin.Context) {
+func (h *HikesHandler) UpdateHike(c *gin.Context) {
 	var params hikeIDPathParam
 	if err := c.ShouldBindUri(&params); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

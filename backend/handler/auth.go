@@ -1,17 +1,33 @@
 package handler
 
 import (
+	"log"
 	"net/http"
 
+	"github.com/TylerWon/hike-log/backend/auth"
 	"github.com/gin-gonic/gin"
 )
+
+// AuthHandler handles authentication API routes.
+type AuthHandler struct {
+	auth auth.Auth
+}
+
+// Creates a new AuthHandler.
+func NewAuthHandler(auth auth.Auth) *AuthHandler {
+	_, err := registerCustomValidators()
+	if err != nil {
+		log.Fatal("Error while registering custom validators: ", err)
+	}
+	return &AuthHandler{auth: auth}
+}
 
 /*
 Checks session cookie to see if a user is authenticated.
 
 Returns: 200 OK and [CheckAuthResponse].
 */
-func (h *Handler) CheckAuth(c *gin.Context) {
+func (h *AuthHandler) CheckAuth(c *gin.Context) {
 	ok, _ := h.auth.IsAuthenticated(c)
 	c.JSON(http.StatusOK, CheckAuthResponse{Authenticated: ok})
 }
@@ -27,7 +43,7 @@ Returns:
  2. 400 Bad Request and an error message when input is bad
  3. 401 Unauthorized and an error message when authentication fails
 */
-func (h *Handler) Login(c *gin.Context) {
+func (h *AuthHandler) Login(c *gin.Context) {
 	var req loginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

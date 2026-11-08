@@ -9,68 +9,74 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+const API_BASE_PATH = "/api/v1"
+
 // Creates a Gin router and registers middleware and API routes.
-func New(handler *handler.Handler, middleware *middleware.Middleware) *gin.Engine {
+func New(h *handler.Handler, m *middleware.Middleware) *gin.Engine {
 	router := gin.Default()
 
-	// CORS middleware (must come before routes)
+	configureCORSMiddleware(router)
+
+	apiRouteGroup := router.Group(API_BASE_PATH)
+	RegisterAuthRoutes(apiRouteGroup, h.Auth)
+	RegisterHikesRoutes(apiRouteGroup, h.Hikes, m)
+	RegisterPhotosRoutes(apiRouteGroup, h.Photos, m)
+
+	router.GET("/health", handler.HealthCheck)
+
+	return router
+}
+
+// Configures CORS middleware on the router.
+func configureCORSMiddleware(router *gin.Engine) {
 	corsConfig := cors.DefaultConfig()
+
 	// Allow frontend to access API
 	corsConfig.AllowOrigins = []string{os.Getenv("FRONTEND_URL")}
 	// Allow frontend to pass session cookie for auth
 	corsConfig.AllowCredentials = true
+
 	router.Use(cors.New(corsConfig))
+}
 
-	// Routes
-	// /api
-	api := router.Group("/api")
+// Registers authentication API routes under the given apiRouteGroup.
+func RegisterAuthRoutes(apiRouteGroup *gin.RouterGroup, h *handler.AuthHandler) {
+	auth := apiRouteGroup.Group("/auth")
 	{
-		// /api/v1
-		v1 := api.Group("/v1")
+		auth.POST("", h.Login)
+		auth.GET("", h.CheckAuth)
+	}
+}
+
+// Registers hike API routes under the given apiRouteGroup.
+func RegisterHikesRoutes(apiRouteGroup *gin.RouterGroup, h *handler.HikesHandler, m *middleware.Middleware) {
+	hikes := apiRouteGroup.Group("/hikes")
+	{
+		hikes.GET("", h.ListHikes)
+		hikes.POST("", m.RequireAuth, h.CreateHike)
+
+		hike := hikes.Group("/:hikeId")
 		{
-			// /api/v1/hikes
-			hikes := v1.Group("/hikes")
+			hike.DELETE("", m.RequireAuth, h.DeleteHike)
+			hike.PUT("", m.RequireAuth, h.UpdateHike)
+
+			photos := hike.Group("/photos")
 			{
-				hikes.GET("", handler.ListHikes)
-				hikes.POST("", middleware.RequireAuth, handler.CreateHike)
-
-				// /api/v1/hikes/:hikeId
-				hike := hikes.Group("/:hikeId")
-				{
-					hike.DELETE("", middleware.RequireAuth, handler.DeleteHike)
-					hike.PUT("", middleware.RequireAuth, handler.UpdateHike)
-
-					// /api/v1/hikes/:hikeId/photos
-					photos := hike.Group("/photos")
-					{
-						photos.POST("", middleware.RequireAuth, handler.CreatePhotos)
-						photos.POST("/presigned-urls", middleware.RequireAuth, handler.CreatePresignedURLs)
-					}
-				}
-			}
-
-			// /api/v1/photos
-			photos := v1.Group("/photos")
-			{
-				// /api/v1/photos/:photoId
-				photo := photos.Group("/:photoId")
-				{
-					photo.DELETE("", middleware.RequireAuth, handler.DeletePhoto)
-					photo.PUT("", middleware.RequireAuth, handler.UpdatePhoto)
-				}
-			}
-
-			// /api/v1/auth
-			auth := v1.Group("/auth")
-			{
-				auth.POST("", handler.Login)
-				auth.GET("", handler.CheckAuth)
+				photos.POST("", m.RequireAuth, h.CreatePhotos)
+				photos.POST("/presigned-urls", m.RequireAuth, h.CreatePresignedURLs)
 			}
 		}
 	}
+}
 
-	// /health
-	router.GET("/health", handler.HealthCheck)
-
-	return router
+// Registers photo API routes under the given apiRouteGroup.
+func RegisterPhotosRoutes(apiRouteGroup *gin.RouterGroup, h *handler.PhotosHandler, m *middleware.Middleware) {
+	photos := apiRouteGroup.Group("/photos")
+	{
+		photo := photos.Group("/:photoId")
+		{
+			photo.DELETE("", m.RequireAuth, h.DeletePhoto)
+			photo.PUT("", m.RequireAuth, h.UpdatePhoto)
+		}
+	}
 }

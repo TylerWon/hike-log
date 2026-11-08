@@ -6,15 +6,52 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"testing"
 
+	"github.com/TylerWon/hike-log/backend/auth"
 	"github.com/TylerWon/hike-log/backend/handler"
+	"github.com/TylerWon/hike-log/backend/middleware"
 	"github.com/TylerWon/hike-log/backend/models"
 	"github.com/TylerWon/hike-log/backend/s3"
 	"github.com/TylerWon/hike-log/backend/store"
 	"github.com/TylerWon/hike-log/backend/testutils"
+	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/suite"
 )
 
-func (suite *handlerTestSuite) TestDeletePhoto_Returns401ErrorWhenUnauthorized() {
+type photosTestSuite struct {
+	suite.Suite
+	auth       auth.Auth
+	middleware *middleware.Middleware
+	s3Client   s3.S3Client
+	store      store.Store
+	suiteDB    *testutils.TestSuiteDB
+	router     *gin.Engine
+}
+
+func (suite *photosTestSuite) SetupSuite() {
+	suite.suiteDB = testutils.NewTestSuiteDB(suite.T())
+	suite.store = testutils.NewStore(suite.T(), suite.suiteDB)
+	suite.s3Client = testutils.NewS3Client(suite.T())
+	suite.auth = testutils.NewAuth(suite.T(), testutils.ADMIN_PASSWORD_HASH, testutils.SESSION_SECRET)
+	suite.middleware = middleware.New(suite.auth)
+	suite.router = testutils.NewPhotosRouter(handler.NewPhotosHandler(suite.store, suite.s3Client), suite.middleware)
+}
+
+func (suite *photosTestSuite) TearDownSuite() {
+	testutils.TeardownStore(suite.T(), suite.store)
+	suite.suiteDB.Teardown(suite.T())
+}
+
+func (suite *photosTestSuite) SetupTest() {
+	suite.suiteDB.Reset(suite.T())
+}
+
+func TestPhotosTestSuite(t *testing.T) {
+	suite.Run(t, new(photosTestSuite))
+}
+
+func (suite *photosTestSuite) TestDeletePhoto_Returns401ErrorWhenUnauthorized() {
 	photo := testutils.ConstructHikes(suite.T(), 1, suite.store, true, true)[0].Photos[0]
 	objectKey := s3.GetPhotoObjectKey(photo.SrcUrl, "local")
 	_, err := suite.s3Client.PutObject(
@@ -25,58 +62,58 @@ func (suite *handlerTestSuite) TestDeletePhoto_Returns401ErrorWhenUnauthorized()
 	)
 	suite.NoError(err)
 
-	res := testutils.SendRequest(suite.router, http.MethodDelete, fmt.Sprintf("/api/v1/photos/%d", photo.ID), nil) // Missing session cookie
+	res := testutils.SendRequest(suite.router, http.MethodDelete, fmt.Sprintf("/photos/%d", photo.ID), nil) // Missing session cookie
 	suite.Equal(http.StatusUnauthorized, res.Code)
 
 	suite.s3Client.DeleteObject(context.TODO(), objectKey)
 }
 
-func (suite *handlerTestSuite) TestDeletePhoto_Returns400ErrorWhenPhotoIDIsInvalid() {
+func (suite *photosTestSuite) TestDeletePhoto_Returns400ErrorWhenPhotoIDIsInvalid() {
 	res := testutils.SendRequest(
 		suite.router,
 		http.MethodDelete,
-		"/api/v1/photos/abc",
+		"/photos/abc",
 		nil,
 		testutils.CreateSessionCookie(suite.auth),
 	)
 	suite.Equal(http.StatusBadRequest, res.Code)
 }
 
-func (suite *handlerTestSuite) TestDeletePhoto_Returns404ErrorWhenPhotoDoesNotExist() {
+func (suite *photosTestSuite) TestDeletePhoto_Returns404ErrorWhenPhotoDoesNotExist() {
 	res := testutils.SendRequest(
 		suite.router,
 		http.MethodDelete,
-		"/api/v1/photos/1",
+		"/photos/1",
 		nil,
 		testutils.CreateSessionCookie(suite.auth),
 	)
 	suite.Equal(http.StatusNotFound, res.Code)
 }
 
-func (suite *handlerTestSuite) TestDeletePhoto_Returns500ErrorWhenDBErrors() {
+func (suite *photosTestSuite) TestDeletePhoto_Returns500ErrorWhenDBErrors() {
 	mockStore := store.MockStore{GetPhotoByIDError: errors.New("Something went wrong")}
-	handler := handler.New(&mockStore, suite.s3Client, suite.auth)
-	router := testutils.NewRouter(handler, suite.middleware)
+	photosHandler := handler.NewPhotosHandler(&mockStore, suite.s3Client)
+	router := testutils.NewPhotosRouter(photosHandler, suite.middleware)
 
 	photo := testutils.ConstructHikes(suite.T(), 1, suite.store, true, true)[0].Photos[0]
 
 	res := testutils.SendRequest(
 		router,
 		http.MethodDelete,
-		fmt.Sprintf("/api/v1/photos/%d", photo.ID),
+		fmt.Sprintf("/photos/%d", photo.ID),
 		nil,
 		testutils.CreateSessionCookie(suite.auth),
 	)
 	suite.Equal(http.StatusInternalServerError, res.Code)
 }
 
-func (suite *handlerTestSuite) TestDeletePhoto_DeletesPhotoWhenS3Errors() {
+func (suite *photosTestSuite) TestDeletePhoto_DeletesPhotoWhenS3Errors() {
 	mockS3Client := s3.MockS3Client{
 		DeleteObjectResult: nil,
 		DeleteObjectError:  errors.New("Something went wrong"),
 	}
-	handler := handler.New(suite.store, &mockS3Client, suite.auth)
-	router := testutils.NewRouter(handler, suite.middleware)
+	photosHandler := handler.NewPhotosHandler(suite.store, &mockS3Client)
+	router := testutils.NewPhotosRouter(photosHandler, suite.middleware)
 
 	photo := testutils.ConstructHikes(suite.T(), 1, suite.store, true, true)[0].Photos[0]
 	objectKey := s3.GetPhotoObjectKey(photo.SrcUrl, "local")
@@ -91,7 +128,7 @@ func (suite *handlerTestSuite) TestDeletePhoto_DeletesPhotoWhenS3Errors() {
 	res := testutils.SendRequest(
 		router,
 		http.MethodDelete,
-		fmt.Sprintf("/api/v1/photos/%d", photo.ID),
+		fmt.Sprintf("/photos/%d", photo.ID),
 		nil,
 		testutils.CreateSessionCookie(suite.auth),
 	)
@@ -107,7 +144,7 @@ func (suite *handlerTestSuite) TestDeletePhoto_DeletesPhotoWhenS3Errors() {
 	suite.s3Client.DeleteObject(context.TODO(), objectKey)
 }
 
-func (suite *handlerTestSuite) TestDeletePhoto_DeletesPhotoAndS3Object() {
+func (suite *photosTestSuite) TestDeletePhoto_DeletesPhotoAndS3Object() {
 	photo := testutils.ConstructHikes(suite.T(), 1, suite.store, true, true)[0].Photos[0]
 	objectKey := s3.GetPhotoObjectKey(photo.SrcUrl, "local")
 	_, err := suite.s3Client.PutObject(
@@ -121,7 +158,7 @@ func (suite *handlerTestSuite) TestDeletePhoto_DeletesPhotoAndS3Object() {
 	res := testutils.SendRequest(
 		suite.router,
 		http.MethodDelete,
-		fmt.Sprintf("/api/v1/photos/%d", photo.ID),
+		fmt.Sprintf("/photos/%d", photo.ID),
 		nil,
 		testutils.CreateSessionCookie(suite.auth),
 	)
@@ -135,7 +172,7 @@ func (suite *handlerTestSuite) TestDeletePhoto_DeletesPhotoAndS3Object() {
 	suite.False(exists)
 }
 
-func (suite *handlerTestSuite) TestUpdatePhoto_Returns401ErrorWhenUnauthorized() {
+func (suite *photosTestSuite) TestUpdatePhoto_Returns401ErrorWhenUnauthorized() {
 	photo := testutils.ConstructHikes(suite.T(), 1, suite.store, true, true)[0].Photos[0]
 
 	body := map[string]any{
@@ -143,23 +180,23 @@ func (suite *handlerTestSuite) TestUpdatePhoto_Returns401ErrorWhenUnauthorized()
 		"displayOrder": 2,
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(suite.router, http.MethodPut, fmt.Sprintf("/api/v1/photos/%d", photo.ID), reqBody) // Missing session cookie
+	res := testutils.SendRequest(suite.router, http.MethodPut, fmt.Sprintf("/photos/%d", photo.ID), reqBody) // Missing session cookie
 
 	suite.Equal(http.StatusUnauthorized, res.Code)
 }
 
-func (suite *handlerTestSuite) TestUpdatePhoto_Returns400ErrorWhenPhotoIDIsInvalid() {
+func (suite *photosTestSuite) TestUpdatePhoto_Returns400ErrorWhenPhotoIDIsInvalid() {
 	res := testutils.SendRequest(
 		suite.router,
 		http.MethodPut,
-		"/api/v1/photos/abc",
+		"/photos/abc",
 		nil,
 		testutils.CreateSessionCookie(suite.auth),
 	)
 	suite.Equal(http.StatusBadRequest, res.Code)
 }
 
-func (suite *handlerTestSuite) TestUpdatePhoto_Returns404ErrorWhenPhotoDoesNotExist() {
+func (suite *photosTestSuite) TestUpdatePhoto_Returns404ErrorWhenPhotoDoesNotExist() {
 	body := map[string]any{
 		"caption":      "Updated caption",
 		"displayOrder": 2,
@@ -168,14 +205,14 @@ func (suite *handlerTestSuite) TestUpdatePhoto_Returns404ErrorWhenPhotoDoesNotEx
 	res := testutils.SendRequest(
 		suite.router,
 		http.MethodPut,
-		"/api/v1/photos/1",
+		"/photos/1",
 		reqBody,
 		testutils.CreateSessionCookie(suite.auth),
 	)
 	suite.Equal(http.StatusNotFound, res.Code)
 }
 
-func (suite *handlerTestSuite) TestUpdatePhoto_Returns400ErrorWhenRequestBodyHasInvalidFields() {
+func (suite *photosTestSuite) TestUpdatePhoto_Returns400ErrorWhenRequestBodyHasInvalidFields() {
 	photo := testutils.ConstructHikes(suite.T(), 1, suite.store, true, true)[0].Photos[0]
 
 	body := map[string]any{
@@ -186,7 +223,7 @@ func (suite *handlerTestSuite) TestUpdatePhoto_Returns400ErrorWhenRequestBodyHas
 	res := testutils.SendRequest(
 		suite.router,
 		http.MethodPut,
-		fmt.Sprintf("/api/v1/photos/%d", photo.ID),
+		fmt.Sprintf("/photos/%d", photo.ID),
 		reqBody,
 		testutils.CreateSessionCookie(suite.auth),
 	)
@@ -194,7 +231,7 @@ func (suite *handlerTestSuite) TestUpdatePhoto_Returns400ErrorWhenRequestBodyHas
 	suite.Equal(http.StatusBadRequest, res.Code)
 }
 
-func (suite *handlerTestSuite) TestUpdatePhoto_Returns400ErrorWhenRequestBodyIsMissingFields() {
+func (suite *photosTestSuite) TestUpdatePhoto_Returns400ErrorWhenRequestBodyIsMissingFields() {
 	photo := testutils.ConstructHikes(suite.T(), 1, suite.store, true, true)[0].Photos[0]
 
 	body := map[string]any{
@@ -204,7 +241,7 @@ func (suite *handlerTestSuite) TestUpdatePhoto_Returns400ErrorWhenRequestBodyIsM
 	res := testutils.SendRequest(
 		suite.router,
 		http.MethodPut,
-		fmt.Sprintf("/api/v1/photos/%d", photo.ID),
+		fmt.Sprintf("/photos/%d", photo.ID),
 		reqBody,
 		testutils.CreateSessionCookie(suite.auth),
 	)
@@ -212,15 +249,15 @@ func (suite *handlerTestSuite) TestUpdatePhoto_Returns400ErrorWhenRequestBodyIsM
 	suite.Equal(http.StatusBadRequest, res.Code)
 }
 
-func (suite *handlerTestSuite) TestUpdatePhoto_Returns500ErrorWhenDBErrors() {
+func (suite *photosTestSuite) TestUpdatePhoto_Returns500ErrorWhenDBErrors() {
 	photo := testutils.ConstructHikes(suite.T(), 1, suite.store, true, true)[0].Photos[0]
 
 	mockStore := store.MockStore{
 		GetPhotoByIDResult: &photo,
 		UpdateRecordError:  errors.New("Something went wrong"),
 	}
-	handler := handler.New(&mockStore, suite.s3Client, suite.auth)
-	router := testutils.NewRouter(handler, suite.middleware)
+	photosHandler := handler.NewPhotosHandler(&mockStore, suite.s3Client)
+	router := testutils.NewPhotosRouter(photosHandler, suite.middleware)
 
 	body := map[string]any{
 		"caption":      "Updated caption",
@@ -230,7 +267,7 @@ func (suite *handlerTestSuite) TestUpdatePhoto_Returns500ErrorWhenDBErrors() {
 	res := testutils.SendRequest(
 		router,
 		http.MethodPut,
-		fmt.Sprintf("/api/v1/photos/%d", photo.ID),
+		fmt.Sprintf("/photos/%d", photo.ID),
 		reqBody,
 		testutils.CreateSessionCookie(suite.auth),
 	)
@@ -238,7 +275,7 @@ func (suite *handlerTestSuite) TestUpdatePhoto_Returns500ErrorWhenDBErrors() {
 	suite.Equal(http.StatusInternalServerError, res.Code)
 }
 
-func (suite *handlerTestSuite) TestUpdatePhoto_UpdatesPhoto() {
+func (suite *photosTestSuite) TestUpdatePhoto_UpdatesPhoto() {
 	photo := testutils.ConstructHikes(suite.T(), 1, suite.store, true, true)[0].Photos[0]
 
 	body := map[string]any{
@@ -249,7 +286,7 @@ func (suite *handlerTestSuite) TestUpdatePhoto_UpdatesPhoto() {
 	res := testutils.SendRequest(
 		suite.router,
 		http.MethodPut,
-		fmt.Sprintf("/api/v1/photos/%d", photo.ID),
+		fmt.Sprintf("/photos/%d", photo.ID),
 		reqBody,
 		testutils.CreateSessionCookie(suite.auth),
 	)
@@ -269,7 +306,7 @@ func (suite *handlerTestSuite) TestUpdatePhoto_UpdatesPhoto() {
 	suite.Equal(expected, *updated)
 }
 
-func (suite *handlerTestSuite) TestUpdatePhoto_UpdatesPhotoWhenOptionalFieldMissing() {
+func (suite *photosTestSuite) TestUpdatePhoto_UpdatesPhotoWhenOptionalFieldMissing() {
 	photo := testutils.ConstructHikes(suite.T(), 1, suite.store, true, true)[0].Photos[0]
 
 	body := map[string]any{
@@ -279,7 +316,7 @@ func (suite *handlerTestSuite) TestUpdatePhoto_UpdatesPhotoWhenOptionalFieldMiss
 	res := testutils.SendRequest(
 		suite.router,
 		http.MethodPut,
-		fmt.Sprintf("/api/v1/photos/%d", photo.ID),
+		fmt.Sprintf("/photos/%d", photo.ID),
 		reqBody,
 		testutils.CreateSessionCookie(suite.auth),
 	)
