@@ -2,11 +2,9 @@ package auth_test
 
 import (
 	"net/http"
-	"os"
 	"strconv"
 	"strings"
 	"testing"
-	"testing/synctest"
 	"time"
 
 	"github.com/TylerWon/hike-log/backend/auth"
@@ -14,14 +12,17 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-var sessionSecret = os.Getenv("SESSION_SECRET")
-
 type authTestSuite struct {
 	suite.Suite
+	auth auth.Auth
+}
+
+func (suite *authTestSuite) SetupSuite() {
+	suite.auth = testutils.NewAuth(suite.T(), testutils.ADMIN_PASSWORD_HASH, testutils.SESSION_SECRET)
 }
 
 func (suite *authTestSuite) TestCreateSessionCookieValue_ReturnsValue() {
-	value := auth.CreateSessionCookieValue(sessionSecret)
+	value := suite.auth.CreateSessionCookieValue()
 
 	parts := strings.Split(value, ".")
 	suite.Len(parts, 2)
@@ -32,55 +33,38 @@ func (suite *authTestSuite) TestCreateSessionCookieValue_ReturnsValue() {
 	suite.InDelta(time.Now().Add(24*time.Hour).Unix(), expiryInt, 5)
 
 	signature := parts[1]
-	suite.Equal(auth.GenerateHmacSha256Signature(expiryStr, sessionSecret), signature)
-}
-
-func (suite *authTestSuite) TestCreateSessionCookieValue_ReturnsDifferentSignaturesForDifferentSecrets() {
-	// Use synctest.Test to freeze time so two CreateSessionCookieValue() calls use the same expiry time to create the signature
-	synctest.Test(suite.T(), func(t *testing.T) {
-		value1 := auth.CreateSessionCookieValue("a")
-		value2 := auth.CreateSessionCookieValue("b")
-
-		value1Signature := strings.Split(value1, ".")[1]
-		value2Signature := strings.Split(value2, ".")[1]
-
-		suite.NotEqual(value1Signature, value2Signature)
-	})
+	suite.Equal(suite.auth.GenerateHmacSha256Signature(expiryStr), signature)
 }
 
 func (suite *authTestSuite) TestGenerateHmacSha256Signature_ReturnsSignature() {
-	payload := "abc"
-	key := "a"
-	signature := auth.GenerateHmacSha256Signature(payload, key)
-	suite.Equal("b4ffe67d267d9eb19f81ccd6ffcde1443294d00892d5b648f03e590b56250ced", signature)
+	signature := suite.auth.GenerateHmacSha256Signature("abc")
+	suite.Equal("545003ead8123a7a230d5e79249e903768f4a407ebebbd6b88db6c519b5fb222", signature)
 }
 
 func (suite *authTestSuite) TestGenerateHmacSha256Signature_ReturnsDifferentSignaturesForDifferentPayloads() {
-	payload1 := "abc"
-	payload2 := "cba"
-	key := "a"
-	signature1 := auth.GenerateHmacSha256Signature(payload1, key)
-	signature2 := auth.GenerateHmacSha256Signature(payload2, key)
+	signature1 := suite.auth.GenerateHmacSha256Signature("abc")
+	signature2 := suite.auth.GenerateHmacSha256Signature("cba")
 	suite.NotEqual(signature1, signature2)
 }
 
-func (suite *authTestSuite) TestGenerateHmacSha256Signature_ReturnsDifferentSignaturesForDifferentKeys() {
+func (suite *authTestSuite) TestGenerateHmacSha256Signature_ReturnsDifferentSignaturesForDifferentSecrets() {
+	auth1 := testutils.NewAuth(suite.T(), testutils.ADMIN_PASSWORD_HASH, "a")
+	auth2 := testutils.NewAuth(suite.T(), testutils.ADMIN_PASSWORD_HASH, "b")
+
 	payload := "abc"
-	key1 := "a"
-	key2 := "b"
-	signature1 := auth.GenerateHmacSha256Signature(payload, key1)
-	signature2 := auth.GenerateHmacSha256Signature(payload, key2)
+	signature1 := auth1.GenerateHmacSha256Signature(payload)
+	signature2 := auth2.GenerateHmacSha256Signature(payload)
+
 	suite.NotEqual(signature1, signature2)
 }
 
 func (suite *authTestSuite) TestIsAuthenticated_ReturnsFalseWhenCookieIsMissing() {
 	c := testutils.NewGinContext(nil)
 
-	res, err := auth.IsAuthenticated(c)
+	res, err := suite.auth.IsAuthenticated(c)
 
 	suite.False(res)
 	suite.Error(err)
-	suite.ErrorAs(err, &auth.AuthError{})
 }
 
 func (suite *authTestSuite) TestIsAuthenticated_ReturnsFalseWhenCookieValueIsInvalid() {
@@ -89,92 +73,67 @@ func (suite *authTestSuite) TestIsAuthenticated_ReturnsFalseWhenCookieValueIsInv
 		Value: "invalid value",
 	})
 
-	res, err := auth.IsAuthenticated(c)
+	res, err := suite.auth.IsAuthenticated(c)
 
 	suite.False(res)
 	suite.Error(err)
-	suite.ErrorAs(err, &auth.AuthError{})
 }
 
 func (suite *authTestSuite) TestIsAuthenticated_ReturnsFalseWhenExpiryTimeIsNotAnInteger() {
 	expiry := "abc"
-	signature := auth.GenerateHmacSha256Signature(expiry, sessionSecret)
+	signature := suite.auth.GenerateHmacSha256Signature(expiry)
 	c := testutils.NewGinContext(&http.Cookie{
 		Name:  auth.SESSION_COOKIE_NAME,
 		Value: expiry + "." + signature,
 	})
 
-	res, err := auth.IsAuthenticated(c)
+	res, err := suite.auth.IsAuthenticated(c)
 
 	suite.False(res)
 	suite.Error(err)
-	suite.ErrorAs(err, &auth.AuthError{})
 }
 
 func (suite *authTestSuite) TestIsAuthenticated_ReturnsFalseWhenCookieIsExpired() {
 	expiry := "1" // Expiry time is not within 24hrs
-	signature := auth.GenerateHmacSha256Signature(expiry, sessionSecret)
+	signature := suite.auth.GenerateHmacSha256Signature(expiry)
 	c := testutils.NewGinContext(&http.Cookie{
 		Name:  auth.SESSION_COOKIE_NAME,
 		Value: expiry + "." + signature,
 	})
 
-	res, err := auth.IsAuthenticated(c)
+	res, err := suite.auth.IsAuthenticated(c)
 
 	suite.False(res)
 	suite.Error(err)
-	suite.ErrorAs(err, &auth.AuthError{})
-}
-
-func (suite *authTestSuite) TestIsAuthenticated_ReturnsFalseWhenSessionSecretIsMissing() {
-	c := testutils.NewGinContext(testutils.CreateValidSessionCookie())
-
-	suite.T().Setenv("SESSION_SECRET", "") // Set secret value to empty string
-
-	res, err := auth.IsAuthenticated(c)
-
-	suite.False(res)
-	suite.Error(err)
-	suite.ErrorAs(err, &auth.ConfigurationError{})
 }
 
 func (suite *authTestSuite) TestIsAuthenticated_ReturnsFalseWhenSignatureIsInvalid() {
 	expiry := strconv.FormatInt(time.Now().Add(time.Hour).Unix(), 10)
-	signature := auth.GenerateHmacSha256Signature(expiry, "abc") // Do not use session secret to generate signature
+	signature := suite.auth.GenerateHmacSha256Signature(expiry)
 	c := testutils.NewGinContext(&http.Cookie{
 		Name:  auth.SESSION_COOKIE_NAME,
-		Value: expiry + "." + signature,
+		Value: expiry + "." + signature + "123", // Add extra characters to signature to invalidate it
 	})
 
-	res, err := auth.IsAuthenticated(c)
+	res, err := suite.auth.IsAuthenticated(c)
 
 	suite.False(res)
 	suite.Error(err)
-	suite.ErrorAs(err, &auth.AuthError{})
 }
 
 func (suite *authTestSuite) TestIsAuthenticated_ReturnsTrue() {
-	c := testutils.NewGinContext(testutils.CreateValidSessionCookie())
+	c := testutils.NewGinContext(testutils.CreateSessionCookie(suite.auth))
 
-	res, err := auth.IsAuthenticated(c)
+	res, err := suite.auth.IsAuthenticated(c)
 
 	suite.True(res)
 	suite.NoError(err)
 }
 
-func (suite *authTestSuite) TestSetSessionCookie_ReturnsErrorWhenSessionSecretIsMissing() {
-	c := testutils.NewGinContext(nil)
-	suite.T().Setenv("SESSION_SECRET", "") // Set secret value to empty string
-	err := auth.SetSessionCookie(c)
-	suite.Error(err)
-}
-
 func (suite *authTestSuite) TestSetSessionCookie_SetsCookie() {
 	c := testutils.NewGinContext(nil)
 
-	err := auth.SetSessionCookie(c)
-
-	suite.NoError(err)
+	suite.auth.SetSessionCookie(c)
 
 	raw := c.Writer.Header().Get("Set-Cookie")
 	sessionCookie, err := http.ParseSetCookie(raw)

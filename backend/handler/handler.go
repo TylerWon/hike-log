@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/TylerWon/hike-log/backend/auth"
 	"github.com/TylerWon/hike-log/backend/s3"
 	"github.com/TylerWon/hike-log/backend/store"
 	"github.com/gin-gonic/gin"
@@ -13,18 +14,19 @@ import (
 
 // A Handler handles the request-response lifecycle for API routes.
 type Handler struct {
-	store    store.Store
+	auth     auth.Auth
 	s3Client s3.S3Client
+	store    store.Store
 }
 
 // Creates a new Handler
-func New(store store.Store, s3Client s3.S3Client) *Handler {
+func New(store store.Store, s3Client s3.S3Client, auth auth.Auth) *Handler {
 	_, err := registerCustomValidators()
 	if err != nil {
 		log.Fatal("Error while registering custom validators: ", err)
 	}
 
-	return &Handler{store, s3Client}
+	return &Handler{auth, s3Client, store}
 }
 
 // Returns a 200 OK. Used for application health checks.

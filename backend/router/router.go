@@ -10,7 +10,7 @@ import (
 )
 
 // Creates a Gin router and registers middleware and API routes.
-func New(handler *handler.Handler) *gin.Engine {
+func New(handler *handler.Handler, middleware *middleware.Middleware) *gin.Engine {
 	router := gin.Default()
 
 	// CORS middleware (must come before routes)

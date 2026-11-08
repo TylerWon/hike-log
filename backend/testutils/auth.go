@@ -2,14 +2,27 @@ package testutils
 
 import (
 	"net/http"
-	"os"
+	"testing"
 
 	"github.com/TylerWon/hike-log/backend/auth"
 )
 
-func CreateValidSessionCookie() *http.Cookie {
+// Creates a session cookie that can be attached to requests.
+func CreateSessionCookie(authService auth.Auth) *http.Cookie {
 	return &http.Cookie{
 		Name:  auth.SESSION_COOKIE_NAME,
-		Value: auth.CreateSessionCookieValue(os.Getenv("SESSION_SECRET")),
+		Value: authService.CreateSessionCookieValue(),
 	}
+}
+
+// Creates an Auth to use during testing.
+func NewAuth(t *testing.T, adminPasswordHash string, sessionSecret string) auth.Auth {
+	t.Helper()
+
+	auth, err := auth.New(adminPasswordHash, sessionSecret)
+	if err != nil {
+		t.Fatal("Failed to setup auth: ", err)
+	}
+
+	return auth
 }

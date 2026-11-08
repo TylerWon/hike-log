@@ -4,8 +4,10 @@ import (
 	"log"
 	"os"
 
+	"github.com/TylerWon/hike-log/backend/auth"
 	"github.com/TylerWon/hike-log/backend/database"
 	"github.com/TylerWon/hike-log/backend/handler"
+	"github.com/TylerWon/hike-log/backend/middleware"
 	"github.com/TylerWon/hike-log/backend/router"
 	"github.com/TylerWon/hike-log/backend/s3"
 	"github.com/TylerWon/hike-log/backend/store"
@@ -29,8 +31,14 @@ func main() {
 		log.Fatal("Failed to setup S3 client: ", err)
 	}
 
-	handler := handler.New(store, s3Client)
-	router := router.New(handler)
+	auth, err := auth.New(os.Getenv("ADMIN_PASSWORD_HASH"), os.Getenv("SESSION_SECRET"))
+	if err != nil {
+		log.Fatal("Failed to setup auth: ", err)
+	}
+
+	middleware := middleware.New(auth)
+	handler := handler.New(store, s3Client, auth)
+	router := router.New(handler, middleware)
 
 	router.Run()
 }

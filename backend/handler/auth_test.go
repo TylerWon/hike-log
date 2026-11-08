@@ -9,19 +9,6 @@ import (
 	"github.com/TylerWon/hike-log/backend/testutils"
 )
 
-func (suite *handlerTestSuite) TestCheckAuth_Returns500ErrorWhenSessionSecretIsMissing() {
-	cookie := testutils.CreateValidSessionCookie() // Create cookie before changing session secret value
-	suite.T().Setenv("SESSION_SECRET", "")
-	res := testutils.SendRequest(
-		suite.router,
-		http.MethodGet,
-		"/api/v1/auth",
-		nil,
-		cookie,
-	)
-	suite.Equal(http.StatusInternalServerError, res.Code)
-}
-
 func (suite *handlerTestSuite) TestCheckAuth_ReturnsUnauthenticated() {
 	res := testutils.SendRequest(suite.router, http.MethodGet, "/api/v1/auth", nil) // Session cookie missing
 
@@ -40,7 +27,7 @@ func (suite *handlerTestSuite) TestCheckAuth_ReturnsAuthenticated() {
 		http.MethodGet,
 		"/api/v1/auth",
 		nil,
-		testutils.CreateValidSessionCookie(),
+		testutils.CreateSessionCookie(suite.auth),
 	)
 
 	suite.Equal(http.StatusOK, res.Code)
@@ -69,7 +56,7 @@ func (suite *handlerTestSuite) TestLogin_Returns400ErrorWhenRequestBodyIsMissing
 
 func (suite *handlerTestSuite) TestLogin_Returns401ErrorWhenPasswordIsIncorrect() {
 	body := map[string]any{
-		"password": "incorrect_password",
+		"password": "incorrect password",
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
 	res := testutils.SendRequest(suite.router, http.MethodPost, "/api/v1/auth", reqBody)
@@ -77,33 +64,9 @@ func (suite *handlerTestSuite) TestLogin_Returns401ErrorWhenPasswordIsIncorrect(
 	suite.Equal(http.StatusUnauthorized, res.Code)
 }
 
-func (suite *handlerTestSuite) TestLogin_Returns500ErrorWhenPasswordSecretIsMissing() {
-	suite.T().Setenv("ADMIN_PASSWORD_HASH", "")
-
-	body := map[string]any{
-		"password": "admin",
-	}
-	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(suite.router, http.MethodPost, "/api/v1/auth", reqBody)
-
-	suite.Equal(http.StatusInternalServerError, res.Code)
-}
-
-func (suite *handlerTestSuite) TestLogin_Returns500ErrorWhenSessionSecretIsMissing() {
-	suite.T().Setenv("SESSION_SECRET", "")
-
-	body := map[string]any{
-		"password": "admin",
-	}
-	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(suite.router, http.MethodPost, "/api/v1/auth", reqBody)
-
-	suite.Equal(http.StatusInternalServerError, res.Code)
-}
-
 func (suite *handlerTestSuite) TestLogin_SetsSessionCookie() {
 	body := map[string]any{
-		"password": "admin",
+		"password": testutils.ADMIN_PASSWORD,
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
 	res := testutils.SendRequest(suite.router, http.MethodPost, "/api/v1/auth", reqBody)
