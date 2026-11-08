@@ -12,22 +12,22 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-type authTestSuite struct {
+type authHandlerTestSuite struct {
 	suite.Suite
 	auth   auth.Auth
 	router *gin.Engine
 }
 
-func (suite *authTestSuite) SetupSuite() {
+func (suite *authHandlerTestSuite) SetupSuite() {
 	suite.auth = testutils.NewAuth(suite.T(), testutils.ADMIN_PASSWORD_HASH, testutils.SESSION_SECRET)
 	suite.router = testutils.NewAuthRouter(handler.NewAuthHandler(suite.auth))
 }
 
 func TestAuthTestSuite(t *testing.T) {
-	suite.Run(t, new(authTestSuite))
+	suite.Run(t, new(authHandlerTestSuite))
 }
 
-func (suite *authTestSuite) TestCheckAuth_ReturnsUnauthenticated() {
+func (suite *authHandlerTestSuite) TestCheckAuth_ReturnsUnauthenticated() {
 	res := testutils.SendRequest(suite.router, http.MethodGet, "/auth", nil) // Session cookie missing
 
 	suite.Equal(http.StatusOK, res.Code)
@@ -39,7 +39,7 @@ func (suite *authTestSuite) TestCheckAuth_ReturnsUnauthenticated() {
 	suite.False(response.Authenticated)
 }
 
-func (suite *authTestSuite) TestCheckAuth_ReturnsAuthenticated() {
+func (suite *authHandlerTestSuite) TestCheckAuth_ReturnsAuthenticated() {
 	res := testutils.SendRequest(
 		suite.router,
 		http.MethodGet,
@@ -57,7 +57,7 @@ func (suite *authTestSuite) TestCheckAuth_ReturnsAuthenticated() {
 	suite.True(response.Authenticated)
 }
 
-func (suite *authTestSuite) TestLogin_Returns400ErrorWhenRequestBodyHasInvalidField() {
+func (suite *authHandlerTestSuite) TestLogin_Returns400ErrorWhenRequestBodyHasInvalidField() {
 	body := map[string]any{
 		"password": 123, // number instead of string
 	}
@@ -67,12 +67,12 @@ func (suite *authTestSuite) TestLogin_Returns400ErrorWhenRequestBodyHasInvalidFi
 	suite.Equal(http.StatusBadRequest, res.Code)
 }
 
-func (suite *authTestSuite) TestLogin_Returns400ErrorWhenRequestBodyIsMissingField() {
+func (suite *authHandlerTestSuite) TestLogin_Returns400ErrorWhenRequestBodyIsMissingField() {
 	res := testutils.SendRequest(suite.router, http.MethodPost, "/auth", nil)
 	suite.Equal(http.StatusBadRequest, res.Code)
 }
 
-func (suite *authTestSuite) TestLogin_Returns401ErrorWhenPasswordIsIncorrect() {
+func (suite *authHandlerTestSuite) TestLogin_Returns401ErrorWhenPasswordIsIncorrect() {
 	body := map[string]any{
 		"password": "incorrect password",
 	}
@@ -82,7 +82,7 @@ func (suite *authTestSuite) TestLogin_Returns401ErrorWhenPasswordIsIncorrect() {
 	suite.Equal(http.StatusUnauthorized, res.Code)
 }
 
-func (suite *authTestSuite) TestLogin_SetsSessionCookie() {
+func (suite *authHandlerTestSuite) TestLogin_SetsSessionCookie() {
 	body := map[string]any{
 		"password": testutils.ADMIN_PASSWORD,
 	}

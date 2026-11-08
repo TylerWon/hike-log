@@ -25,7 +25,7 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-type hikesTestSuite struct {
+type hikesHandlerTestSuite struct {
 	suite.Suite
 	auth       auth.Auth
 	middleware *middleware.Middleware
@@ -35,7 +35,7 @@ type hikesTestSuite struct {
 	router     *gin.Engine
 }
 
-func (suite *hikesTestSuite) SetupSuite() {
+func (suite *hikesHandlerTestSuite) SetupSuite() {
 	suite.suiteDB = testutils.NewTestSuiteDB(suite.T())
 	suite.store = testutils.NewStore(suite.T(), suite.suiteDB)
 	suite.s3Client = testutils.NewS3Client(suite.T())
@@ -44,20 +44,20 @@ func (suite *hikesTestSuite) SetupSuite() {
 	suite.router = testutils.NewHikesRouter(handler.NewHikesHandler(suite.store, suite.s3Client), suite.middleware)
 }
 
-func (suite *hikesTestSuite) TearDownSuite() {
+func (suite *hikesHandlerTestSuite) TearDownSuite() {
 	testutils.TeardownStore(suite.T(), suite.store)
 	suite.suiteDB.Teardown(suite.T())
 }
 
-func (suite *hikesTestSuite) SetupTest() {
+func (suite *hikesHandlerTestSuite) SetupTest() {
 	suite.suiteDB.Reset(suite.T())
 }
 
 func TestHikesTestSuite(t *testing.T) {
-	suite.Run(t, new(hikesTestSuite))
+	suite.Run(t, new(hikesHandlerTestSuite))
 }
 
-func (suite *hikesTestSuite) TestCreateHike_Returns401ErrorWhenUnauthorized() {
+func (suite *hikesHandlerTestSuite) TestCreateHike_Returns401ErrorWhenUnauthorized() {
 	body := map[string]any{
 		"trailName":     "Trail 1",
 		"date":          "2026-02-05",
@@ -75,7 +75,7 @@ func (suite *hikesTestSuite) TestCreateHike_Returns401ErrorWhenUnauthorized() {
 	suite.Equal(http.StatusUnauthorized, res.Code)
 }
 
-func (suite *hikesTestSuite) TestCreateHike_Returns400ErrorWhenRequestBodyHasInvalidFields() {
+func (suite *hikesHandlerTestSuite) TestCreateHike_Returns400ErrorWhenRequestBodyHasInvalidFields() {
 	body := map[string]any{
 		"trailName":     "Trail 1",
 		"date":          "05-02-2026", // DD-MM-YYYY instead of YYYY-MM-DD
@@ -99,7 +99,7 @@ func (suite *hikesTestSuite) TestCreateHike_Returns400ErrorWhenRequestBodyHasInv
 	suite.Equal(http.StatusBadRequest, res.Code)
 }
 
-func (suite *hikesTestSuite) TestCreateHike_Returns400ErrorWhenRequestBodyIsMissingFields() {
+func (suite *hikesHandlerTestSuite) TestCreateHike_Returns400ErrorWhenRequestBodyIsMissingFields() {
 	body := map[string]any{
 		"date":          "2026-02-05",
 		"notes":         "Easy hike",
@@ -121,7 +121,7 @@ func (suite *hikesTestSuite) TestCreateHike_Returns400ErrorWhenRequestBodyIsMiss
 	suite.Equal(http.StatusBadRequest, res.Code)
 }
 
-func (suite *hikesTestSuite) TestCreateHike_Returns500ErrorWhenDBErrors() {
+func (suite *hikesHandlerTestSuite) TestCreateHike_Returns500ErrorWhenDBErrors() {
 	mockStore := store.MockStore{CreateRecordError: errors.New("Something went wrong")}
 	hikesHandler := handler.NewHikesHandler(&mockStore, suite.s3Client)
 	router := testutils.NewHikesRouter(hikesHandler, suite.middleware)
@@ -149,7 +149,7 @@ func (suite *hikesTestSuite) TestCreateHike_Returns500ErrorWhenDBErrors() {
 	suite.Equal(http.StatusInternalServerError, res.Code)
 }
 
-func (suite *hikesTestSuite) TestCreateHike_CreatesAndReturnsHike() {
+func (suite *hikesHandlerTestSuite) TestCreateHike_CreatesAndReturnsHike() {
 	body := map[string]any{
 		"trailName":     "Trail 1",
 		"date":          "2026-02-05",
@@ -192,7 +192,7 @@ func (suite *hikesTestSuite) TestCreateHike_CreatesAndReturnsHike() {
 	suite.Equal(expected, response)
 }
 
-func (suite *hikesTestSuite) TestCreatePhotos_Returns401ErrorWhenUnauthorized() {
+func (suite *hikesHandlerTestSuite) TestCreatePhotos_Returns401ErrorWhenUnauthorized() {
 	hikes := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)
 
 	objectKey1 := s3.CreatePhotoObjectKey(hikes[0].ID)
@@ -228,7 +228,7 @@ func (suite *hikesTestSuite) TestCreatePhotos_Returns401ErrorWhenUnauthorized() 
 	suite.Equal(http.StatusUnauthorized, res.Code)
 }
 
-func (suite *hikesTestSuite) TestCreatePhotos_Returns400ErrorWhenHikeIDIsInvalid() {
+func (suite *hikesHandlerTestSuite) TestCreatePhotos_Returns400ErrorWhenHikeIDIsInvalid() {
 	body := [](map[string]any){
 		{
 			"index":        0,
@@ -249,7 +249,7 @@ func (suite *hikesTestSuite) TestCreatePhotos_Returns400ErrorWhenHikeIDIsInvalid
 	suite.Equal(http.StatusBadRequest, res.Code)
 }
 
-func (suite *hikesTestSuite) TestCreatePhotos_Returns404ErrorWhenHikeDoesNotExist() {
+func (suite *hikesHandlerTestSuite) TestCreatePhotos_Returns404ErrorWhenHikeDoesNotExist() {
 	body := [](map[string]any){
 		{
 			"index":        0,
@@ -270,7 +270,7 @@ func (suite *hikesTestSuite) TestCreatePhotos_Returns404ErrorWhenHikeDoesNotExis
 	suite.Equal(http.StatusNotFound, res.Code)
 }
 
-func (suite *hikesTestSuite) TestCreatePhotos_Returns400ErrorWhenRequestItemIsMissingFields() {
+func (suite *hikesHandlerTestSuite) TestCreatePhotos_Returns400ErrorWhenRequestItemIsMissingFields() {
 	hikes := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)
 
 	body := [](map[string]any){
@@ -298,7 +298,7 @@ func (suite *hikesTestSuite) TestCreatePhotos_Returns400ErrorWhenRequestItemIsMi
 	suite.Equal(http.StatusBadRequest, res.Code)
 }
 
-func (suite *hikesTestSuite) TestCreatePhotos_Returns400ErrorWhenObjectKeyIsInvalid() {
+func (suite *hikesHandlerTestSuite) TestCreatePhotos_Returns400ErrorWhenObjectKeyIsInvalid() {
 	hikes := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)
 
 	body := [](map[string]any){
@@ -321,7 +321,7 @@ func (suite *hikesTestSuite) TestCreatePhotos_Returns400ErrorWhenObjectKeyIsInva
 	suite.Equal(http.StatusBadRequest, res.Code)
 }
 
-func (suite *hikesTestSuite) TestCreatePhotos_Returns400ErrorWhenPathAndObjectKeyHikeIDMismatch() {
+func (suite *hikesHandlerTestSuite) TestCreatePhotos_Returns400ErrorWhenPathAndObjectKeyHikeIDMismatch() {
 	hikes := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)
 
 	body := [](map[string]any){
@@ -344,7 +344,7 @@ func (suite *hikesTestSuite) TestCreatePhotos_Returns400ErrorWhenPathAndObjectKe
 	suite.Equal(http.StatusBadRequest, res.Code)
 }
 
-func (suite *hikesTestSuite) TestCreatePhotos_ReturnsPartialErrorWhenPhotoDoesNotExistInS3() {
+func (suite *hikesHandlerTestSuite) TestCreatePhotos_ReturnsPartialErrorWhenPhotoDoesNotExistInS3() {
 	hikes := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)
 
 	body := [](map[string]any){
@@ -375,7 +375,7 @@ func (suite *hikesTestSuite) TestCreatePhotos_ReturnsPartialErrorWhenPhotoDoesNo
 	suite.False(response[0].Success)
 }
 
-func (suite *hikesTestSuite) TestCreatePhotos_ReturnsPartialErrorWhenS3Errors() {
+func (suite *hikesHandlerTestSuite) TestCreatePhotos_ReturnsPartialErrorWhenS3Errors() {
 	mockS3Client := s3.MockS3Client{
 		DoesObjectExistResult: false,
 		DoesObjectExistError:  errors.New("Something went wrong"),
@@ -413,7 +413,7 @@ func (suite *hikesTestSuite) TestCreatePhotos_ReturnsPartialErrorWhenS3Errors() 
 	suite.False(response[0].Success)
 }
 
-func (suite *hikesTestSuite) TestCreatePhotos_ReturnsPartialErrorWhenDBErrors() {
+func (suite *hikesHandlerTestSuite) TestCreatePhotos_ReturnsPartialErrorWhenDBErrors() {
 	hikes := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)
 
 	mockStore := store.MockStore{
@@ -452,7 +452,7 @@ func (suite *hikesTestSuite) TestCreatePhotos_ReturnsPartialErrorWhenDBErrors() 
 	suite.False(response[0].Success)
 }
 
-func (suite *hikesTestSuite) TestCreatePhotos_CreatesPhotos() {
+func (suite *hikesHandlerTestSuite) TestCreatePhotos_CreatesPhotos() {
 	hikes := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)
 
 	objectKey1 := s3.CreatePhotoObjectKey(hikes[0].ID)
@@ -518,7 +518,7 @@ func (suite *hikesTestSuite) TestCreatePhotos_CreatesPhotos() {
 	suite.NoError(err)
 }
 
-func (suite *hikesTestSuite) TestCreatePresignedURLs_Returns401ErrorWhenUnauthorized() {
+func (suite *hikesHandlerTestSuite) TestCreatePresignedURLs_Returns401ErrorWhenUnauthorized() {
 	hikes := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)
 
 	body := [](map[string]any){
@@ -544,7 +544,7 @@ func (suite *hikesTestSuite) TestCreatePresignedURLs_Returns401ErrorWhenUnauthor
 	suite.Equal(http.StatusUnauthorized, res.Code)
 }
 
-func (suite *hikesTestSuite) TestCreatePresignedURLs_Returns400ErrorWhenHikeIDIsInvalid() {
+func (suite *hikesHandlerTestSuite) TestCreatePresignedURLs_Returns400ErrorWhenHikeIDIsInvalid() {
 	body := [](map[string]any){
 		{
 			"index":         0,
@@ -563,7 +563,7 @@ func (suite *hikesTestSuite) TestCreatePresignedURLs_Returns400ErrorWhenHikeIDIs
 	suite.Equal(http.StatusBadRequest, res.Code)
 }
 
-func (suite *hikesTestSuite) TestCreatePresignedURLs_Returns404ErrorWhenHikeDoesNotExist() {
+func (suite *hikesHandlerTestSuite) TestCreatePresignedURLs_Returns404ErrorWhenHikeDoesNotExist() {
 	body := [](map[string]any){
 		{
 			"index":         0,
@@ -582,7 +582,7 @@ func (suite *hikesTestSuite) TestCreatePresignedURLs_Returns404ErrorWhenHikeDoes
 	suite.Equal(http.StatusNotFound, res.Code)
 }
 
-func (suite *hikesTestSuite) TestCreatePresignedURLs_Returns400ErrorWhenRequestItemIsMissingFields() {
+func (suite *hikesHandlerTestSuite) TestCreatePresignedURLs_Returns400ErrorWhenRequestItemIsMissingFields() {
 	hikes := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)
 
 	body := [](map[string]any){
@@ -602,7 +602,7 @@ func (suite *hikesTestSuite) TestCreatePresignedURLs_Returns400ErrorWhenRequestI
 	suite.Equal(http.StatusBadRequest, res.Code)
 }
 
-func (suite *hikesTestSuite) TestCreatePresignedURLs_Returns400ErrorWhenRequestItemHasAnInvalidImageType() {
+func (suite *hikesHandlerTestSuite) TestCreatePresignedURLs_Returns400ErrorWhenRequestItemHasAnInvalidImageType() {
 	hikes := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)
 
 	body := [](map[string]any){
@@ -623,7 +623,7 @@ func (suite *hikesTestSuite) TestCreatePresignedURLs_Returns400ErrorWhenRequestI
 	suite.Equal(http.StatusBadRequest, res.Code)
 }
 
-func (suite *hikesTestSuite) TestCreatePresignedURLs_Returns400ErrorWhenContentLengthIsOutsideBounds() {
+func (suite *hikesHandlerTestSuite) TestCreatePresignedURLs_Returns400ErrorWhenContentLengthIsOutsideBounds() {
 	hikes := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)
 
 	body := [](map[string]any){
@@ -661,7 +661,7 @@ func (suite *hikesTestSuite) TestCreatePresignedURLs_Returns400ErrorWhenContentL
 	suite.Equal(http.StatusBadRequest, res.Code)
 }
 
-func (suite *hikesTestSuite) TestCreatePresignedURLs_Returns500ErrorWhenDBErrors() {
+func (suite *hikesHandlerTestSuite) TestCreatePresignedURLs_Returns500ErrorWhenDBErrors() {
 	mockStore := store.MockStore{
 		GetHikeByIDResult: nil,
 		GetHikeByIDError:  errors.New("Something went wrong"),
@@ -689,7 +689,7 @@ func (suite *hikesTestSuite) TestCreatePresignedURLs_Returns500ErrorWhenDBErrors
 	suite.Equal(http.StatusInternalServerError, res.Code)
 }
 
-func (suite *hikesTestSuite) TestCreatePresignedURLs_ReturnsPartialErrorWhenS3Errors() {
+func (suite *hikesHandlerTestSuite) TestCreatePresignedURLs_ReturnsPartialErrorWhenS3Errors() {
 	mockS3Client := s3.MockS3Client{
 		CreatePresignedPutObjectRequestResult: nil,
 		CreatePresignedPutObjectRequestError:  errors.New("Something went wrong"),
@@ -730,7 +730,7 @@ func (suite *hikesTestSuite) TestCreatePresignedURLs_ReturnsPartialErrorWhenS3Er
 	suite.NotEmpty(item.Error)
 }
 
-func (suite *hikesTestSuite) TestCreatePresignedURLs_ReturnsPresignedURLs() {
+func (suite *hikesHandlerTestSuite) TestCreatePresignedURLs_ReturnsPresignedURLs() {
 	hikes := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)
 
 	body := [](map[string]any){
@@ -775,7 +775,7 @@ func (suite *hikesTestSuite) TestCreatePresignedURLs_ReturnsPresignedURLs() {
 	}
 }
 
-func (suite *hikesTestSuite) TestDeleteHike_Returns401ErrorWhenUnauthorized() {
+func (suite *hikesHandlerTestSuite) TestDeleteHike_Returns401ErrorWhenUnauthorized() {
 	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, true, true)[0]
 
 	photo := hike.Photos[0]
@@ -794,7 +794,7 @@ func (suite *hikesTestSuite) TestDeleteHike_Returns401ErrorWhenUnauthorized() {
 	suite.s3Client.DeleteObject(context.TODO(), objectKey)
 }
 
-func (suite *hikesTestSuite) TestDeleteHike_Returns400ErrorWhenHikeIDIsInvalid() {
+func (suite *hikesHandlerTestSuite) TestDeleteHike_Returns400ErrorWhenHikeIDIsInvalid() {
 	res := testutils.SendRequest(
 		suite.router,
 		http.MethodDelete,
@@ -805,7 +805,7 @@ func (suite *hikesTestSuite) TestDeleteHike_Returns400ErrorWhenHikeIDIsInvalid()
 	suite.Equal(http.StatusBadRequest, res.Code)
 }
 
-func (suite *hikesTestSuite) TestDeleteHike_Returns404ErrorWhenHikeDoesNotExist() {
+func (suite *hikesHandlerTestSuite) TestDeleteHike_Returns404ErrorWhenHikeDoesNotExist() {
 	res := testutils.SendRequest(
 		suite.router,
 		http.MethodDelete,
@@ -816,7 +816,7 @@ func (suite *hikesTestSuite) TestDeleteHike_Returns404ErrorWhenHikeDoesNotExist(
 	suite.Equal(http.StatusNotFound, res.Code)
 }
 
-func (suite *hikesTestSuite) TestDeleteHike_Returns500ErrorWhenDBErrors() {
+func (suite *hikesHandlerTestSuite) TestDeleteHike_Returns500ErrorWhenDBErrors() {
 	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, true, true)[0]
 
 	mockStore := store.MockStore{DeleteRecordError: errors.New("Something went wrong")}
@@ -833,7 +833,7 @@ func (suite *hikesTestSuite) TestDeleteHike_Returns500ErrorWhenDBErrors() {
 	suite.Equal(http.StatusInternalServerError, res.Code)
 }
 
-func (suite *hikesTestSuite) TestDeleteHike_DeletesHikeAndPhotosWhenS3Errors() {
+func (suite *hikesHandlerTestSuite) TestDeleteHike_DeletesHikeAndPhotosWhenS3Errors() {
 	mockS3Client := s3.MockS3Client{
 		ListObjectsResult:   &s3Sdk.ListObjectsV2Output{Contents: []s3types.Object{{Key: awsSdk.String("test")}}},
 		DeleteObjectsResult: nil,
@@ -876,7 +876,7 @@ func (suite *hikesTestSuite) TestDeleteHike_DeletesHikeAndPhotosWhenS3Errors() {
 	suite.s3Client.DeleteObject(context.TODO(), objectKey)
 }
 
-func (suite *hikesTestSuite) TestDeleteHike_DeletesHikeAndPhotosAndS3Objects() {
+func (suite *hikesHandlerTestSuite) TestDeleteHike_DeletesHikeAndPhotosAndS3Objects() {
 	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, true, true)[0]
 
 	photo := hike.Photos[0]
@@ -911,7 +911,7 @@ func (suite *hikesTestSuite) TestDeleteHike_DeletesHikeAndPhotosAndS3Objects() {
 	suite.s3Client.DeleteObject(context.TODO(), objectKey)
 }
 
-func (suite *hikesTestSuite) TestListHike_Returns500ErrorWhenDBErrors() {
+func (suite *hikesHandlerTestSuite) TestListHike_Returns500ErrorWhenDBErrors() {
 
 	mockStore := store.MockStore{
 		ListHikesResult: nil,
@@ -927,7 +927,7 @@ func (suite *hikesTestSuite) TestListHike_Returns500ErrorWhenDBErrors() {
 	suite.Equal(http.StatusInternalServerError, res.Code)
 }
 
-func (suite *hikesTestSuite) TestListHike_ReturnsNothingWhenThereAreNoHikes() {
+func (suite *hikesHandlerTestSuite) TestListHike_ReturnsNothingWhenThereAreNoHikes() {
 	res := testutils.SendRequest(suite.router, http.MethodGet, "/hikes", nil)
 
 	suite.Equal(http.StatusOK, res.Code)
@@ -939,7 +939,7 @@ func (suite *hikesTestSuite) TestListHike_ReturnsNothingWhenThereAreNoHikes() {
 	suite.Len(hikes, 0)
 }
 
-func (suite *hikesTestSuite) TestListHike_ReturnsHikes() {
+func (suite *hikesHandlerTestSuite) TestListHike_ReturnsHikes() {
 	hikes := testutils.ConstructHikes(suite.T(), 2, suite.store, true, true)
 
 	res := testutils.SendRequest(suite.router, http.MethodGet, "/hikes", nil)
@@ -955,7 +955,7 @@ func (suite *hikesTestSuite) TestListHike_ReturnsHikes() {
 	suite.Equal(hikes[0], response[1])
 }
 
-func (suite *hikesTestSuite) TestUpdateHike_Returns401ErrorWhenUnauthorized() {
+func (suite *hikesHandlerTestSuite) TestUpdateHike_Returns401ErrorWhenUnauthorized() {
 	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)[0]
 
 	body := map[string]any{
@@ -975,7 +975,7 @@ func (suite *hikesTestSuite) TestUpdateHike_Returns401ErrorWhenUnauthorized() {
 	suite.Equal(http.StatusUnauthorized, res.Code)
 }
 
-func (suite *hikesTestSuite) TestUpdateHike_Returns400ErrorWhenHikeIDIsInvalid() {
+func (suite *hikesHandlerTestSuite) TestUpdateHike_Returns400ErrorWhenHikeIDIsInvalid() {
 	res := testutils.SendRequest(
 		suite.router,
 		http.MethodPut,
@@ -986,7 +986,7 @@ func (suite *hikesTestSuite) TestUpdateHike_Returns400ErrorWhenHikeIDIsInvalid()
 	suite.Equal(http.StatusBadRequest, res.Code)
 }
 
-func (suite *hikesTestSuite) TestUpdateHike_Returns404ErrorWhenHikeDoesNotExist() {
+func (suite *hikesHandlerTestSuite) TestUpdateHike_Returns404ErrorWhenHikeDoesNotExist() {
 	res := testutils.SendRequest(
 		suite.router,
 		http.MethodPut,
@@ -997,7 +997,7 @@ func (suite *hikesTestSuite) TestUpdateHike_Returns404ErrorWhenHikeDoesNotExist(
 	suite.Equal(http.StatusNotFound, res.Code)
 }
 
-func (suite *hikesTestSuite) TestUpdateHike_Returns400ErrorWhenRequestBodyHasInvalidFields() {
+func (suite *hikesHandlerTestSuite) TestUpdateHike_Returns400ErrorWhenRequestBodyHasInvalidFields() {
 	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)[0]
 
 	body := map[string]any{
@@ -1023,7 +1023,7 @@ func (suite *hikesTestSuite) TestUpdateHike_Returns400ErrorWhenRequestBodyHasInv
 	suite.Equal(http.StatusBadRequest, res.Code)
 }
 
-func (suite *hikesTestSuite) TestUpdateHike_Returns400ErrorWhenRequestBodyIsMissingFields() {
+func (suite *hikesHandlerTestSuite) TestUpdateHike_Returns400ErrorWhenRequestBodyIsMissingFields() {
 	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)[0]
 
 	body := map[string]any{
@@ -1047,7 +1047,7 @@ func (suite *hikesTestSuite) TestUpdateHike_Returns400ErrorWhenRequestBodyIsMiss
 	suite.Equal(http.StatusBadRequest, res.Code)
 }
 
-func (suite *hikesTestSuite) TestUpdateHike_Returns500ErrorWhenDBErrors() {
+func (suite *hikesHandlerTestSuite) TestUpdateHike_Returns500ErrorWhenDBErrors() {
 	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)[0]
 
 	mockStore := store.MockStore{
@@ -1080,7 +1080,7 @@ func (suite *hikesTestSuite) TestUpdateHike_Returns500ErrorWhenDBErrors() {
 	suite.Equal(http.StatusInternalServerError, res.Code)
 }
 
-func (suite *hikesTestSuite) TestUpdateHike_UpdatesHike() {
+func (suite *hikesHandlerTestSuite) TestUpdateHike_UpdatesHike() {
 	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)[0]
 
 	body := map[string]any{
