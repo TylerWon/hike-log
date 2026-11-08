@@ -21,6 +21,10 @@ func (suite *validationTestSuite) SetupTest() {
 	suite.validator = v
 }
 
+func TestValidationTestSuite(t *testing.T) {
+	suite.Run(t, new(validationTestSuite))
+}
+
 func (suite *validationTestSuite) TestDivisibleByHalfValidator_ReturnsErrorForNonFloatField() {
 	type sample struct {
 		Value string `binding:"divisibleByHalf"`
@@ -136,8 +140,4 @@ func (suite *validationTestSuite) TestValidObjectKeyValidator_ValidationSucceeds
 
 	err := suite.validator.Struct(sample{"hikes/1/photos/acde070d-8c4c-4f0d-9d8a-162843c10333"})
 	suite.Require().NoError(err)
-}
-
-func TestValidationTestSuite(t *testing.T) {
-	suite.Run(t, new(validationTestSuite))
 }

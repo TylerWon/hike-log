@@ -11,6 +11,10 @@ type dateTestSuite struct {
 	suite.Suite
 }
 
+func TestDateTestSuite(t *testing.T) {
+	suite.Run(t, new(dateTestSuite))
+}
+
 func (suite *dateTestSuite) TestMarshalJSON() {
 	date := Date("2026-09-02")
 	b, err := json.Marshal(date)
@@ -23,8 +27,4 @@ func (suite *dateTestSuite) TestUnmarshalJSON() {
 	err := json.Unmarshal([]byte(`"2026-09-02"`), &date)
 	suite.Require().NoError(err)
 	suite.Require().Equal(Date("2026-09-02"), date)
-}
-
-func TestDateTestSuite(t *testing.T) {
-	suite.Run(t, new(dateTestSuite))
 }

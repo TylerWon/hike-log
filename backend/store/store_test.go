@@ -32,6 +32,10 @@ func (suite *storeTestSuite) SetupTest() {
 	suite.suiteDB.Reset(suite.T())
 }
 
+func TestStoreTestSuite(t *testing.T) {
+	suite.Run(t, new(storeTestSuite))
+}
+
 func (suite *storeTestSuite) TestCreateRecord_ReturnsErrorWhenDBErrors() {
 	mockDatabase := database.MockDatabase{
 		CreateResult: &gorm.DB{Error: errors.New("Something went wrong")},
@@ -209,8 +213,4 @@ func (suite *storeTestSuite) TestUpdateRecord_UpdatesModel() {
 	updated, err := suite.store.GetHikeByID(hike.ID)
 	suite.Require().NoError(err)
 	suite.Require().Equal(hike, *updated)
-}
-
-func TestStoreTestSuite(t *testing.T) {
-	suite.Run(t, new(storeTestSuite))
 }

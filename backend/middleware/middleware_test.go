@@ -21,6 +21,10 @@ func (suite *middlewareTestSuite) SetupSuite() {
 	suite.middleware = middleware.New(suite.auth)
 }
 
+func TestAuthTestSuite(t *testing.T) {
+	suite.Run(t, new(middlewareTestSuite))
+}
+
 func (suite *middlewareTestSuite) TestRequireAuth_Returns401ErrorAndAbortsWhenUnauthenticated() {
 	c := testutils.NewGinContext(nil) // Missing session cookie
 
@@ -37,8 +41,4 @@ func (suite *middlewareTestSuite) TestRequireAuth_PassesWhenAuthenticated() {
 	suite.middleware.RequireAuth(c)
 
 	suite.Require().False(c.IsAborted())
-}
-
-func TestAuthTestSuite(t *testing.T) {
-	suite.Run(t, new(middlewareTestSuite))
 }

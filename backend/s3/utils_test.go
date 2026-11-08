@@ -12,6 +12,10 @@ type utilsTestSuite struct {
 	suite.Suite
 }
 
+func TestUtilsTestSuite(t *testing.T) {
+	suite.Run(t, new(utilsTestSuite))
+}
+
 func (suite *utilsTestSuite) TestCreatePhotoObjectKey_ReturnsKeyWithExpectedFormat() {
 	hikeId := uint(42)
 	objectKey := CreatePhotoObjectKey(hikeId)
@@ -58,8 +62,4 @@ func (suite *utilsTestSuite) TestGetPhotoObjectKey_ReturnsObjectKeyFromVirtualHo
 	objectURL := CreatePhotoObjectURL(objectKey, "production")
 	actual := GetPhotoObjectKey(objectURL, "production")
 	suite.Require().Equal(objectKey, actual)
-}
-
-func TestUtilsTestSuite(t *testing.T) {
-	suite.Run(t, new(utilsTestSuite))
 }

@@ -17,6 +17,10 @@ type s3ClientTestSuite struct {
 	suite.Suite
 }
 
+func TestS3ClientTestSuite(t *testing.T) {
+	suite.Run(t, new(s3ClientTestSuite))
+}
+
 func (suite *s3ClientTestSuite) TestCreatePresignedPutObjectRequest_ReturnsErrorWhenS3Errors() {
 	mockPresignClient := MockPresignClient{
 		PresignPutObjectResult: nil,
@@ -235,8 +239,4 @@ func (suite *s3ClientTestSuite) TestPutObject_UpdatesExistingObject() {
 
 	_, err = s3Client.DeleteObject(context.TODO(), objectKey)
 	suite.Require().NoError(err)
-}
-
-func TestS3ClientTestSuite(t *testing.T) {
-	suite.Run(t, new(s3ClientTestSuite))
 }

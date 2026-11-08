@@ -21,6 +21,10 @@ func (suite *authTestSuite) SetupSuite() {
 	suite.auth = testutils.NewAuth(suite.T(), nil, nil)
 }
 
+func TestAuthTestSuite(t *testing.T) {
+	suite.Run(t, new(authTestSuite))
+}
+
 func (suite *authTestSuite) TestCreateSessionCookieValue_ReturnsValue() {
 	value := suite.auth.CreateSessionCookieValue()
 
@@ -149,8 +153,4 @@ func (suite *authTestSuite) TestSetSessionCookie_SetsCookie() {
 	suite.Require().Empty(sessionCookie.Domain)
 	suite.Require().True(sessionCookie.Secure)
 	suite.Require().True(sessionCookie.HttpOnly)
-}
-
-func TestAuthTestSuite(t *testing.T) {
-	suite.Run(t, new(authTestSuite))
 }
