@@ -18,7 +18,7 @@ type authTestSuite struct {
 }
 
 func (suite *authTestSuite) SetupSuite() {
-	suite.auth = testutils.NewAuth(suite.T(), testutils.ADMIN_PASSWORD_HASH, testutils.SESSION_SECRET)
+	suite.auth = testutils.NewAuth(suite.T(), nil, nil)
 }
 
 func (suite *authTestSuite) TestCreateSessionCookieValue_ReturnsValue() {
@@ -48,8 +48,10 @@ func (suite *authTestSuite) TestGenerateHmacSha256Signature_ReturnsDifferentSign
 }
 
 func (suite *authTestSuite) TestGenerateHmacSha256Signature_ReturnsDifferentSignaturesForDifferentSecrets() {
-	auth1 := testutils.NewAuth(suite.T(), testutils.ADMIN_PASSWORD_HASH, "a")
-	auth2 := testutils.NewAuth(suite.T(), testutils.ADMIN_PASSWORD_HASH, "b")
+	secret1 := "a"
+	secret2 := "b"
+	auth1 := testutils.NewAuth(suite.T(), nil, &secret1)
+	auth2 := testutils.NewAuth(suite.T(), nil, &secret2)
 
 	payload := "abc"
 	signature1 := auth1.GenerateHmacSha256Signature(payload)

@@ -17,7 +17,7 @@ type middlewareTestSuite struct {
 }
 
 func (suite *middlewareTestSuite) SetupSuite() {
-	suite.auth = testutils.NewAuth(suite.T(), testutils.ADMIN_PASSWORD_HASH, testutils.SESSION_SECRET)
+	suite.auth = testutils.NewAuth(suite.T(), nil, nil)
 	suite.middleware = middleware.New(suite.auth)
 }
 

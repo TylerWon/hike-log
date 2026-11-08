@@ -39,7 +39,7 @@ func (suite *hikesHandlerTestSuite) SetupSuite() {
 	suite.suiteDB = testutils.NewTestSuiteDB(suite.T())
 	suite.store = testutils.NewStore(suite.T(), suite.suiteDB)
 	suite.s3Client = testutils.NewS3Client(suite.T())
-	suite.auth = testutils.NewAuth(suite.T(), testutils.ADMIN_PASSWORD_HASH, testutils.SESSION_SECRET)
+	suite.auth = testutils.NewAuth(suite.T(), nil, nil)
 	suite.middleware = middleware.New(suite.auth)
 	suite.router = testutils.NewHikesRouter(handler.NewHikesHandler(suite.store, suite.s3Client), suite.middleware)
 }
