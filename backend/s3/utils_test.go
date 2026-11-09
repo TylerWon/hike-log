@@ -32,7 +32,7 @@ func (suite *utilsTestSuite) TestCreatePhotoObjectKey_ReturnsUniqueKeys() {
 
 func (suite *utilsTestSuite) TestCreatePhotoObjectURL_ReturnsPathStyleURLInLocalEnvironment() {
 	objectKey := "test"
-	awsEndpointURL := os.Getenv("AWS_PUBLIC_ENDPOINT_URL")
+	awsEndpointURL := os.Getenv("AWS_EXTERNAL_ENDPOINT_URL")
 	bucketName := os.Getenv("AWS_S3_BUCKET_NAME")
 
 	url := CreatePhotoObjectURL(objectKey, "local")

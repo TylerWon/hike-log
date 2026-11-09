@@ -19,7 +19,7 @@ func CreatePhotoObjectURL(objectKey string, env string) string {
 	bucketName := os.Getenv("AWS_S3_BUCKET_NAME")
 
 	if env == "local" {
-		endpoint := os.Getenv("AWS_PUBLIC_ENDPOINT_URL")
+		endpoint := os.Getenv("AWS_EXTERNAL_ENDPOINT_URL")
 		return fmt.Sprintf("%s/%s/%s", endpoint, bucketName, objectKey)
 	}
 
@@ -33,7 +33,7 @@ func GetPhotoObjectKey(objectURL string, env string) string {
 	bucketName := os.Getenv("AWS_S3_BUCKET_NAME")
 
 	if env == "local" {
-		endpoint := os.Getenv("AWS_PUBLIC_ENDPOINT_URL")
+		endpoint := os.Getenv("AWS_EXTERNAL_ENDPOINT_URL")
 		prefix := fmt.Sprintf("%s/%s/", endpoint, bucketName)
 		return strings.TrimPrefix(objectURL, prefix)
 	}

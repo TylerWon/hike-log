@@ -49,7 +49,7 @@ func (suite *s3ClientTestSuite) TestCreatePresignedPutObjectRequest_ReturnsPresi
 	// The presigned URL has dynamic values so only verify certain parts of it
 	parsedURL, err := url.Parse(request.URL)
 	suite.Require().NoError(err)
-	suite.Require().Contains(os.Getenv("AWS_PUBLIC_ENDPOINT_URL"), parsedURL.Host)
+	suite.Require().Contains(os.Getenv("AWS_EXTERNAL_ENDPOINT_URL"), parsedURL.Host)
 	suite.Require().Contains(parsedURL.Path, objectKey)
 
 	parsedQueryParams, err := url.ParseQuery(parsedURL.RawQuery)

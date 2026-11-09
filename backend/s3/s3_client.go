@@ -90,7 +90,7 @@ func NewS3Client() (S3Client, error) {
 			o.UsePathStyle = true
 		})
 
-		publicEndpoint := os.Getenv("AWS_PUBLIC_ENDPOINT_URL")
+		publicEndpoint := os.Getenv("AWS_EXTERNAL_ENDPOINT_URL")
 		presignS3Client := s3Sdk.NewFromConfig(cfg, func(o *s3Sdk.Options) {
 			// Docker DNS cannot resolve default virtual-hosted-style addresses so use path-style instead
 			o.UsePathStyle = true
