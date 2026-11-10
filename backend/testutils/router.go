@@ -7,12 +7,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Creates a full application router to use during testing.
-func NewRouter(h *handler.Handler, m *middleware.Middleware) *gin.Engine {
-	gin.SetMode(gin.TestMode)
-	return router.New(h, m)
-}
-
 // Creates a test router with only auth routes.
 func NewAuthRouter(h *handler.AuthHandler) *gin.Engine {
 	gin.SetMode(gin.TestMode)

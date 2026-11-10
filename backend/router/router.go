@@ -1,7 +1,7 @@
 package router
 
 import (
-	"os"
+	"errors"
 
 	"github.com/TylerWon/hike-log/backend/handler"
 	"github.com/TylerWon/hike-log/backend/middleware"
@@ -12,10 +12,14 @@ import (
 const API_BASE_PATH = "/api/v1"
 
 // Creates a Gin router and registers middleware and API routes.
-func New(h *handler.Handler, m *middleware.Middleware) *gin.Engine {
+func New(h *handler.Handler, m *middleware.Middleware, frontendURL string) (*gin.Engine, error) {
+	if frontendURL == "" {
+		return nil, errors.New("frontendURL is empty")
+	}
+
 	router := gin.Default()
 
-	configureCORSMiddleware(router)
+	configureCORSMiddleware(router, frontendURL)
 
 	apiRouteGroup := router.Group(API_BASE_PATH)
 	RegisterAuthRoutes(apiRouteGroup, h.Auth)
@@ -24,19 +28,19 @@ func New(h *handler.Handler, m *middleware.Middleware) *gin.Engine {
 
 	router.GET("/health", handler.HealthCheck)
 
-	return router
+	return router, nil
 }
 
 // Configures CORS middleware on the router.
-func configureCORSMiddleware(router *gin.Engine) {
-	corsConfig := cors.DefaultConfig()
+func configureCORSMiddleware(router *gin.Engine, frontendURL string) {
+	cfg := cors.DefaultConfig()
 
 	// Allow frontend to access API
-	corsConfig.AllowOrigins = []string{os.Getenv("FRONTEND_URL")}
+	cfg.AllowOrigins = []string{frontendURL}
 	// Allow frontend to pass session cookie for auth
-	corsConfig.AllowCredentials = true
+	cfg.AllowCredentials = true
 
-	router.Use(cors.New(corsConfig))
+	router.Use(cors.New(cfg))
 }
 
 // Registers authentication API routes under the given apiRouteGroup.

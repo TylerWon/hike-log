@@ -58,7 +58,11 @@ func main() {
 
 	middleware := middleware.New(auth)
 	handler := handler.NewHandler(store, photoStorage, auth)
-	router := router.New(handler, middleware)
+
+	router, err := router.New(handler, middleware, os.Getenv("FRONTEND_URL"))
+	if err != nil {
+		log.Fatal("Failed to setup router: ", err)
+	}
 
 	router.Run()
 }
