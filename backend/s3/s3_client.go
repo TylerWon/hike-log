@@ -4,11 +4,10 @@ import (
 	"context"
 	"errors"
 	"io"
-	"os"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	v4 "github.com/aws/aws-sdk-go-v2/aws/signer/v4"
-	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/credentials"
 	s3Sdk "github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 )
@@ -74,43 +73,72 @@ type client interface {
 }
 
 // Creates a new S3Client.
-func NewS3Client() (S3Client, error) {
-	// Resolve AWS credentials using the SDK's default credential chain (i.e. (env vars, then ~/.aws/config, then
-	// ~/.aws/credentials)
-	cfg, err := config.LoadDefaultConfig(context.TODO())
-	if err != nil {
-		return nil, err
+func NewS3Client(
+	env string,
+	accessKeyID string,
+	secretAccessKey string,
+	region string,
+	endpointURL string,
+	externalEndpointURL string,
+	bucketName string,
+) (S3Client, error) {
+	if env == "" {
+		return nil, errors.New("env is empty")
+	} else if accessKeyID == "" {
+		return nil, errors.New("accessKeyID is empty")
+	} else if secretAccessKey == "" {
+		return nil, errors.New("secretAccessKey is empty")
+	} else if region == "" {
+		return nil, errors.New("region is empty")
+	} else if bucketName == "" {
+		return nil, errors.New("bucketName is empty")
+	}
+
+	if env == "local" {
+		if endpointURL == "" {
+			return nil, errors.New("endpointURL is empty")
+		} else if externalEndpointURL == "" {
+			return nil, errors.New("externalEndpointURL is empty")
+		}
+	}
+
+	cfg := aws.Config{
+		Region: region,
+		Credentials: aws.NewCredentialsCache(
+			credentials.NewStaticCredentialsProvider(accessKeyID, secretAccessKey, ""),
+		),
 	}
 
 	var client *s3Sdk.Client
 	var presignClient *s3Sdk.PresignClient
-	if os.Getenv("ENV") == "local" {
+	if env == "local" {
 		client = s3Sdk.NewFromConfig(cfg, func(o *s3Sdk.Options) {
 			// Docker DNS cannot resolve default virtual-hosted-style addresses so use path-style instead
 			o.UsePathStyle = true
+
+			// Override default AWS API endpoint used by the client to be endpointURL (ex. "localstack:4566").
+			// This ensures client interacts with LocalStack and not the true AWS API.
+			o.BaseEndpoint = aws.String(endpointURL)
 		})
 
-		publicEndpoint := os.Getenv("AWS_EXTERNAL_ENDPOINT_URL")
 		presignS3Client := s3Sdk.NewFromConfig(cfg, func(o *s3Sdk.Options) {
 			// Docker DNS cannot resolve default virtual-hosted-style addresses so use path-style instead
 			o.UsePathStyle = true
 
-			// Ensures presign URLs use a publicly accessible endpoint (i.e. "localhost:4566" instead of "localstack:4566").
-			// Only services running in Docker know how to resolve the "localstack" hostname. Presign URLs are used in the
-			// browser (i.e. outside of Docker) so they cannot contain this hostname. As a result, "localhost:4566" must be
-			// used instead as it is accessible by the host machine and maps to the Localstack Docker service via port-
+			// Override default AWS API endpoint used by the presignClient to be externalEndpointURL
+			// (ex. "localhost:4566"). This ensures presignClient interacts with LocalStack and not the true AWS API
+			// and that this endpoint is used in the presign URLs it creates.
+			//
+			// Only services running in Docker know how to resolve the "localstack" hostname. Since presign URLs are
+			// used in the browser, they cannot contain that hostname. As a result, "localhost:4566" should be used
+			// instead as it is accessible by the host machine and maps to the LocalStack Docker service via port-
 			// forwarding.
-			o.BaseEndpoint = aws.String(publicEndpoint)
+			o.BaseEndpoint = aws.String(externalEndpointURL)
 		})
 		presignClient = s3Sdk.NewPresignClient(presignS3Client)
 	} else {
 		client = s3Sdk.NewFromConfig(cfg)
 		presignClient = s3Sdk.NewPresignClient(client)
-	}
-
-	bucketName := os.Getenv("AWS_S3_BUCKET_NAME")
-	if bucketName == "" {
-		return nil, errors.New("Bucket name could not be retrieved from AWS_S3_BUCKET_NAME env var")
 	}
 
 	return &s3ClientImpl{client, presignClient, bucketName}, nil

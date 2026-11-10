@@ -37,7 +37,7 @@ type hikesHandlerTestSuite struct {
 func (suite *hikesHandlerTestSuite) SetupSuite() {
 	suite.suiteDB = testutils.NewTestSuiteDB(suite.T())
 	suite.store = testutils.NewStore(suite.T(), suite.suiteDB)
-	suite.s3Client = testutils.NewS3Client(suite.T())
+	suite.s3Client = testutils.NewS3Client(suite.T(), nil, nil, nil, nil, nil, nil, nil)
 	suite.photoStorage = testutils.NewPhotoStorage(suite.T(), suite.s3Client, nil, nil, nil, nil)
 	suite.auth = testutils.NewAuth(suite.T(), nil, nil)
 	suite.middleware = middleware.New(suite.auth)

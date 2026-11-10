@@ -27,7 +27,15 @@ func main() {
 		log.Fatal("Failed to create store: ", err)
 	}
 
-	s3Client, err := s3.NewS3Client()
+	s3Client, err := s3.NewS3Client(
+		os.Getenv("ENV"),
+		os.Getenv("AWS_ACCESS_KEY_ID"),
+		os.Getenv("AWS_SECRET_ACCESS_KEY"),
+		os.Getenv("AWS_REGION"),
+		os.Getenv("AWS_ENDPOINT_URL"),
+		os.Getenv("AWS_EXTERNAL_ENDPOINT_URL"),
+		os.Getenv("AWS_S3_BUCKET_NAME"),
+	)
 	if err != nil {
 		log.Fatal("Failed to setup S3 client: ", err)
 	}
