@@ -9,7 +9,6 @@ import (
 )
 
 type MockS3Client struct {
-	CreatePhotoObjectKeyResult            string
 	CreatePresignedPutObjectRequestResult *v4.PresignedHTTPRequest
 	CreatePresignedPutObjectRequestError  error
 	DeleteObjectResult                    *s3Sdk.DeleteObjectOutput
@@ -22,10 +21,6 @@ type MockS3Client struct {
 	ListObjectsError                      error
 	PutObjectResult                       *s3Sdk.PutObjectOutput
 	PutObjectError                        error
-}
-
-func (m *MockS3Client) CreatePhotoObjectKey(hikeId uint) string {
-	return m.CreatePhotoObjectKeyResult
 }
 
 func (m *MockS3Client) CreatePresignedPutObjectRequest(

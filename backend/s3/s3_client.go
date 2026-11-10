@@ -97,7 +97,7 @@ func NewS3Client() (S3Client, error) {
 
 			// Ensures presign URLs use a publicly accessible endpoint (i.e. "localhost:4566" instead of "localstack:4566").
 			// Only services running in Docker know how to resolve the "localstack" hostname. Presign URLs are used in the
-			// browser (i.e.) outside of Docker so they cannot contain this hostname. As a result, "localhost:4566" must be
+			// browser (i.e. outside of Docker) so they cannot contain this hostname. As a result, "localhost:4566" must be
 			// used instead as it is accessible by the host machine and maps to the Localstack Docker service via port-
 			// forwarding.
 			o.BaseEndpoint = aws.String(publicEndpoint)

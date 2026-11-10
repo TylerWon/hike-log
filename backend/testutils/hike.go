@@ -7,12 +7,19 @@ import (
 
 	"github.com/TylerWon/hike-log/backend/models"
 	"github.com/TylerWon/hike-log/backend/models/types"
-	"github.com/TylerWon/hike-log/backend/s3"
+	"github.com/TylerWon/hike-log/backend/photostorage"
 	"github.com/TylerWon/hike-log/backend/store"
 )
 
 // Constructs n Hikes and returns them. Optionally can add Photos to the Hikes and save the Hikes to the database.
-func ConstructHikes(t *testing.T, n int, store store.Store, photos bool, save bool) []models.Hike {
+func ConstructHikes(
+	t *testing.T,
+	n int,
+	store store.Store,
+	photoStorage photostorage.PhotoStorage,
+	photos bool,
+	save bool,
+) []models.Hike {
 	t.Helper()
 
 	var hikes []models.Hike
@@ -30,10 +37,10 @@ func ConstructHikes(t *testing.T, n int, store store.Store, photos bool, save bo
 		}
 
 		if photos {
-			objectKey := s3.CreatePhotoObjectKey(uint(i))
+			objectKey := photoStorage.CreatePhotoObjectKey(uint(i))
 			hike.Photos = []models.Photo{
 				{
-					SrcUrl:       s3.CreatePhotoObjectURL(objectKey, "local"),
+					SrcUrl:       photoStorage.GetPhotoObjectURL(objectKey),
 					Caption:      "Caption",
 					DisplayOrder: 1,
 				},

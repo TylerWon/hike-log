@@ -6,6 +6,7 @@ import (
 
 	"github.com/TylerWon/hike-log/backend/database"
 	"github.com/TylerWon/hike-log/backend/models"
+	"github.com/TylerWon/hike-log/backend/photostorage"
 	"github.com/TylerWon/hike-log/backend/store"
 	"github.com/TylerWon/hike-log/backend/testutils"
 	"github.com/stretchr/testify/suite"
@@ -14,13 +15,15 @@ import (
 
 type storeTestSuite struct {
 	suite.Suite
-	suiteDB *testutils.TestSuiteDB
-	store   store.Store
+	photoStorage photostorage.PhotoStorage
+	suiteDB      *testutils.TestSuiteDB
+	store        store.Store
 }
 
 func (suite *storeTestSuite) SetupSuite() {
 	suite.suiteDB = testutils.NewTestSuiteDB(suite.T())
 	suite.store = testutils.NewStore(suite.T(), suite.suiteDB)
+	suite.photoStorage = testutils.NewPhotoStorage(suite.T(), nil, nil, nil, nil, nil)
 }
 
 func (suite *storeTestSuite) TearDownSuite() {
@@ -42,14 +45,14 @@ func (suite *storeTestSuite) TestCreateRecord_ReturnsErrorWhenDBErrors() {
 	}
 	store := store.NewTestStore(&mockDatabase)
 
-	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, false, false)[0]
+	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, suite.photoStorage, false, false)[0]
 	err := store.CreateRecord(&hike)
 
 	suite.Require().Error(err)
 }
 
 func (suite *storeTestSuite) TestCreateRecord_CreatesModel() {
-	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, false, false)[0]
+	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, suite.photoStorage, false, false)[0]
 	err := suite.store.CreateRecord(&hike)
 
 	suite.Require().NoError(err)
@@ -60,7 +63,7 @@ func (suite *storeTestSuite) TestCreateRecord_CreatesModel() {
 }
 
 func (suite *storeTestSuite) TestCreateRecord_CreatesModels() {
-	hikes := testutils.ConstructHikes(suite.T(), 2, suite.store, false, false)
+	hikes := testutils.ConstructHikes(suite.T(), 2, suite.store, suite.photoStorage, false, false)
 	err := suite.store.CreateRecord(hikes)
 
 	suite.Require().NoError(err)
@@ -80,7 +83,7 @@ func (suite *storeTestSuite) TestDeleteRecord_ReturnsErrorWhenDBErrors() {
 	}
 	store := store.NewTestStore(&mockDatabase)
 
-	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)[0]
+	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, suite.photoStorage, false, true)[0]
 	err := store.DeleteRecord(&hike)
 	suite.Require().Error(err)
 }
@@ -91,7 +94,7 @@ func (suite *storeTestSuite) TestDeleteRecord_NoErrorWhenHikeDoesNotExist() {
 }
 
 func (suite *storeTestSuite) TestDeleteRecord_DeletesModel() {
-	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)[0]
+	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, suite.photoStorage, false, true)[0]
 	err := suite.store.DeleteRecord(&hike)
 	suite.Require().NoError(err)
 
@@ -100,7 +103,7 @@ func (suite *storeTestSuite) TestDeleteRecord_DeletesModel() {
 }
 
 func (suite *storeTestSuite) TestDeleteRecord_DeletesModels() {
-	hikes := testutils.ConstructHikes(suite.T(), 2, suite.store, false, true)
+	hikes := testutils.ConstructHikes(suite.T(), 2, suite.store, suite.photoStorage, false, true)
 	err := suite.store.DeleteRecord(&hikes)
 	suite.Require().NoError(err)
 
@@ -121,14 +124,14 @@ func (suite *storeTestSuite) TestGetHikeByID_ReturnsErrorWhenDBErrors() {
 	}
 	store := store.NewTestStore(&mockDatabase)
 
-	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)[0]
+	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, suite.photoStorage, false, true)[0]
 	_, err := store.GetHikeByID(hike.ID)
 
 	suite.Require().Error(err)
 }
 
 func (suite *storeTestSuite) TestGetHikeByID_ReturnsHike() {
-	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)[0]
+	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, suite.photoStorage, false, true)[0]
 	result, err := suite.store.GetHikeByID(hike.ID)
 
 	suite.Require().NoError(err)
@@ -146,7 +149,7 @@ func (suite *storeTestSuite) TestGetPhotoByID_ReturnsErrorWhenDBErrors() {
 	}
 	store := store.NewTestStore(&mockDatabase)
 
-	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, true, true)[0]
+	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, suite.photoStorage, true, true)[0]
 	photo := hike.Photos[0]
 	_, err := store.GetPhotoByID(photo.ID)
 
@@ -154,7 +157,7 @@ func (suite *storeTestSuite) TestGetPhotoByID_ReturnsErrorWhenDBErrors() {
 }
 
 func (suite *storeTestSuite) TestGetPhotoByID_ReturnsPhoto() {
-	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, true, true)[0]
+	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, suite.photoStorage, true, true)[0]
 	photo := hike.Photos[0]
 	result, err := suite.store.GetPhotoByID(photo.ID)
 
@@ -168,14 +171,14 @@ func (suite *storeTestSuite) TestListHikes_ReturnsErrorWhenDBErrors() {
 	}
 	store := store.NewTestStore(&mockDatabase)
 
-	testutils.ConstructHikes(suite.T(), 2, suite.store, true, true)
+	testutils.ConstructHikes(suite.T(), 2, suite.store, suite.photoStorage, true, true)
 	_, err := store.ListHikes()
 
 	suite.Require().Error(err)
 }
 
 func (suite *storeTestSuite) TestListHikes_ReturnsHikes() {
-	hikes := testutils.ConstructHikes(suite.T(), 2, suite.store, true, true)
+	hikes := testutils.ConstructHikes(suite.T(), 2, suite.store, suite.photoStorage, true, true)
 	result, err := suite.store.ListHikes()
 
 	suite.Require().NoError(err)
@@ -189,7 +192,7 @@ func (suite *storeTestSuite) TestUpdateRecord_ReturnsErrorWhenDBErrors() {
 	}
 	store := store.NewTestStore(&mockDatabase)
 
-	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)[0]
+	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, suite.photoStorage, false, true)[0]
 
 	hike.Difficulty = 5
 	hike.TrailName = "Other trail name"
@@ -203,7 +206,7 @@ func (suite *storeTestSuite) TestUpdateRecord_NoErrorWhenHikeDoesNotExist() {
 }
 
 func (suite *storeTestSuite) TestUpdateRecord_UpdatesModel() {
-	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, false, true)[0]
+	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, suite.photoStorage, false, true)[0]
 
 	hike.Difficulty = 5
 	hike.TrailName = "Other trail name"

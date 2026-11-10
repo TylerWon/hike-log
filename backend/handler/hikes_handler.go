@@ -4,30 +4,29 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 	"strconv"
 	"strings"
 
 	"github.com/TylerWon/hike-log/backend/models"
 	"github.com/TylerWon/hike-log/backend/models/types"
-	"github.com/TylerWon/hike-log/backend/s3"
+	"github.com/TylerWon/hike-log/backend/photostorage"
 	"github.com/TylerWon/hike-log/backend/store"
 	"github.com/gin-gonic/gin"
 )
 
 // HikesHandler handles hike API routes.
 type HikesHandler struct {
-	s3Client s3.S3Client
-	store    store.Store
+	photoStorage photostorage.PhotoStorage
+	store        store.Store
 }
 
 // Creates a new HikesHandler.
-func NewHikesHandler(store store.Store, s3Client s3.S3Client) *HikesHandler {
+func NewHikesHandler(store store.Store, photoStorage photostorage.PhotoStorage) *HikesHandler {
 	_, err := registerCustomValidators()
 	if err != nil {
 		log.Fatal("Error while registering custom validators: ", err)
 	}
-	return &HikesHandler{s3Client: s3Client, store: store}
+	return &HikesHandler{photoStorage: photoStorage, store: store}
 }
 
 /*
@@ -117,7 +116,7 @@ func (h *HikesHandler) CreatePhotos(c *gin.Context) {
 			return
 		}
 
-		exists, err := h.s3Client.DoesObjectExist(c, item.ObjectKey)
+		exists, err := h.photoStorage.DoesPhotoExist(c, item.ObjectKey)
 		if err != nil {
 			log.Printf("Unable to verify if photo %d (ObjectKey=%s) exists in the S3 bucket: %v", idx, item.ObjectKey, err)
 			item := createPhotosResponseItem{
@@ -137,9 +136,8 @@ func (h *HikesHandler) CreatePhotos(c *gin.Context) {
 			continue
 		}
 
-		srcURL := s3.CreatePhotoObjectURL(item.ObjectKey, os.Getenv("ENV"))
 		photo := models.Photo{
-			SrcUrl:       srcURL,
+			SrcUrl:       h.photoStorage.GetPhotoObjectURL(item.ObjectKey),
 			Caption:      item.Caption,
 			DisplayOrder: item.DisplayOrder,
 			HikeID:       params.HikeID,
@@ -197,11 +195,9 @@ func (h *HikesHandler) CreatePresignedURLs(c *gin.Context) {
 
 	var res CreatePresignedURLsResponse
 	for idx, item := range req {
-		objectKey := s3.CreatePhotoObjectKey(params.HikeID)
-
-		presignedReq, err := h.s3Client.CreatePresignedPutObjectRequest(
+		presignedURL, objectKey, err := h.photoStorage.CreatePresignedUploadURL(
 			c,
-			objectKey,
+			params.HikeID,
 			item.ContentType,
 			int64(item.ContentLength),
 		)
@@ -216,7 +212,7 @@ func (h *HikesHandler) CreatePresignedURLs(c *gin.Context) {
 			Index:   *item.Index,
 			Success: true,
 			Result: &createPresignedURLsResponseItemResult{
-				PresignedURL: presignedReq.URL,
+				PresignedURL: presignedURL,
 				ObjectKey:    objectKey,
 			},
 		}
@@ -262,26 +258,11 @@ func (h *HikesHandler) DeleteHike(c *gin.Context) {
 		return
 	}
 
-	objectKeyPrefix := fmt.Sprintf("hikes/%d/photos/", params.HikeID)
-	result, err := h.s3Client.ListObjects(c, objectKeyPrefix)
+	err = h.photoStorage.DeletePhotosForHike(c, params.HikeID)
 	if err != nil {
-		log.Printf("Failed to list S3 Photo objects for Hike (id=%d): %v", params.HikeID, err)
+		log.Printf("Failed to delete S3 Photo objects for Hike (id=%d): %v", params.HikeID, err)
 		c.JSON(http.StatusOK, gin.H{"message": "ok"}) // return OK since Hike deleted, only orphan S3 objects
 		return
-	}
-
-	if len(result.Contents) > 0 {
-		var objectKeys []string
-		for _, object := range result.Contents {
-			objectKeys = append(objectKeys, *object.Key)
-		}
-
-		_, err := h.s3Client.DeleteObjects(c, objectKeys)
-		if err != nil {
-			log.Printf("Failed to delete S3 Photo objects for Hike (id=%d): %v", params.HikeID, err)
-			c.JSON(http.StatusOK, gin.H{"message": "ok"}) // return OK since Hike deleted, only orphan S3 objects
-			return
-		}
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "ok"})

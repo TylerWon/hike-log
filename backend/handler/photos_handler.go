@@ -3,27 +3,26 @@ package handler
 import (
 	"log"
 	"net/http"
-	"os"
 
 	"github.com/TylerWon/hike-log/backend/models"
-	"github.com/TylerWon/hike-log/backend/s3"
+	"github.com/TylerWon/hike-log/backend/photostorage"
 	"github.com/TylerWon/hike-log/backend/store"
 	"github.com/gin-gonic/gin"
 )
 
 // PhotosHandler handles photo API routes.
 type PhotosHandler struct {
-	s3Client s3.S3Client
-	store    store.Store
+	photoStorage photostorage.PhotoStorage
+	store        store.Store
 }
 
 // Creates a new PhotosHandler.
-func NewPhotosHandler(store store.Store, s3Client s3.S3Client) *PhotosHandler {
+func NewPhotosHandler(store store.Store, photoStorage photostorage.PhotoStorage) *PhotosHandler {
 	_, err := registerCustomValidators()
 	if err != nil {
 		log.Fatal("Error while registering custom validators: ", err)
 	}
-	return &PhotosHandler{s3Client: s3Client, store: store}
+	return &PhotosHandler{photoStorage: photoStorage, store: store}
 }
 
 /*
@@ -58,8 +57,7 @@ func (h *PhotosHandler) DeletePhoto(c *gin.Context) {
 		return
 	}
 
-	objectKey := s3.GetPhotoObjectKey(photo.SrcUrl, os.Getenv("ENV"))
-	_, err = h.s3Client.DeleteObject(c, objectKey)
+	err = h.photoStorage.DeletePhoto(c, photo.SrcUrl)
 	if err != nil {
 		log.Printf("Failed to delete S3 photo object for Photo (id=%d): %v", params.PhotoID, err)
 		c.JSON(http.StatusOK, gin.H{"message": "ok"}) // return OK since Photo deleted, only orphan S3 object

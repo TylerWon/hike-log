@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/TylerWon/hike-log/backend/auth"
-	"github.com/TylerWon/hike-log/backend/s3"
+	"github.com/TylerWon/hike-log/backend/photostorage"
 	"github.com/TylerWon/hike-log/backend/store"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -20,11 +20,11 @@ type Handler struct {
 }
 
 // Creates a new Handler.
-func NewHandler(store store.Store, s3Client s3.S3Client, auth auth.Auth) *Handler {
+func NewHandler(store store.Store, photoStorage photostorage.PhotoStorage, auth auth.Auth) *Handler {
 	return &Handler{
 		Auth:   NewAuthHandler(auth),
-		Hikes:  NewHikesHandler(store, s3Client),
-		Photos: NewPhotosHandler(store, s3Client),
+		Hikes:  NewHikesHandler(store, photoStorage),
+		Photos: NewPhotosHandler(store, photoStorage),
 	}
 }
 
