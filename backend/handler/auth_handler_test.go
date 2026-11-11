@@ -21,7 +21,7 @@ type authHandlerTestSuite struct {
 
 func (suite *authHandlerTestSuite) SetupSuite() {
 	suite.auth = testutils.NewAuth(suite.T(), config.AuthConfig{})
-	suite.router = testutils.NewAuthRouter(handler.NewAuthHandler(suite.auth))
+	suite.router = testutils.NewAuthRouter(testutils.NewAuthHandler(suite.T(), suite.auth))
 }
 
 func TestAuthTestSuite(t *testing.T) {

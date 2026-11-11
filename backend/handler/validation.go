@@ -2,6 +2,7 @@ package handler
 
 import (
 	"errors"
+	"fmt"
 	"math"
 	"reflect"
 	"strconv"
@@ -24,12 +25,23 @@ var VALID_IMAGE_TYPES = map[string]struct{}{
 func registerCustomValidators() (*validator.Validate, error) {
 	v, ok := binding.Validator.Engine().(*validator.Validate)
 	if !ok {
-		return nil, errors.New("Failed to register custom validators")
+		return nil, errors.New("Failed to obtain validator engine")
 	}
 
-	v.RegisterValidation("divisibleByHalf", divisibleByHalfValidator)
-	v.RegisterValidation("validImageType", validImageTypeValidator)
-	v.RegisterValidation("validObjectKey", validObjectKeyValidator)
+	err := v.RegisterValidation("divisibleByHalf", divisibleByHalfValidator)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to register divisibleByHalf validator: %w", err)
+	}
+
+	err = v.RegisterValidation("validImageType", validImageTypeValidator)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to register validImageType validator: %w", err)
+	}
+
+	err = v.RegisterValidation("validObjectKey", validObjectKeyValidator)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to register validObjectKey validator: %w", err)
+	}
 
 	return v, nil
 }

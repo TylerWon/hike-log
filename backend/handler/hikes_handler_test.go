@@ -42,7 +42,10 @@ func (suite *hikesHandlerTestSuite) SetupSuite() {
 	suite.photoStorage = testutils.NewPhotoStorage(suite.T(), suite.s3Client, "", config.AWSConfig{})
 	suite.auth = testutils.NewAuth(suite.T(), config.AuthConfig{})
 	suite.middleware = middleware.New(suite.auth)
-	suite.router = testutils.NewHikesRouter(handler.NewHikesHandler(suite.store, suite.photoStorage), suite.middleware)
+	suite.router = testutils.NewHikesRouter(
+		testutils.NewHikesHandler(suite.T(), suite.store, suite.photoStorage),
+		suite.middleware,
+	)
 }
 
 func (suite *hikesHandlerTestSuite) TearDownSuite() {
@@ -124,7 +127,7 @@ func (suite *hikesHandlerTestSuite) TestCreateHike_Returns400ErrorWhenRequestBod
 
 func (suite *hikesHandlerTestSuite) TestCreateHike_Returns500ErrorWhenDBErrors() {
 	mockStore := store.MockStore{CreateRecordError: errors.New("Something went wrong")}
-	hikesHandler := handler.NewHikesHandler(&mockStore, suite.photoStorage)
+	hikesHandler := testutils.NewHikesHandler(suite.T(), &mockStore, suite.photoStorage)
 	router := testutils.NewHikesRouter(hikesHandler, suite.middleware)
 
 	body := map[string]any{
@@ -381,7 +384,7 @@ func (suite *hikesHandlerTestSuite) TestCreatePhotos_ReturnsPartialErrorWhenS3Er
 		DoesPhotoExistResult: false,
 		DoesPhotoExistError:  errors.New("Something went wrong"),
 	}
-	hikesHandler := handler.NewHikesHandler(suite.store, &mockPhotoStorage)
+	hikesHandler := testutils.NewHikesHandler(suite.T(), suite.store, &mockPhotoStorage)
 	router := testutils.NewHikesRouter(hikesHandler, suite.middleware)
 
 	hikes := testutils.ConstructHikes(suite.T(), 1, suite.store, suite.photoStorage, false, true)
@@ -422,7 +425,7 @@ func (suite *hikesHandlerTestSuite) TestCreatePhotos_ReturnsPartialErrorWhenDBEr
 		CreateRecordError: errors.New("Something went wrong"),
 	}
 	mockPhotoStorage := photostorage.MockPhotoStorage{DoesPhotoExistResult: true}
-	hikesHandler := handler.NewHikesHandler(&mockStore, &mockPhotoStorage)
+	hikesHandler := testutils.NewHikesHandler(suite.T(), &mockStore, &mockPhotoStorage)
 	router := testutils.NewHikesRouter(hikesHandler, suite.middleware)
 
 	body := [](map[string]any){
@@ -667,7 +670,7 @@ func (suite *hikesHandlerTestSuite) TestCreatePresignedURLs_Returns500ErrorWhenD
 		GetHikeByIDResult: nil,
 		GetHikeByIDError:  errors.New("Something went wrong"),
 	}
-	hikesHandler := handler.NewHikesHandler(&mockStore, suite.photoStorage)
+	hikesHandler := testutils.NewHikesHandler(suite.T(), &mockStore, suite.photoStorage)
 	router := testutils.NewHikesRouter(hikesHandler, suite.middleware)
 
 	hikes := testutils.ConstructHikes(suite.T(), 1, suite.store, suite.photoStorage, false, true)
@@ -694,7 +697,7 @@ func (suite *hikesHandlerTestSuite) TestCreatePresignedURLs_ReturnsPartialErrorW
 	mockPhotoStorage := photostorage.MockPhotoStorage{
 		CreatePresignedUploadURLError: errors.New("Something went wrong"),
 	}
-	hikesHandler := handler.NewHikesHandler(suite.store, &mockPhotoStorage)
+	hikesHandler := testutils.NewHikesHandler(suite.T(), suite.store, &mockPhotoStorage)
 	router := testutils.NewHikesRouter(hikesHandler, suite.middleware)
 
 	hikes := testutils.ConstructHikes(suite.T(), 1, suite.store, suite.photoStorage, false, true)
@@ -820,7 +823,7 @@ func (suite *hikesHandlerTestSuite) TestDeleteHike_Returns500ErrorWhenDBErrors()
 	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, suite.photoStorage, true, true)[0]
 
 	mockStore := store.MockStore{DeleteRecordError: errors.New("Something went wrong")}
-	hikesHandler := handler.NewHikesHandler(&mockStore, suite.photoStorage)
+	hikesHandler := testutils.NewHikesHandler(suite.T(), &mockStore, suite.photoStorage)
 	router := testutils.NewHikesRouter(hikesHandler, suite.middleware)
 
 	res := testutils.SendRequest(
@@ -837,7 +840,7 @@ func (suite *hikesHandlerTestSuite) TestDeleteHike_DeletesHikeAndPhotosWhenS3Err
 	mockPhotoStorage := photostorage.MockPhotoStorage{
 		DeletePhotosForHikeError: errors.New("Something went wrong"),
 	}
-	hikesHandler := handler.NewHikesHandler(suite.store, &mockPhotoStorage)
+	hikesHandler := testutils.NewHikesHandler(suite.T(), suite.store, &mockPhotoStorage)
 	router := testutils.NewHikesRouter(hikesHandler, suite.middleware)
 
 	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, suite.photoStorage, true, true)[0]
@@ -915,7 +918,7 @@ func (suite *hikesHandlerTestSuite) TestListHike_Returns500ErrorWhenDBErrors() {
 		ListHikesResult: nil,
 		ListHikesError:  errors.New("Something went wrong"),
 	}
-	hikesHandler := handler.NewHikesHandler(&mockStore, suite.photoStorage)
+	hikesHandler := testutils.NewHikesHandler(suite.T(), &mockStore, suite.photoStorage)
 	router := testutils.NewHikesRouter(hikesHandler, suite.middleware)
 
 	testutils.ConstructHikes(suite.T(), 2, suite.store, suite.photoStorage, true, true)
@@ -1052,7 +1055,7 @@ func (suite *hikesHandlerTestSuite) TestUpdateHike_Returns500ErrorWhenDBErrors()
 		GetHikeByIDResult: &hike,
 		UpdateRecordError: errors.New("Something went wrong"),
 	}
-	hikesHandler := handler.NewHikesHandler(&mockStore, suite.photoStorage)
+	hikesHandler := testutils.NewHikesHandler(suite.T(), &mockStore, suite.photoStorage)
 	router := testutils.NewHikesRouter(hikesHandler, suite.middleware)
 
 	body := map[string]any{

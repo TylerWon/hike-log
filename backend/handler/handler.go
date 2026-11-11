@@ -2,6 +2,7 @@ package handler
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -20,12 +21,27 @@ type Handler struct {
 }
 
 // Creates a new Handler.
-func NewHandler(store store.Store, photoStorage photostorage.PhotoStorage, auth auth.Auth) *Handler {
-	return &Handler{
-		Auth:   NewAuthHandler(auth),
-		Hikes:  NewHikesHandler(store, photoStorage),
-		Photos: NewPhotosHandler(store, photoStorage),
+func NewHandler(store store.Store, photoStorage photostorage.PhotoStorage, auth auth.Auth) (*Handler, error) {
+	authHandler, err := NewAuthHandler(auth)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to create auth handler: %w", err)
 	}
+
+	hikesHandler, err := NewHikesHandler(store, photoStorage)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to create hikes handler: %w", err)
+	}
+
+	photosHandler, err := NewPhotosHandler(store, photoStorage)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to create photos handler: %w", err)
+	}
+
+	return &Handler{
+		Auth:   authHandler,
+		Hikes:  hikesHandler,
+		Photos: photosHandler,
+	}, nil
 }
 
 // Returns a 200 OK for application health checks.

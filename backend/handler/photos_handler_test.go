@@ -10,7 +10,6 @@ import (
 
 	"github.com/TylerWon/hike-log/backend/auth"
 	"github.com/TylerWon/hike-log/backend/config"
-	"github.com/TylerWon/hike-log/backend/handler"
 	"github.com/TylerWon/hike-log/backend/middleware"
 	"github.com/TylerWon/hike-log/backend/models"
 	"github.com/TylerWon/hike-log/backend/photostorage"
@@ -39,7 +38,10 @@ func (suite *photosHandlerTestSuite) SetupSuite() {
 	suite.photoStorage = testutils.NewPhotoStorage(suite.T(), suite.s3Client, "", config.AWSConfig{})
 	suite.auth = testutils.NewAuth(suite.T(), config.AuthConfig{})
 	suite.middleware = middleware.New(suite.auth)
-	suite.router = testutils.NewPhotosRouter(handler.NewPhotosHandler(suite.store, suite.photoStorage), suite.middleware)
+	suite.router = testutils.NewPhotosRouter(
+		testutils.NewPhotosHandler(suite.T(), suite.store, suite.photoStorage),
+		suite.middleware,
+	)
 }
 
 func (suite *photosHandlerTestSuite) TearDownSuite() {
@@ -96,7 +98,7 @@ func (suite *photosHandlerTestSuite) TestDeletePhoto_Returns404ErrorWhenPhotoDoe
 
 func (suite *photosHandlerTestSuite) TestDeletePhoto_Returns500ErrorWhenDBErrors() {
 	mockStore := store.MockStore{GetPhotoByIDError: errors.New("Something went wrong")}
-	photosHandler := handler.NewPhotosHandler(&mockStore, suite.photoStorage)
+	photosHandler := testutils.NewPhotosHandler(suite.T(), &mockStore, suite.photoStorage)
 	router := testutils.NewPhotosRouter(photosHandler, suite.middleware)
 
 	photo := testutils.ConstructHikes(suite.T(), 1, suite.store, suite.photoStorage, true, true)[0].Photos[0]
@@ -115,7 +117,7 @@ func (suite *photosHandlerTestSuite) TestDeletePhoto_DeletesPhotoButS3ObjectDele
 	mockPhotoStorage := photostorage.MockPhotoStorage{
 		DeletePhotoError: errors.New("Something went wrong"),
 	}
-	photosHandler := handler.NewPhotosHandler(suite.store, &mockPhotoStorage)
+	photosHandler := testutils.NewPhotosHandler(suite.T(), suite.store, &mockPhotoStorage)
 	router := testutils.NewPhotosRouter(photosHandler, suite.middleware)
 
 	photo := testutils.ConstructHikes(suite.T(), 1, suite.store, suite.photoStorage, true, true)[0].Photos[0]
@@ -259,7 +261,7 @@ func (suite *photosHandlerTestSuite) TestUpdatePhoto_Returns500ErrorWhenDBErrors
 		GetPhotoByIDResult: &photo,
 		UpdateRecordError:  errors.New("Something went wrong"),
 	}
-	photosHandler := handler.NewPhotosHandler(&mockStore, suite.photoStorage)
+	photosHandler := testutils.NewPhotosHandler(suite.T(), &mockStore, suite.photoStorage)
 	router := testutils.NewPhotosRouter(photosHandler, suite.middleware)
 
 	body := map[string]any{
