@@ -1,9 +1,9 @@
 package testutils
 
 import (
-	"os"
 	"testing"
 
+	"github.com/TylerWon/hike-log/backend/config"
 	"github.com/TylerWon/hike-log/backend/photostorage"
 	"github.com/TylerWon/hike-log/backend/s3"
 )
@@ -12,38 +12,27 @@ import (
 func NewPhotoStorage(
 	t *testing.T,
 	s3Client s3.S3Client,
-	env *string,
-	bucketName *string,
-	region *string,
-	externalEndpointURL *string,
+	env string,
+	awsConfig config.AWSConfig,
 ) photostorage.PhotoStorage {
 	t.Helper()
 
-	envValue := os.Getenv("ENV")
-	bucketNameValue := os.Getenv("AWS_S3_BUCKET_NAME")
-	regionValue := os.Getenv("AWS_REGION")
-	externalEndpointURLValue := os.Getenv("AWS_EXTERNAL_ENDPOINT_URL")
+	testConfig := TestConfig()
 
-	if env != nil {
-		envValue = *env
+	if env != "" {
+		testConfig.Env = env
 	}
-	if bucketName != nil {
-		bucketNameValue = *bucketName
+	if awsConfig.S3.BucketName != "" {
+		testConfig.AWS.S3.BucketName = awsConfig.S3.BucketName
 	}
-	if region != nil {
-		regionValue = *region
+	if awsConfig.Region != "" {
+		testConfig.AWS.Region = awsConfig.Region
 	}
-	if externalEndpointURL != nil {
-		externalEndpointURLValue = *externalEndpointURL
+	if awsConfig.ExternalEndpointURL != "" {
+		testConfig.AWS.ExternalEndpointURL = awsConfig.ExternalEndpointURL
 	}
 
-	photoStorage, err := photostorage.New(
-		s3Client,
-		envValue,
-		bucketNameValue,
-		regionValue,
-		externalEndpointURLValue,
-	)
+	photoStorage, err := photostorage.New(s3Client, testConfig.Env, testConfig.AWS)
 	if err != nil {
 		t.Fatal("Failed to setup photo storage: ", err)
 	}

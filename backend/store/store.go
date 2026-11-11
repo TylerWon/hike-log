@@ -1,6 +1,7 @@
 package store
 
 import (
+	"github.com/TylerWon/hike-log/backend/config"
 	"github.com/TylerWon/hike-log/backend/database"
 	"github.com/TylerWon/hike-log/backend/models"
 	"gorm.io/gorm"
@@ -23,7 +24,7 @@ type storeImpl struct {
 }
 
 // Creates a Store connected to the database specified in the given dbConfig.
-func New(dbConfig database.DBConfig) (Store, error) {
+func New(dbConfig config.DBConfig) (Store, error) {
 	db, err := database.Connect(dbConfig)
 	if err != nil {
 		return nil, err

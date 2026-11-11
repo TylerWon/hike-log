@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/TylerWon/hike-log/backend/auth"
+	"github.com/TylerWon/hike-log/backend/config"
 	"github.com/TylerWon/hike-log/backend/middleware"
 	"github.com/TylerWon/hike-log/backend/testutils"
 	"github.com/stretchr/testify/suite"
@@ -17,7 +18,7 @@ type middlewareTestSuite struct {
 }
 
 func (suite *middlewareTestSuite) SetupSuite() {
-	suite.auth = testutils.NewAuth(suite.T(), nil, nil)
+	suite.auth = testutils.NewAuth(suite.T(), config.AuthConfig{})
 	suite.middleware = middleware.New(suite.auth)
 }
 

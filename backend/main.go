@@ -2,10 +2,9 @@ package main
 
 import (
 	"log"
-	"os"
 
 	"github.com/TylerWon/hike-log/backend/auth"
-	"github.com/TylerWon/hike-log/backend/database"
+	"github.com/TylerWon/hike-log/backend/config"
 	"github.com/TylerWon/hike-log/backend/handler"
 	"github.com/TylerWon/hike-log/backend/middleware"
 	"github.com/TylerWon/hike-log/backend/photostorage"
@@ -15,43 +14,27 @@ import (
 )
 
 func main() {
-	dbConfig := database.DBConfig{
-		DbHost:     os.Getenv("DB_HOST"),
-		DbPort:     os.Getenv("DB_PORT"),
-		DbName:     os.Getenv("DB_NAME"),
-		DbUser:     os.Getenv("DB_USER"),
-		DbPassword: os.Getenv("DB_PASSWORD"),
+	config, err := config.New()
+	if err != nil {
+		log.Fatal("Failed to load config: ", err)
 	}
-	store, err := store.New(dbConfig)
+
+	store, err := store.New(config.Database)
 	if err != nil {
 		log.Fatal("Failed to create store: ", err)
 	}
 
-	s3Client, err := s3.NewS3Client(
-		os.Getenv("ENV"),
-		os.Getenv("AWS_ACCESS_KEY_ID"),
-		os.Getenv("AWS_SECRET_ACCESS_KEY"),
-		os.Getenv("AWS_REGION"),
-		os.Getenv("AWS_ENDPOINT_URL"),
-		os.Getenv("AWS_EXTERNAL_ENDPOINT_URL"),
-		os.Getenv("AWS_S3_BUCKET_NAME"),
-	)
+	s3Client, err := s3.NewS3Client(config.Env, config.AWS)
 	if err != nil {
 		log.Fatal("Failed to setup S3 client: ", err)
 	}
 
-	photoStorage, err := photostorage.New(
-		s3Client,
-		os.Getenv("ENV"),
-		os.Getenv("AWS_S3_BUCKET_NAME"),
-		os.Getenv("AWS_REGION"),
-		os.Getenv("AWS_EXTERNAL_ENDPOINT_URL"),
-	)
+	photoStorage, err := photostorage.New(s3Client, config.Env, config.AWS)
 	if err != nil {
 		log.Fatal("Failed to setup photo storage: ", err)
 	}
 
-	auth, err := auth.New(os.Getenv("ADMIN_PASSWORD_HASH"), os.Getenv("SESSION_SECRET"))
+	auth, err := auth.New(config.Auth)
 	if err != nil {
 		log.Fatal("Failed to setup auth: ", err)
 	}
@@ -59,7 +42,7 @@ func main() {
 	middleware := middleware.New(auth)
 	handler := handler.NewHandler(store, photoStorage, auth)
 
-	router, err := router.New(handler, middleware, os.Getenv("FRONTEND_URL"))
+	router, err := router.New(handler, middleware, config.FrontendURL)
 	if err != nil {
 		log.Fatal("Failed to setup router: ", err)
 	}

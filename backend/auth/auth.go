@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/TylerWon/hike-log/backend/config"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -30,19 +31,18 @@ type Auth interface {
 
 // authImpl is an implementation of the Auth interface.
 type authImpl struct {
-	adminPasswordHash string
-	sessionSecret     string
+	authConfig config.AuthConfig
 }
 
 // Creates a new Auth.
-func New(adminPasswordHash string, sessionSecret string) (Auth, error) {
-	if adminPasswordHash == "" {
+func New(authConfig config.AuthConfig) (Auth, error) {
+	if authConfig.AdminPasswordHash == "" {
 		return nil, errors.New("adminPasswordHash is empty")
-	} else if sessionSecret == "" {
+	} else if authConfig.SessionSecret == "" {
 		return nil, errors.New("sessionSecret is empty")
 	}
 
-	return &authImpl{adminPasswordHash, sessionSecret}, nil
+	return &authImpl{authConfig: authConfig}, nil
 }
 
 /*
@@ -64,7 +64,7 @@ Generates a HMAC-SHA256 signature of the given payload using the sessionSecret a
 string.
 */
 func (a *authImpl) GenerateHmacSha256Signature(payload string) string {
-	mac := hmac.New(sha256.New, []byte(a.sessionSecret))
+	mac := hmac.New(sha256.New, []byte(a.authConfig.SessionSecret))
 	mac.Write([]byte(payload))
 	digest := mac.Sum(nil)
 	signature := hex.EncodeToString(digest)
@@ -137,6 +137,6 @@ func (a *authImpl) SetSessionCookie(c *gin.Context) {
 Checks if the given password is correct.
 */
 func (a *authImpl) VerifyPassword(password string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(a.adminPasswordHash), []byte(password))
+	err := bcrypt.CompareHashAndPassword([]byte(a.authConfig.AdminPasswordHash), []byte(password))
 	return err == nil
 }

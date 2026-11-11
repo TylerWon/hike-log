@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/TylerWon/hike-log/backend/auth"
+	"github.com/TylerWon/hike-log/backend/config"
 	"github.com/TylerWon/hike-log/backend/handler"
 	"github.com/TylerWon/hike-log/backend/middleware"
 	"github.com/TylerWon/hike-log/backend/models"
@@ -34,9 +35,9 @@ type photosHandlerTestSuite struct {
 func (suite *photosHandlerTestSuite) SetupSuite() {
 	suite.suiteDB = testutils.NewTestSuiteDB(suite.T())
 	suite.store = testutils.NewStore(suite.T(), suite.suiteDB)
-	suite.s3Client = testutils.NewS3Client(suite.T(), nil, nil, nil, nil, nil, nil, nil)
-	suite.photoStorage = testutils.NewPhotoStorage(suite.T(), suite.s3Client, nil, nil, nil, nil)
-	suite.auth = testutils.NewAuth(suite.T(), nil, nil)
+	suite.s3Client = testutils.NewS3Client(suite.T(), "", config.AWSConfig{})
+	suite.photoStorage = testutils.NewPhotoStorage(suite.T(), suite.s3Client, "", config.AWSConfig{})
+	suite.auth = testutils.NewAuth(suite.T(), config.AuthConfig{})
 	suite.middleware = middleware.New(suite.auth)
 	suite.router = testutils.NewPhotosRouter(handler.NewPhotosHandler(suite.store, suite.photoStorage), suite.middleware)
 }

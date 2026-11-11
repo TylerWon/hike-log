@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/TylerWon/hike-log/backend/auth"
+	"github.com/TylerWon/hike-log/backend/config"
 	"github.com/TylerWon/hike-log/backend/testutils"
 	"github.com/stretchr/testify/suite"
 )
@@ -18,7 +19,7 @@ type authTestSuite struct {
 }
 
 func (suite *authTestSuite) SetupSuite() {
-	suite.auth = testutils.NewAuth(suite.T(), nil, nil)
+	suite.auth = testutils.NewAuth(suite.T(), config.AuthConfig{})
 }
 
 func TestAuthTestSuite(t *testing.T) {
@@ -52,10 +53,13 @@ func (suite *authTestSuite) TestGenerateHmacSha256Signature_ReturnsDifferentSign
 }
 
 func (suite *authTestSuite) TestGenerateHmacSha256Signature_ReturnsDifferentSignaturesForDifferentSecrets() {
-	secret1 := "a"
-	secret2 := "b"
-	auth1 := testutils.NewAuth(suite.T(), nil, &secret1)
-	auth2 := testutils.NewAuth(suite.T(), nil, &secret2)
+	testConfig := testutils.TestConfig()
+
+	testConfig.Auth.SessionSecret = "a"
+	auth1 := testutils.NewAuth(suite.T(), testConfig.Auth)
+
+	testConfig.Auth.SessionSecret = "b"
+	auth2 := testutils.NewAuth(suite.T(), testConfig.Auth)
 
 	payload := "abc"
 	signature1 := auth1.GenerateHmacSha256Signature(payload)

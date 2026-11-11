@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io"
 
+	"github.com/TylerWon/hike-log/backend/config"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	v4 "github.com/aws/aws-sdk-go-v2/aws/signer/v4"
 	"github.com/aws/aws-sdk-go-v2/credentials"
@@ -73,39 +74,31 @@ type client interface {
 }
 
 // Creates a new S3Client.
-func NewS3Client(
-	env string,
-	accessKeyID string,
-	secretAccessKey string,
-	region string,
-	endpointURL string,
-	externalEndpointURL string,
-	bucketName string,
-) (S3Client, error) {
+func NewS3Client(env string, awsConfig config.AWSConfig) (S3Client, error) {
 	if env == "" {
 		return nil, errors.New("env is empty")
-	} else if accessKeyID == "" {
+	} else if awsConfig.AccessKeyID == "" {
 		return nil, errors.New("accessKeyID is empty")
-	} else if secretAccessKey == "" {
+	} else if awsConfig.SecretAccessKey == "" {
 		return nil, errors.New("secretAccessKey is empty")
-	} else if region == "" {
+	} else if awsConfig.Region == "" {
 		return nil, errors.New("region is empty")
-	} else if bucketName == "" {
+	} else if awsConfig.S3.BucketName == "" {
 		return nil, errors.New("bucketName is empty")
 	}
 
 	if env == "local" {
-		if endpointURL == "" {
-			return nil, errors.New("endpointURL is empty")
-		} else if externalEndpointURL == "" {
-			return nil, errors.New("externalEndpointURL is empty")
+		if awsConfig.EndpointURL == "" {
+			return nil, errors.New("endpointURL is empty in local environment")
+		} else if awsConfig.ExternalEndpointURL == "" {
+			return nil, errors.New("externalEndpointURL is empty in local environment")
 		}
 	}
 
 	cfg := aws.Config{
-		Region: region,
+		Region: awsConfig.Region,
 		Credentials: aws.NewCredentialsCache(
-			credentials.NewStaticCredentialsProvider(accessKeyID, secretAccessKey, ""),
+			credentials.NewStaticCredentialsProvider(awsConfig.AccessKeyID, awsConfig.SecretAccessKey, ""),
 		),
 	}
 
@@ -118,7 +111,7 @@ func NewS3Client(
 
 			// Override default AWS API endpoint used by the client to be endpointURL (ex. "localstack:4566").
 			// This ensures client interacts with LocalStack and not the true AWS API.
-			o.BaseEndpoint = aws.String(endpointURL)
+			o.BaseEndpoint = aws.String(awsConfig.EndpointURL)
 		})
 
 		presignS3Client := s3Sdk.NewFromConfig(cfg, func(o *s3Sdk.Options) {
@@ -133,7 +126,7 @@ func NewS3Client(
 			// used in the browser, they cannot contain that hostname. As a result, "localhost:4566" should be used
 			// instead as it is accessible by the host machine and maps to the LocalStack Docker service via port-
 			// forwarding.
-			o.BaseEndpoint = aws.String(externalEndpointURL)
+			o.BaseEndpoint = aws.String(awsConfig.ExternalEndpointURL)
 		})
 		presignClient = s3Sdk.NewPresignClient(presignS3Client)
 	} else {
@@ -141,7 +134,7 @@ func NewS3Client(
 		presignClient = s3Sdk.NewPresignClient(client)
 	}
 
-	return &s3ClientImpl{client, presignClient, bucketName}, nil
+	return &s3ClientImpl{client, presignClient, awsConfig.S3.BucketName}, nil
 }
 
 // Creates a new S3Client. Allows injection of internal dependencies to allow for mocking.

@@ -10,8 +10,7 @@ import (
 func NewStore(t *testing.T, testSuiteDB *TestSuiteDB) store.Store {
 	t.Helper()
 
-	dbConfig := createDBConfig(testSuiteDB.DBName)
-	store, err := store.New(dbConfig)
+	store, err := store.New(testSuiteDB.testDBConfig)
 	if err != nil {
 		t.Fatal("Failed to create store: ", err)
 	}

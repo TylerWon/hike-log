@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/TylerWon/hike-log/backend/config"
 	"github.com/TylerWon/hike-log/backend/s3"
 	"github.com/google/uuid"
 )
@@ -28,31 +29,31 @@ type PhotoStorage interface {
 
 // photoStorageImpl is an implementation of the PhotoStorage interface.
 type photoStorageImpl struct {
-	s3Client            s3.S3Client
-	env                 string
-	bucketName          string
-	region              string
-	externalEndpointURL string
+	awsConfig config.AWSConfig
+	env       string
+	s3Client  s3.S3Client
 }
 
 // Creates a new PhotoStorage.
-func New(s3Client s3.S3Client, env string, bucketName string, region string, externalEndpointURL string) (PhotoStorage, error) {
+func New(s3Client s3.S3Client, env string, awsConfig config.AWSConfig) (PhotoStorage, error) {
 	if env == "" {
 		return nil, errors.New("env is empty")
-	} else if bucketName == "" {
+	} else if awsConfig.S3.BucketName == "" {
 		return nil, errors.New("bucketName is empty")
-	} else if region == "" {
+	} else if awsConfig.Region == "" {
 		return nil, errors.New("region is empty")
-	} else if env == "local" && externalEndpointURL == "" {
-		return nil, errors.New("externalEndpointURL is empty")
+	}
+
+	if env == "local" {
+		if awsConfig.ExternalEndpointURL == "" {
+			return nil, errors.New("externalEndpointURL is empty in local environment")
+		}
 	}
 
 	return &photoStorageImpl{
-		s3Client:            s3Client,
-		env:                 env,
-		bucketName:          bucketName,
-		region:              region,
-		externalEndpointURL: externalEndpointURL,
+		awsConfig: awsConfig,
+		env:       env,
+		s3Client:  s3Client,
 	}, nil
 }
 
@@ -112,11 +113,11 @@ func (p *photoStorageImpl) DoesPhotoExist(ctx context.Context, objectKey string)
 func (p *photoStorageImpl) GetPhotoObjectKey(objectURL string) string {
 	if p.env == "local" {
 		// objectURL is in path-style for local environments
-		prefix := fmt.Sprintf("%s/%s/", p.externalEndpointURL, p.bucketName)
+		prefix := fmt.Sprintf("%s/%s/", p.awsConfig.ExternalEndpointURL, p.awsConfig.S3.BucketName)
 		return strings.TrimPrefix(objectURL, prefix)
 	}
 	// objectURL is in virtual-hosted-style for non-local environments
-	prefix := fmt.Sprintf("https://%s.s3.%s.amazonaws.com/", p.bucketName, p.region)
+	prefix := fmt.Sprintf("https://%s.s3.%s.amazonaws.com/", p.awsConfig.S3.BucketName, p.awsConfig.Region)
 	return strings.TrimPrefix(objectURL, prefix)
 }
 
@@ -124,8 +125,8 @@ func (p *photoStorageImpl) GetPhotoObjectKey(objectURL string) string {
 func (p *photoStorageImpl) GetPhotoObjectURL(objectKey string) string {
 	if p.env == "local" {
 		// objectURL should be path-style for local environments
-		return fmt.Sprintf("%s/%s/%s", p.externalEndpointURL, p.bucketName, objectKey)
+		return fmt.Sprintf("%s/%s/%s", p.awsConfig.ExternalEndpointURL, p.awsConfig.S3.BucketName, objectKey)
 	}
 	// objectURL should be virtual-hosted-style for non-local environments
-	return fmt.Sprintf("https://%s.s3.%s.amazonaws.com/%s", p.bucketName, p.region, objectKey)
+	return fmt.Sprintf("https://%s.s3.%s.amazonaws.com/%s", p.awsConfig.S3.BucketName, p.awsConfig.Region, objectKey)
 }

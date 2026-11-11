@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 
+	"github.com/TylerWon/hike-log/backend/config"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -30,24 +31,15 @@ type databaseImpl struct {
 	db *gorm.DB
 }
 
-// DBConfig stores database connection details.
-type DBConfig struct {
-	DbHost     string
-	DbPort     string
-	DbName     string
-	DbUser     string
-	DbPassword string
-}
-
 // Connects to the database specified in the given dbConfig.
-func Connect(dbConfig DBConfig) (Database, error) {
+func Connect(dbConfig config.DBConfig) (Database, error) {
 	dsn := fmt.Sprintf(
 		"host=%s port=%s dbname=%s user=%s password=%s",
-		dbConfig.DbHost,
-		dbConfig.DbPort,
-		dbConfig.DbName,
-		dbConfig.DbUser,
-		dbConfig.DbPassword,
+		dbConfig.DBHost,
+		dbConfig.DBPort,
+		dbConfig.DBName,
+		dbConfig.DBUser,
+		dbConfig.DBPassword,
 	)
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})

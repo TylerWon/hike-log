@@ -2,53 +2,62 @@ package testutils
 
 import (
 	"fmt"
-	"os"
 	"strings"
 	"testing"
 
+	"github.com/TylerWon/hike-log/backend/config"
 	"github.com/TylerWon/hike-log/backend/database"
 )
 
 // TestSuiteDB holds a shared database for a test suite.
 type TestSuiteDB struct {
-	DBName  string
-	adminDB database.Database
-	testDB  database.Database
+	adminDB      database.Database
+	testDB       database.Database
+	testDBConfig config.DBConfig
 }
 
 // Creates a dedicated database for a test suite.
 func NewTestSuiteDB(t *testing.T) *TestSuiteDB {
 	t.Helper()
 
-	adminDB := connectToAdminDB(t)
-	dbName := strings.ToLower(strings.ReplaceAll(t.Name(), "/", "_"))
+	testConfig := TestConfig()
+
+	adminDBConfig := testConfig.Database
+	adminDBConfig.DBName = "postgres"
+	adminDB, err := database.Connect(adminDBConfig)
+	if err != nil {
+		t.Fatal("Failed to connect to 'postgres' database: ", err)
+	}
+
+	testDBConfig := testConfig.Database
+	testSuiteName := strings.ToLower(strings.ReplaceAll(t.Name(), "/", "_"))
+	testDBConfig.DBName = testDBConfig.DBName + "__" + testSuiteName
 
 	var exists int
-	result := adminDB.Raw("SELECT 1 FROM pg_database WHERE datname = ?", dbName).Scan(&exists)
+	result := adminDB.Raw("SELECT 1 FROM pg_database WHERE datname = ?", testDBConfig.DBName).Scan(&exists)
 	if result.Error != nil {
-		t.Fatalf("Unable to verify if old test suite database (%s) was deleted: %v", dbName, result.Error)
+		t.Fatalf("Unable to verify if old test suite database (%s) was deleted: %v", testDBConfig.DBName, result.Error)
 	} else if exists != 0 {
-		result := adminDB.Exec(fmt.Sprintf("DROP DATABASE %s", dbName))
+		result := adminDB.Exec(fmt.Sprintf("DROP DATABASE %s", testDBConfig.DBName))
 		if result.Error != nil {
-			t.Fatalf("Failed to delete old test suite database (%s): %v", dbName, result.Error)
+			t.Fatalf("Failed to delete old test suite database (%s): %v", testDBConfig.DBName, result.Error)
 		}
 	}
 
-	result = adminDB.Exec(fmt.Sprintf("CREATE DATABASE %s", dbName))
+	result = adminDB.Exec(fmt.Sprintf("CREATE DATABASE %s", testDBConfig.DBName))
 	if result.Error != nil {
-		t.Fatalf("Failed to create test suite database (%s): %v", dbName, result.Error)
+		t.Fatalf("Failed to create test suite database (%s): %v", testDBConfig.DBName, result.Error)
 	}
 
-	dbConfig := createDBConfig(dbName)
-	testDB, err := database.Connect(dbConfig)
+	testDB, err := database.Connect(testDBConfig)
 	if err != nil {
-		t.Fatalf("Failed to connect to test suite database (%s): %v", dbName, err)
+		t.Fatalf("Failed to connect to test suite database (%s): %v", testDBConfig.DBName, err)
 	}
 
 	return &TestSuiteDB{
-		adminDB: adminDB,
-		testDB:  testDB,
-		DBName:  dbName,
+		adminDB:      adminDB,
+		testDB:       testDB,
+		testDBConfig: testDBConfig,
 	}
 }
 
@@ -58,7 +67,7 @@ func (suiteDB *TestSuiteDB) Reset(t *testing.T) {
 
 	result := suiteDB.testDB.Exec("TRUNCATE TABLE photos, hikes RESTART IDENTITY CASCADE")
 	if result.Error != nil {
-		t.Fatalf("Failed to reset %s database: %v", suiteDB.DBName, result.Error)
+		t.Fatalf("Failed to reset %s database: %v", suiteDB.testDBConfig.DBName, result.Error)
 	}
 }
 
@@ -69,36 +78,15 @@ func (suiteDB *TestSuiteDB) Teardown(t *testing.T) {
 	closeDB(t, suiteDB.testDB)
 
 	var exists int
-	suiteDB.adminDB.Raw("SELECT 1 FROM pg_database WHERE datname = ?", suiteDB.DBName).Scan(&exists)
+	suiteDB.adminDB.Raw("SELECT 1 FROM pg_database WHERE datname = ?", suiteDB.testDBConfig.DBName).Scan(&exists)
 	if exists != 0 {
-		result := suiteDB.adminDB.Exec(fmt.Sprintf("DROP DATABASE %s", suiteDB.DBName))
+		result := suiteDB.adminDB.Exec(fmt.Sprintf("DROP DATABASE %s", suiteDB.testDBConfig.DBName))
 		if result.Error != nil {
-			t.Fatalf("Failed to delete test suite database (%s): %v", suiteDB.DBName, result.Error)
+			t.Fatalf("Failed to delete test suite database (%s): %v", suiteDB.testDBConfig.DBName, result.Error)
 		}
 	}
 
 	closeDB(t, suiteDB.adminDB)
-}
-
-func connectToAdminDB(t *testing.T) database.Database {
-	t.Helper()
-
-	db, err := database.Connect(createDBConfig("postgres"))
-	if err != nil {
-		t.Fatal("Failed to connect to 'postgres' database: ", err)
-	}
-
-	return db
-}
-
-func createDBConfig(dbName string) database.DBConfig {
-	return database.DBConfig{
-		DbHost:     os.Getenv("DB_HOST"),
-		DbPort:     os.Getenv("DB_PORT"),
-		DbName:     dbName,
-		DbUser:     os.Getenv("DB_USER"),
-		DbPassword: os.Getenv("DB_PASSWORD"),
-	}
 }
 
 func closeDB(t *testing.T, db database.Database) {

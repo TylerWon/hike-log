@@ -4,6 +4,7 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/TylerWon/hike-log/backend/config"
 	"github.com/TylerWon/hike-log/backend/database"
 	"github.com/TylerWon/hike-log/backend/models"
 	"github.com/TylerWon/hike-log/backend/photostorage"
@@ -23,7 +24,7 @@ type storeTestSuite struct {
 func (suite *storeTestSuite) SetupSuite() {
 	suite.suiteDB = testutils.NewTestSuiteDB(suite.T())
 	suite.store = testutils.NewStore(suite.T(), suite.suiteDB)
-	suite.photoStorage = testutils.NewPhotoStorage(suite.T(), nil, nil, nil, nil, nil)
+	suite.photoStorage = testutils.NewPhotoStorage(suite.T(), nil, "", config.AWSConfig{})
 }
 
 func (suite *storeTestSuite) TearDownSuite() {

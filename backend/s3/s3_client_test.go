@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/TylerWon/hike-log/backend/config"
 	"github.com/TylerWon/hike-log/backend/s3"
 	"github.com/TylerWon/hike-log/backend/testutils"
 	"github.com/stretchr/testify/suite"
@@ -35,8 +36,8 @@ func (suite *s3ClientTestSuite) TestCreatePresignedPutObjectRequest_ReturnsError
 }
 
 func (suite *s3ClientTestSuite) TestCreatePresignedPutObjectRequest_ReturnsPresignedRequestWithExternalEndpointWhenLocalEnvironment() {
-	env, externalEndpointURL := "local", "http://localhost:4566"
-	s3Client := testutils.NewS3Client(suite.T(), &env, nil, nil, nil, nil, &externalEndpointURL, nil)
+	awsConfig := config.AWSConfig{ExternalEndpointURL: "http://localhost:4566"}
+	s3Client := testutils.NewS3Client(suite.T(), "local", awsConfig)
 
 	objectKey := "abc"
 	request, err := s3Client.CreatePresignedPutObjectRequest(context.TODO(), objectKey, "application/json", 5000)
@@ -67,8 +68,8 @@ func (suite *s3ClientTestSuite) TestCreatePresignedPutObjectRequest_ReturnsPresi
 }
 
 func (suite *s3ClientTestSuite) TestCreatePresignedPutObjectRequest_ReturnsPresignedRequestWithDefaultAWSEndpointWhenNonLocalEnvironment() {
-	env, region, bucketName := "production", "us-west-2", "bucket"
-	s3Client := testutils.NewS3Client(suite.T(), &env, nil, nil, &region, nil, nil, &bucketName)
+	awsConfig := config.AWSConfig{Region: "us-east-1", S3: config.S3Config{BucketName: "bucket"}}
+	s3Client := testutils.NewS3Client(suite.T(), "production", awsConfig)
 
 	objectKey := "abc"
 	request, err := s3Client.CreatePresignedPutObjectRequest(context.TODO(), objectKey, "application/json", 5000)
@@ -82,7 +83,7 @@ func (suite *s3ClientTestSuite) TestCreatePresignedPutObjectRequest_ReturnsPresi
 	// The presigned URL has dynamic values so only verify certain parts of it
 	parsedURL, err := url.Parse(request.URL)
 	suite.Require().NoError(err)
-	expectedHost := fmt.Sprintf("%s.s3.%s.amazonaws.com", bucketName, region)
+	expectedHost := fmt.Sprintf("%s.s3.%s.amazonaws.com", awsConfig.S3.BucketName, awsConfig.Region)
 	suite.Require().Equal(expectedHost, parsedURL.Host)
 	suite.Require().Contains(parsedURL.Path, objectKey)
 
@@ -112,7 +113,7 @@ func (suite *s3ClientTestSuite) TestDeleteObject_ReturnsErrorWhenS3Errors() {
 }
 
 func (suite *s3ClientTestSuite) TestDeleteObject_DeletesObject() {
-	s3Client := testutils.NewS3Client(suite.T(), nil, nil, nil, nil, nil, nil, nil)
+	s3Client := testutils.NewS3Client(suite.T(), "", config.AWSConfig{})
 
 	objectKey := fmt.Sprintf("delete-object-%d", time.Now().UnixNano())
 	_, err := s3Client.PutObject(context.TODO(), objectKey, strings.NewReader("content"), "text/plain")
@@ -127,7 +128,7 @@ func (suite *s3ClientTestSuite) TestDeleteObject_DeletesObject() {
 }
 
 func (suite *s3ClientTestSuite) TestDeleteObject_NoErrorWhenObjectDoesNotExist() {
-	s3Client := testutils.NewS3Client(suite.T(), nil, nil, nil, nil, nil, nil, nil)
+	s3Client := testutils.NewS3Client(suite.T(), "", config.AWSConfig{})
 
 	_, err := s3Client.DeleteObject(context.TODO(), "test")
 	suite.Require().NoError(err)
@@ -146,7 +147,7 @@ func (suite *s3ClientTestSuite) TestDeleteObjects_ReturnsErrorWhenS3Errors() {
 }
 
 func (suite *s3ClientTestSuite) TestDeleteObjects_DeletesObjects() {
-	s3Client := testutils.NewS3Client(suite.T(), nil, nil, nil, nil, nil, nil, nil)
+	s3Client := testutils.NewS3Client(suite.T(), "", config.AWSConfig{})
 
 	objectKey1 := fmt.Sprintf("delete-objects-1-%d", time.Now().UnixNano())
 	_, err := s3Client.PutObject(context.TODO(), objectKey1, strings.NewReader("content"), "text/plain")
@@ -169,7 +170,7 @@ func (suite *s3ClientTestSuite) TestDeleteObjects_DeletesObjects() {
 }
 
 func (suite *s3ClientTestSuite) TestDeleteObjects_NoErrorWhenObjectDoesNotExist() {
-	s3Client := testutils.NewS3Client(suite.T(), nil, nil, nil, nil, nil, nil, nil)
+	s3Client := testutils.NewS3Client(suite.T(), "", config.AWSConfig{})
 
 	objectKey := fmt.Sprintf("delete-objects-%d", time.Now().UnixNano())
 	_, err := s3Client.PutObject(context.TODO(), objectKey, strings.NewReader("content"), "text/plain")
@@ -196,7 +197,7 @@ func (suite *s3ClientTestSuite) TestDoesObjectExist_ReturnsErrorWhenS3Errors() {
 }
 
 func (suite *s3ClientTestSuite) TestDoesObjectExist_ReturnsFalseWhenObjectDoesNotExist() {
-	s3Client := testutils.NewS3Client(suite.T(), nil, nil, nil, nil, nil, nil, nil)
+	s3Client := testutils.NewS3Client(suite.T(), "", config.AWSConfig{})
 
 	exists, err := s3Client.DoesObjectExist(context.TODO(), "abc")
 	suite.Require().NoError(err)
@@ -204,7 +205,7 @@ func (suite *s3ClientTestSuite) TestDoesObjectExist_ReturnsFalseWhenObjectDoesNo
 }
 
 func (suite *s3ClientTestSuite) TestDoesObjectExist_ReturnsTrueWhenObjectExists() {
-	s3Client := testutils.NewS3Client(suite.T(), nil, nil, nil, nil, nil, nil, nil)
+	s3Client := testutils.NewS3Client(suite.T(), "", config.AWSConfig{})
 
 	objectKey := fmt.Sprintf("does-object-exist-%d", time.Now().UnixNano())
 	_, err := s3Client.PutObject(context.TODO(), objectKey, strings.NewReader("content"), "text/plain")
@@ -231,7 +232,7 @@ func (suite *s3ClientTestSuite) TestPutObject_ReturnsErrorWhenS3Errors() {
 }
 
 func (suite *s3ClientTestSuite) TestPutObject_InsertsNewObject() {
-	s3Client := testutils.NewS3Client(suite.T(), nil, nil, nil, nil, nil, nil, nil)
+	s3Client := testutils.NewS3Client(suite.T(), "", config.AWSConfig{})
 
 	objectKey := fmt.Sprintf("put-object-%d", time.Now().UnixNano())
 	_, err := s3Client.PutObject(context.TODO(), objectKey, strings.NewReader("content"), "text/plain")
@@ -246,7 +247,7 @@ func (suite *s3ClientTestSuite) TestPutObject_InsertsNewObject() {
 }
 
 func (suite *s3ClientTestSuite) TestPutObject_UpdatesExistingObject() {
-	s3Client := testutils.NewS3Client(suite.T(), nil, nil, nil, nil, nil, nil, nil)
+	s3Client := testutils.NewS3Client(suite.T(), "", config.AWSConfig{})
 
 	objectKey := fmt.Sprintf("put-object-%d", time.Now().UnixNano())
 	_, err := s3Client.PutObject(context.TODO(), objectKey, strings.NewReader("content"), "text/plain")

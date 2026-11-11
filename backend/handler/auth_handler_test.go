@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/TylerWon/hike-log/backend/auth"
+	"github.com/TylerWon/hike-log/backend/config"
 	"github.com/TylerWon/hike-log/backend/handler"
 	"github.com/TylerWon/hike-log/backend/testutils"
 	"github.com/gin-gonic/gin"
@@ -19,7 +20,7 @@ type authHandlerTestSuite struct {
 }
 
 func (suite *authHandlerTestSuite) SetupSuite() {
-	suite.auth = testutils.NewAuth(suite.T(), nil, nil)
+	suite.auth = testutils.NewAuth(suite.T(), config.AuthConfig{})
 	suite.router = testutils.NewAuthRouter(handler.NewAuthHandler(suite.auth))
 }
 
@@ -84,7 +85,7 @@ func (suite *authHandlerTestSuite) TestLogin_Returns401ErrorWhenPasswordIsIncorr
 
 func (suite *authHandlerTestSuite) TestLogin_SetsSessionCookie() {
 	body := map[string]any{
-		"password": testutils.ADMIN_PASSWORD,
+		"password": "admin",
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
 	res := testutils.SendRequest(suite.router, http.MethodPost, "/auth", reqBody)
