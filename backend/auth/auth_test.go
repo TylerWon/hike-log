@@ -131,7 +131,7 @@ func (suite *authTestSuite) TestIsAuthenticated_ReturnsFalseWhenSignatureIsInval
 	suite.Require().Error(err)
 }
 
-func (suite *authTestSuite) TestIsAuthenticated_ReturnsTrue() {
+func (suite *authTestSuite) TestIsAuthenticated_ReturnsTrueWhenCookieIsValid() {
 	c := testutils.NewGinContext(testutils.CreateSessionCookie(suite.auth))
 
 	res, err := suite.auth.IsAuthenticated(c)
@@ -157,4 +157,14 @@ func (suite *authTestSuite) TestSetSessionCookie_SetsCookie() {
 	suite.Require().Empty(sessionCookie.Domain)
 	suite.Require().True(sessionCookie.Secure)
 	suite.Require().True(sessionCookie.HttpOnly)
+}
+
+func (suite *authTestSuite) TestVerifyPassword_ReturnsFalseWhenPasswordIsIncorrect() {
+	ok := suite.auth.VerifyPassword("incorrect password")
+	suite.Require().False(ok)
+}
+
+func (suite *authTestSuite) TestVerifyPassword_ReturnsTrueWhenPasswordIsCorrect() {
+	ok := suite.auth.VerifyPassword("admin")
+	suite.Require().True(ok)
 }
