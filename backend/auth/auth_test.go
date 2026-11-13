@@ -26,6 +26,27 @@ func TestAuthTestSuite(t *testing.T) {
 	suite.Run(t, new(authTestSuite))
 }
 
+func (suite *authTestSuite) TestNew_ReturnsErrorWhenAdminPasswordHashIsEmpty() {
+	testConfig := testutils.NewTestConfig()
+	testConfig.Auth.AdminPasswordHash = ""
+	_, err := auth.New(testConfig.Auth)
+	suite.Require().Error(err)
+}
+
+func (suite *authTestSuite) TestNew_ReturnsErrorWhenSessionSecretIsEmpty() {
+	testConfig := testutils.NewTestConfig()
+	testConfig.Auth.SessionSecret = ""
+	_, err := auth.New(testConfig.Auth)
+	suite.Require().Error(err)
+}
+
+func (suite *authTestSuite) TestNew_CreatesAuth() {
+	testConfig := testutils.NewTestConfig()
+	a, err := auth.New(testConfig.Auth)
+	suite.Require().NoError(err)
+	suite.Require().NotNil(a)
+}
+
 func (suite *authTestSuite) TestCreateSessionCookieValue_ReturnsValue() {
 	value := suite.auth.CreateSessionCookieValue()
 

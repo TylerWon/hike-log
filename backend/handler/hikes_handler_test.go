@@ -60,6 +60,11 @@ func TestHikesTestSuite(t *testing.T) {
 	suite.Run(t, new(hikesHandlerTestSuite))
 }
 
+func (suite *hikesHandlerTestSuite) TestNewHikesHandler_CreatesHikesHandler() {
+	h := handler.NewHikesHandler(suite.store, suite.photoStorage)
+	suite.Require().NotNil(h)
+}
+
 func (suite *hikesHandlerTestSuite) TestCreateHike_Returns401ErrorWhenUnauthorized() {
 	body := map[string]any{
 		"trailName":     "Trail 1",

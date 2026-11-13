@@ -28,6 +28,11 @@ func TestAuthTestSuite(t *testing.T) {
 	suite.Run(t, new(authHandlerTestSuite))
 }
 
+func (suite *authHandlerTestSuite) TestNewAuthHandler_CreatesAuthHandler() {
+	h := handler.NewAuthHandler(suite.auth)
+	suite.Require().NotNil(h)
+}
+
 func (suite *authHandlerTestSuite) TestCheckAuth_ReturnsUnauthenticated() {
 	res := testutils.SendRequest(suite.T(), suite.router, http.MethodGet, "/auth", nil) // Session cookie missing
 
@@ -41,7 +46,7 @@ func (suite *authHandlerTestSuite) TestCheckAuth_ReturnsUnauthenticated() {
 }
 
 func (suite *authHandlerTestSuite) TestCheckAuth_ReturnsAuthenticated() {
-	res := testutils.SendRequest(suite.T(), 
+	res := testutils.SendRequest(suite.T(),
 		suite.router,
 		http.MethodGet,
 		"/auth",

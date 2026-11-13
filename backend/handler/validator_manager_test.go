@@ -37,6 +37,12 @@ func TestValidatorManagerTestSuite(t *testing.T) {
 	suite.Run(t, new(validatorManagerTestSuite))
 }
 
+func (suite *validatorManagerTestSuite) TestNewValidatorManager_CreatesValidatorManager() {
+	validatorManager, err := handler.NewValidatorManager()
+	suite.Require().NoError(err)
+	suite.Require().NotNil(validatorManager)
+}
+
 func (suite *validatorManagerTestSuite) TestDivisibleByHalfValidator_ReturnsErrorForNonFloatField() {
 	type sample struct {
 		Value string `binding:"divisibleByHalf"`

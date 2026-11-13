@@ -10,6 +10,7 @@ import (
 
 	"github.com/TylerWon/hike-log/backend/auth"
 	"github.com/TylerWon/hike-log/backend/config"
+	"github.com/TylerWon/hike-log/backend/handler"
 	"github.com/TylerWon/hike-log/backend/middleware"
 	"github.com/TylerWon/hike-log/backend/models"
 	"github.com/TylerWon/hike-log/backend/photostorage"
@@ -54,6 +55,11 @@ func (suite *photosHandlerTestSuite) SetupTest() {
 
 func TestPhotosTestSuite(t *testing.T) {
 	suite.Run(t, new(photosHandlerTestSuite))
+}
+
+func (suite *photosHandlerTestSuite) TestNewPhotosHandler_CreatesPhotosHandler() {
+	h := handler.NewPhotosHandler(suite.store, suite.photoStorage)
+	suite.Require().NotNil(h)
 }
 
 func (suite *photosHandlerTestSuite) TestDeletePhoto_Returns401ErrorWhenUnauthorized() {

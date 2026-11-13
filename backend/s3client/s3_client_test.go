@@ -23,6 +23,72 @@ func TestS3ClientTestSuite(t *testing.T) {
 	suite.Run(t, new(s3ClientTestSuite))
 }
 
+func (suite *s3ClientTestSuite) TestNew_ReturnsErrorWhenEnvIsEmpty() {
+	testConfig := testutils.NewTestConfig()
+	_, err := s3client.New("", testConfig.AWS)
+	suite.Require().Error(err)
+}
+
+func (suite *s3ClientTestSuite) TestNew_ReturnsErrorWhenAccessKeyIDIsEmpty() {
+	testConfig := testutils.NewTestConfig()
+	testConfig.AWS.AccessKeyID = ""
+	_, err := s3client.New(testConfig.Env, testConfig.AWS)
+	suite.Require().Error(err)
+}
+
+func (suite *s3ClientTestSuite) TestNew_ReturnsErrorWhenSecretAccessKeyIsEmpty() {
+	testConfig := testutils.NewTestConfig()
+	testConfig.AWS.SecretAccessKey = ""
+	_, err := s3client.New(testConfig.Env, testConfig.AWS)
+	suite.Require().Error(err)
+}
+
+func (suite *s3ClientTestSuite) TestNew_ReturnsErrorWhenRegionIsEmpty() {
+	testConfig := testutils.NewTestConfig()
+	testConfig.AWS.Region = ""
+	_, err := s3client.New(testConfig.Env, testConfig.AWS)
+	suite.Require().Error(err)
+}
+
+func (suite *s3ClientTestSuite) TestNew_ReturnsErrorWhenBucketNameIsEmpty() {
+	testConfig := testutils.NewTestConfig()
+	testConfig.AWS.S3.BucketName = ""
+	_, err := s3client.New(testConfig.Env, testConfig.AWS)
+	suite.Require().Error(err)
+}
+
+func (suite *s3ClientTestSuite) TestNew_ReturnsErrorWhenEndpointURLIsEmptyInLocalEnvironment() {
+	testConfig := testutils.NewTestConfig()
+	testConfig.Env = "local"
+	testConfig.AWS.EndpointURL = ""
+	_, err := s3client.New(testConfig.Env, testConfig.AWS)
+	suite.Require().Error(err)
+}
+
+func (suite *s3ClientTestSuite) TestNew_ReturnsErrorWhenExternalEndpointURLIsEmptyInLocalEnvironment() {
+	testConfig := testutils.NewTestConfig()
+	testConfig.Env = "local"
+	testConfig.AWS.ExternalEndpointURL = ""
+	_, err := s3client.New(testConfig.Env, testConfig.AWS)
+	suite.Require().Error(err)
+}
+
+func (suite *s3ClientTestSuite) TestNew_CreatesClientForNonLocalEnvironment() {
+	testConfig := testutils.NewTestConfig()
+	testConfig.Env = "production"
+	client, err := s3client.New(testConfig.Env, testConfig.AWS)
+	suite.Require().NoError(err)
+	suite.Require().NotNil(client)
+}
+
+func (suite *s3ClientTestSuite) TestNew_CreatesClientForLocalEnvironment() {
+	testConfig := testutils.NewTestConfig()
+	testConfig.Env = "local"
+	client, err := s3client.New(testConfig.Env, testConfig.AWS)
+	suite.Require().NoError(err)
+	suite.Require().NotNil(client)
+}
+
 func (suite *s3ClientTestSuite) TestCreatePresignedPutObjectRequest_ReturnsErrorWhenS3Errors() {
 	mockPresignClient := s3client.MockPresignClient{
 		PresignPutObjectResult: nil,
