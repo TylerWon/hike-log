@@ -11,15 +11,8 @@ import (
 	"github.com/TylerWon/hike-log/backend/store"
 )
 
-// Constructs n Hikes and returns them. Optionally can add Photos to the Hikes and save the Hikes to the database.
-func ConstructHikes(
-	t *testing.T,
-	n int,
-	store store.Store,
-	photoStorage photostorage.PhotoStorage,
-	photos bool,
-	save bool,
-) []models.Hike {
+// Constructs n Hikes and returns them. Optionally allows a Photo to be created for each Hike.
+func ConstructHikes(t *testing.T, n int, photoStorage photostorage.PhotoStorage, photo bool) []models.Hike {
 	t.Helper()
 
 	var hikes []models.Hike
@@ -36,7 +29,7 @@ func ConstructHikes(
 			AllTrailsUrl:  "https://www.alltrails.com/",
 		}
 
-		if photos {
+		if photo {
 			objectKey := photoStorage.CreatePhotoObjectKey(uint(i))
 			hike.Photos = []models.Photo{
 				{
@@ -50,11 +43,24 @@ func ConstructHikes(
 		hikes = append(hikes, hike)
 	}
 
-	if save {
-		err := store.CreateRecord(hikes)
-		if err != nil {
-			t.Fatal("Failed to save hikes: ", err)
-		}
+	return hikes
+}
+
+// Constructs n Hikes and saves them to the database. Optionally allows a Photo to be created for each Hike.
+func ConstructAndSaveHikes(
+	t *testing.T,
+	n int,
+	store store.Store,
+	photoStorage photostorage.PhotoStorage,
+	photo bool,
+) []models.Hike {
+	t.Helper()
+
+	hikes := ConstructHikes(t, n, photoStorage, photo)
+
+	err := store.CreateRecord(hikes)
+	if err != nil {
+		t.Fatal("Failed to save hikes: ", err)
 	}
 
 	return hikes

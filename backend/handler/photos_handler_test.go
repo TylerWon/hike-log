@@ -57,7 +57,7 @@ func TestPhotosTestSuite(t *testing.T) {
 }
 
 func (suite *photosHandlerTestSuite) TestDeletePhoto_Returns401ErrorWhenUnauthorized() {
-	photo := testutils.ConstructHikes(suite.T(), 1, suite.store, suite.photoStorage, true, true)[0].Photos[0]
+	photo := testutils.ConstructAndSaveHikes(suite.T(), 1, suite.store, suite.photoStorage, true)[0].Photos[0]
 	objectKey := suite.photoStorage.GetPhotoObjectKey(photo.SrcUrl)
 	_, err := suite.s3Client.PutObject(
 		context.TODO(),
@@ -100,7 +100,7 @@ func (suite *photosHandlerTestSuite) TestDeletePhoto_Returns500ErrorWhenDBErrors
 	photosHandler := testutils.NewPhotosHandler(suite.T(), &mockStore, suite.photoStorage)
 	router := testutils.NewPhotosRouter(suite.T(), photosHandler, suite.middleware)
 
-	photo := testutils.ConstructHikes(suite.T(), 1, suite.store, suite.photoStorage, true, true)[0].Photos[0]
+	photo := testutils.ConstructAndSaveHikes(suite.T(), 1, suite.store, suite.photoStorage, true)[0].Photos[0]
 
 	res := testutils.SendRequest(suite.T(),
 		router,
@@ -119,7 +119,7 @@ func (suite *photosHandlerTestSuite) TestDeletePhoto_DeletesPhotoButS3ObjectDele
 	photosHandler := testutils.NewPhotosHandler(suite.T(), suite.store, &mockPhotoStorage)
 	router := testutils.NewPhotosRouter(suite.T(), photosHandler, suite.middleware)
 
-	photo := testutils.ConstructHikes(suite.T(), 1, suite.store, suite.photoStorage, true, true)[0].Photos[0]
+	photo := testutils.ConstructAndSaveHikes(suite.T(), 1, suite.store, suite.photoStorage, true)[0].Photos[0]
 	objectKey := suite.photoStorage.GetPhotoObjectKey(photo.SrcUrl)
 	_, err := suite.s3Client.PutObject(
 		context.TODO(),
@@ -149,7 +149,7 @@ func (suite *photosHandlerTestSuite) TestDeletePhoto_DeletesPhotoButS3ObjectDele
 }
 
 func (suite *photosHandlerTestSuite) TestDeletePhoto_DeletesPhotoAndS3Object() {
-	photo := testutils.ConstructHikes(suite.T(), 1, suite.store, suite.photoStorage, true, true)[0].Photos[0]
+	photo := testutils.ConstructAndSaveHikes(suite.T(), 1, suite.store, suite.photoStorage, true)[0].Photos[0]
 	objectKey := suite.photoStorage.GetPhotoObjectKey(photo.SrcUrl)
 	_, err := suite.s3Client.PutObject(
 		context.TODO(),
@@ -177,7 +177,7 @@ func (suite *photosHandlerTestSuite) TestDeletePhoto_DeletesPhotoAndS3Object() {
 }
 
 func (suite *photosHandlerTestSuite) TestUpdatePhoto_Returns401ErrorWhenUnauthorized() {
-	photo := testutils.ConstructHikes(suite.T(), 1, suite.store, suite.photoStorage, true, true)[0].Photos[0]
+	photo := testutils.ConstructAndSaveHikes(suite.T(), 1, suite.store, suite.photoStorage, true)[0].Photos[0]
 
 	body := map[string]any{
 		"caption":      "Updated caption",
@@ -217,7 +217,7 @@ func (suite *photosHandlerTestSuite) TestUpdatePhoto_Returns404ErrorWhenPhotoDoe
 }
 
 func (suite *photosHandlerTestSuite) TestUpdatePhoto_Returns400ErrorWhenRequestBodyHasInvalidFields() {
-	photo := testutils.ConstructHikes(suite.T(), 1, suite.store, suite.photoStorage, true, true)[0].Photos[0]
+	photo := testutils.ConstructAndSaveHikes(suite.T(), 1, suite.store, suite.photoStorage, true)[0].Photos[0]
 
 	body := map[string]any{
 		"caption":      "Updated caption",
@@ -236,7 +236,7 @@ func (suite *photosHandlerTestSuite) TestUpdatePhoto_Returns400ErrorWhenRequestB
 }
 
 func (suite *photosHandlerTestSuite) TestUpdatePhoto_Returns400ErrorWhenRequestBodyIsMissingFields() {
-	photo := testutils.ConstructHikes(suite.T(), 1, suite.store, suite.photoStorage, true, true)[0].Photos[0]
+	photo := testutils.ConstructAndSaveHikes(suite.T(), 1, suite.store, suite.photoStorage, true)[0].Photos[0]
 
 	body := map[string]any{
 		"caption": "Updated caption",
@@ -254,7 +254,7 @@ func (suite *photosHandlerTestSuite) TestUpdatePhoto_Returns400ErrorWhenRequestB
 }
 
 func (suite *photosHandlerTestSuite) TestUpdatePhoto_Returns500ErrorWhenDBErrors() {
-	photo := testutils.ConstructHikes(suite.T(), 1, suite.store, suite.photoStorage, true, true)[0].Photos[0]
+	photo := testutils.ConstructAndSaveHikes(suite.T(), 1, suite.store, suite.photoStorage, true)[0].Photos[0]
 
 	mockStore := store.MockStore{
 		GetPhotoByIDResult: &photo,
@@ -280,7 +280,7 @@ func (suite *photosHandlerTestSuite) TestUpdatePhoto_Returns500ErrorWhenDBErrors
 }
 
 func (suite *photosHandlerTestSuite) TestUpdatePhoto_UpdatesPhoto() {
-	photo := testutils.ConstructHikes(suite.T(), 1, suite.store, suite.photoStorage, true, true)[0].Photos[0]
+	photo := testutils.ConstructAndSaveHikes(suite.T(), 1, suite.store, suite.photoStorage, true)[0].Photos[0]
 
 	body := map[string]any{
 		"caption":      "Updated caption",
@@ -311,7 +311,7 @@ func (suite *photosHandlerTestSuite) TestUpdatePhoto_UpdatesPhoto() {
 }
 
 func (suite *photosHandlerTestSuite) TestUpdatePhoto_UpdatesPhotoWhenOptionalFieldMissing() {
-	photo := testutils.ConstructHikes(suite.T(), 1, suite.store, suite.photoStorage, true, true)[0].Photos[0]
+	photo := testutils.ConstructAndSaveHikes(suite.T(), 1, suite.store, suite.photoStorage, true)[0].Photos[0]
 
 	body := map[string]any{
 		"displayOrder": 2,

@@ -62,14 +62,14 @@ func (suite *storeTestSuite) TestCreateRecord_ReturnsErrorWhenDBErrors() {
 	}
 	s := testutils.NewStore(suite.T(), &mockDatabase)
 
-	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, suite.photoStorage, false, false)[0]
+	hike := testutils.ConstructHikes(suite.T(), 1, suite.photoStorage, false)[0]
 	err := s.CreateRecord(&hike)
 
 	suite.Require().Error(err)
 }
 
 func (suite *storeTestSuite) TestCreateRecord_CreatesModel() {
-	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, suite.photoStorage, false, false)[0]
+	hike := testutils.ConstructHikes(suite.T(), 1, suite.photoStorage, false)[0]
 	err := suite.store.CreateRecord(&hike)
 
 	suite.Require().NoError(err)
@@ -80,7 +80,7 @@ func (suite *storeTestSuite) TestCreateRecord_CreatesModel() {
 }
 
 func (suite *storeTestSuite) TestCreateRecord_CreatesModels() {
-	hikes := testutils.ConstructHikes(suite.T(), 2, suite.store, suite.photoStorage, false, false)
+	hikes := testutils.ConstructHikes(suite.T(), 2, suite.photoStorage, false)
 	err := suite.store.CreateRecord(hikes)
 
 	suite.Require().NoError(err)
@@ -100,7 +100,7 @@ func (suite *storeTestSuite) TestDeleteRecord_ReturnsErrorWhenDBErrors() {
 	}
 	s := testutils.NewStore(suite.T(), &mockDatabase)
 
-	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, suite.photoStorage, false, true)[0]
+	hike := testutils.ConstructAndSaveHikes(suite.T(), 1, suite.store, suite.photoStorage, false)[0]
 	err := s.DeleteRecord(&hike)
 	suite.Require().Error(err)
 }
@@ -111,7 +111,7 @@ func (suite *storeTestSuite) TestDeleteRecord_NoErrorWhenHikeDoesNotExist() {
 }
 
 func (suite *storeTestSuite) TestDeleteRecord_DeletesModel() {
-	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, suite.photoStorage, false, true)[0]
+	hike := testutils.ConstructAndSaveHikes(suite.T(), 1, suite.store, suite.photoStorage, false)[0]
 	err := suite.store.DeleteRecord(&hike)
 	suite.Require().NoError(err)
 
@@ -120,7 +120,7 @@ func (suite *storeTestSuite) TestDeleteRecord_DeletesModel() {
 }
 
 func (suite *storeTestSuite) TestDeleteRecord_DeletesModels() {
-	hikes := testutils.ConstructHikes(suite.T(), 2, suite.store, suite.photoStorage, false, true)
+	hikes := testutils.ConstructAndSaveHikes(suite.T(), 2, suite.store, suite.photoStorage, false)
 	err := suite.store.DeleteRecord(&hikes)
 	suite.Require().NoError(err)
 
@@ -141,14 +141,14 @@ func (suite *storeTestSuite) TestGetHikeByID_ReturnsErrorWhenDBErrors() {
 	}
 	s := testutils.NewStore(suite.T(), &mockDatabase)
 
-	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, suite.photoStorage, false, true)[0]
+	hike := testutils.ConstructAndSaveHikes(suite.T(), 1, suite.store, suite.photoStorage, false)[0]
 	_, err := s.GetHikeByID(hike.ID)
 
 	suite.Require().Error(err)
 }
 
 func (suite *storeTestSuite) TestGetHikeByID_ReturnsHike() {
-	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, suite.photoStorage, false, true)[0]
+	hike := testutils.ConstructAndSaveHikes(suite.T(), 1, suite.store, suite.photoStorage, false)[0]
 	result, err := suite.store.GetHikeByID(hike.ID)
 
 	suite.Require().NoError(err)
@@ -166,20 +166,18 @@ func (suite *storeTestSuite) TestGetPhotoByID_ReturnsErrorWhenDBErrors() {
 	}
 	s := testutils.NewStore(suite.T(), &mockDatabase)
 
-	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, suite.photoStorage, true, true)[0]
-	photo := hike.Photos[0]
+	photo := testutils.ConstructAndSaveHikes(suite.T(), 1, suite.store, suite.photoStorage, true)[0].Photos[0]
 	_, err := s.GetPhotoByID(photo.ID)
 
 	suite.Require().Error(err)
 }
 
 func (suite *storeTestSuite) TestGetPhotoByID_ReturnsPhoto() {
-	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, suite.photoStorage, true, true)[0]
-	photo := hike.Photos[0]
+	photo := testutils.ConstructAndSaveHikes(suite.T(), 1, suite.store, suite.photoStorage, true)[0].Photos[0]
 	result, err := suite.store.GetPhotoByID(photo.ID)
 
 	suite.Require().NoError(err)
-	suite.Require().Equal(hike.Photos[0], *result)
+	suite.Require().Equal(photo, *result)
 }
 
 func (suite *storeTestSuite) TestListHikes_ReturnsErrorWhenDBErrors() {
@@ -188,14 +186,14 @@ func (suite *storeTestSuite) TestListHikes_ReturnsErrorWhenDBErrors() {
 	}
 	s := testutils.NewStore(suite.T(), &mockDatabase)
 
-	testutils.ConstructHikes(suite.T(), 2, suite.store, suite.photoStorage, true, true)
+	testutils.ConstructAndSaveHikes(suite.T(), 2, suite.store, suite.photoStorage, false)
 	_, err := s.ListHikes()
 
 	suite.Require().Error(err)
 }
 
 func (suite *storeTestSuite) TestListHikes_ReturnsHikes() {
-	hikes := testutils.ConstructHikes(suite.T(), 2, suite.store, suite.photoStorage, true, true)
+	hikes := testutils.ConstructAndSaveHikes(suite.T(), 2, suite.store, suite.photoStorage, true)
 	result, err := suite.store.ListHikes()
 
 	suite.Require().NoError(err)
@@ -209,7 +207,7 @@ func (suite *storeTestSuite) TestUpdateRecord_ReturnsErrorWhenDBErrors() {
 	}
 	s := testutils.NewStore(suite.T(), &mockDatabase)
 
-	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, suite.photoStorage, false, true)[0]
+	hike := testutils.ConstructAndSaveHikes(suite.T(), 1, suite.store, suite.photoStorage, false)[0]
 
 	hike.Difficulty = 5
 	hike.TrailName = "Other trail name"
@@ -223,7 +221,7 @@ func (suite *storeTestSuite) TestUpdateRecord_NoErrorWhenHikeDoesNotExist() {
 }
 
 func (suite *storeTestSuite) TestUpdateRecord_UpdatesModel() {
-	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, suite.photoStorage, false, true)[0]
+	hike := testutils.ConstructAndSaveHikes(suite.T(), 1, suite.store, suite.photoStorage, false)[0]
 
 	hike.Difficulty = 5
 	hike.TrailName = "Other trail name"
