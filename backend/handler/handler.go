@@ -21,8 +21,13 @@ type Handler struct {
 }
 
 // Creates a new Handler.
-func NewHandler(store store.Store, photoStorage photostorage.PhotoStorage, auth auth.Auth) (*Handler, error) {
-	_, err := RegisterCustomValidators()
+func NewHandler(
+	store store.Store,
+	photoStorage photostorage.PhotoStorage,
+	auth auth.Auth,
+	validatorManager ValidatorManager,
+) (*Handler, error) {
+	err := validatorManager.RegisterValidators()
 	if err != nil {
 		return nil, fmt.Errorf("Failed to register custom validators: %w", err)
 	}

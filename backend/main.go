@@ -45,12 +45,17 @@ func main() {
 		log.Fatal("Failed to setup auth: ", err)
 	}
 
-	middleware := middleware.New(auth)
+	validatorManager, err := handler.NewValidatorManager()
+	if err != nil {
+		log.Fatal("Failed to setup validator manager: ", err)
+	}
 
-	handler, err := handler.NewHandler(store, photoStorage, auth)
+	handler, err := handler.NewHandler(store, photoStorage, auth, validatorManager)
 	if err != nil {
 		log.Fatal("Failed to setup handler: ", err)
 	}
+
+	middleware := middleware.New(auth)
 
 	router, err := router.New(handler, middleware, config.FrontendURL)
 	if err != nil {

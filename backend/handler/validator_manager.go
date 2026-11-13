@@ -21,29 +21,44 @@ var VALID_IMAGE_TYPES = map[string]struct{}{
 	"image/heif": {},
 }
 
-// Registers custom struct field validators used by Gin for model validation
-func RegisterCustomValidators() (*validator.Validate, error) {
+// ValidatorManager manages custom struct field validators. These are used by Gin for model validation.
+type ValidatorManager interface {
+	RegisterValidators() error
+}
+
+// validatorManagerImpl is an implementation of the ValidatorManager interface.
+type validatorManagerImpl struct {
+	validate *validator.Validate
+}
+
+// Creates a new ValidatorManager.
+func NewValidatorManager() (ValidatorManager, error) {
 	v, ok := binding.Validator.Engine().(*validator.Validate)
 	if !ok {
 		return nil, errors.New("Failed to obtain validator engine")
 	}
 
-	err := v.RegisterValidation("divisibleByHalf", divisibleByHalfValidator)
+	return &validatorManagerImpl{validate: v}, nil
+}
+
+// Registers custom struct field validators.
+func (c *validatorManagerImpl) RegisterValidators() error {
+	err := c.validate.RegisterValidation("divisibleByHalf", divisibleByHalfValidator)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to register divisibleByHalf validator: %w", err)
+		return fmt.Errorf("Failed to register divisibleByHalf validator: %w", err)
 	}
 
-	err = v.RegisterValidation("validImageType", validImageTypeValidator)
+	err = c.validate.RegisterValidation("validImageType", validImageTypeValidator)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to register validImageType validator: %w", err)
+		return fmt.Errorf("Failed to register validImageType validator: %w", err)
 	}
 
-	err = v.RegisterValidation("validObjectKey", validObjectKeyValidator)
+	err = c.validate.RegisterValidation("validObjectKey", validObjectKeyValidator)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to register validObjectKey validator: %w", err)
+		return fmt.Errorf("Failed to register validObjectKey validator: %w", err)
 	}
 
-	return v, nil
+	return nil
 }
 
 // Checks that a float field is divisible by 0.5
