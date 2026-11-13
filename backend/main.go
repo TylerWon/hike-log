@@ -13,6 +13,7 @@ import (
 	"github.com/TylerWon/hike-log/backend/router"
 	"github.com/TylerWon/hike-log/backend/s3client"
 	"github.com/TylerWon/hike-log/backend/store"
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
@@ -21,6 +22,10 @@ func main() {
 	cfg, err := config.New()
 	if err != nil {
 		fatal("Failed to load config", err)
+	}
+
+	if cfg.Env != "local" {
+		gin.SetMode(gin.ReleaseMode)
 	}
 
 	db, err := database.Connect(cfg.Database)
