@@ -1,8 +1,13 @@
 package main
 
 import (
+	"context"
 	"log/slog"
+	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/TylerWon/hike-log/backend/auth"
 	"github.com/TylerWon/hike-log/backend/config"
@@ -14,6 +19,11 @@ import (
 	"github.com/TylerWon/hike-log/backend/s3client"
 	"github.com/TylerWon/hike-log/backend/store"
 	"github.com/gin-gonic/gin"
+)
+
+const (
+	SERVER_PORT           = ":8080"
+	SHUTDOWN_TIMEOUT_SECS = 15
 )
 
 func main() {
@@ -70,11 +80,49 @@ func main() {
 		fatal("Failed to setup router", err)
 	}
 
-	if err := router.Run(); err != nil {
-		fatal("Failed to start server", err)
+	server := &http.Server{
+		Addr:    SERVER_PORT,
+		Handler: router,
+	}
+	go runServer(server)
+
+	gracefulShutdown(server, store)
+}
+
+// Starts the HTTP server.
+func runServer(server *http.Server) {
+	// Blocks until error or shutdown
+	err := server.ListenAndServe()
+	if err != nil && err != http.ErrServerClosed {
+		fatal("Server error", err)
 	}
 }
 
+// Handles shutdown of the HTTP server.
+func gracefulShutdown(server *http.Server, store store.Store) {
+	// Wait for termination signals (SIGTERM, SIGINT)
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+
+	slog.Info("Shutting down")
+	ctx, cancel := context.WithTimeout(context.Background(), SHUTDOWN_TIMEOUT_SECS*time.Second)
+	defer cancel()
+
+	// Shutdown server with timeout
+	err := server.Shutdown(ctx)
+	if err != nil {
+		slog.Error("Shutdown error", "err", err)
+	}
+
+	// Close connection to database
+	err = store.CloseConnection()
+	if err != nil {
+		slog.Error("Database close error", "err", err)
+	}
+}
+
+// Logs a message then terminates the application.
 func fatal(msg string, err error) {
 	slog.Error(msg, "err", err)
 	os.Exit(1)
