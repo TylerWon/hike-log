@@ -23,12 +23,11 @@ type storeTestSuite struct {
 
 func (suite *storeTestSuite) SetupSuite() {
 	suite.suiteDB = testutils.NewTestSuiteDB(suite.T())
-	suite.store = testutils.NewStore(suite.T(), suite.suiteDB)
+	suite.store = testutils.NewStore(suite.T(), suite.suiteDB.TestDB)
 	suite.photoStorage = testutils.NewPhotoStorage(suite.T(), nil, "", config.AWSConfig{})
 }
 
 func (suite *storeTestSuite) TearDownSuite() {
-	testutils.TeardownStore(suite.T(), suite.store)
 	suite.suiteDB.Teardown(suite.T())
 }
 
@@ -40,14 +39,31 @@ func TestStoreTestSuite(t *testing.T) {
 	suite.Run(t, new(storeTestSuite))
 }
 
+func (suite *storeTestSuite) TestNew_ReturnsErrorWhenAutoMigrateFails() {
+	mockDatabase := database.MockDatabase{
+		AutoMigrateError: errors.New("Something went wrong"),
+	}
+	_, err := store.New(&mockDatabase)
+
+	suite.Require().Error(err)
+}
+
+func (suite *storeTestSuite) TestNew_CreatesStore() {
+	mockDatabase := database.MockDatabase{}
+	s, err := store.New(&mockDatabase)
+
+	suite.Require().NoError(err)
+	suite.Require().NotNil(s)
+}
+
 func (suite *storeTestSuite) TestCreateRecord_ReturnsErrorWhenDBErrors() {
 	mockDatabase := database.MockDatabase{
 		CreateResult: &gorm.DB{Error: errors.New("Something went wrong")},
 	}
-	store := store.NewTestStore(&mockDatabase)
+	s := testutils.NewStore(suite.T(), &mockDatabase)
 
 	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, suite.photoStorage, false, false)[0]
-	err := store.CreateRecord(&hike)
+	err := s.CreateRecord(&hike)
 
 	suite.Require().Error(err)
 }
@@ -82,10 +98,10 @@ func (suite *storeTestSuite) TestDeleteRecord_ReturnsErrorWhenDBErrors() {
 	mockDatabase := database.MockDatabase{
 		DeleteResult: &gorm.DB{Error: errors.New("Something went wrong")},
 	}
-	store := store.NewTestStore(&mockDatabase)
+	s := testutils.NewStore(suite.T(), &mockDatabase)
 
 	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, suite.photoStorage, false, true)[0]
-	err := store.DeleteRecord(&hike)
+	err := s.DeleteRecord(&hike)
 	suite.Require().Error(err)
 }
 
@@ -123,10 +139,10 @@ func (suite *storeTestSuite) TestGetHikeByID_ReturnsErrorWhenDBErrors() {
 	mockDatabase := database.MockDatabase{
 		FirstResult: &gorm.DB{Error: errors.New("Something went wrong")},
 	}
-	store := store.NewTestStore(&mockDatabase)
+	s := testutils.NewStore(suite.T(), &mockDatabase)
 
 	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, suite.photoStorage, false, true)[0]
-	_, err := store.GetHikeByID(hike.ID)
+	_, err := s.GetHikeByID(hike.ID)
 
 	suite.Require().Error(err)
 }
@@ -148,11 +164,11 @@ func (suite *storeTestSuite) TestGetPhotoByID_ReturnsErrorWhenDBErrors() {
 	mockDatabase := database.MockDatabase{
 		FirstResult: &gorm.DB{Error: errors.New("Something went wrong")},
 	}
-	store := store.NewTestStore(&mockDatabase)
+	s := testutils.NewStore(suite.T(), &mockDatabase)
 
 	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, suite.photoStorage, true, true)[0]
 	photo := hike.Photos[0]
-	_, err := store.GetPhotoByID(photo.ID)
+	_, err := s.GetPhotoByID(photo.ID)
 
 	suite.Require().Error(err)
 }
@@ -170,10 +186,10 @@ func (suite *storeTestSuite) TestListHikes_ReturnsErrorWhenDBErrors() {
 	mockDatabase := database.MockDatabase{
 		FindResult: &gorm.DB{Error: errors.New("Something went wrong")},
 	}
-	store := store.NewTestStore(&mockDatabase)
+	s := testutils.NewStore(suite.T(), &mockDatabase)
 
 	testutils.ConstructHikes(suite.T(), 2, suite.store, suite.photoStorage, true, true)
-	_, err := store.ListHikes()
+	_, err := s.ListHikes()
 
 	suite.Require().Error(err)
 }
@@ -191,13 +207,13 @@ func (suite *storeTestSuite) TestUpdateRecord_ReturnsErrorWhenDBErrors() {
 	mockDatabase := database.MockDatabase{
 		UpdatesResult: &gorm.DB{Error: errors.New("Something went wrong")},
 	}
-	store := store.NewTestStore(&mockDatabase)
+	s := testutils.NewStore(suite.T(), &mockDatabase)
 
 	hike := testutils.ConstructHikes(suite.T(), 1, suite.store, suite.photoStorage, false, true)[0]
 
 	hike.Difficulty = 5
 	hike.TrailName = "Other trail name"
-	err := store.UpdateRecord(&hike)
+	err := s.UpdateRecord(&hike)
 	suite.Require().Error(err)
 }
 

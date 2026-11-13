@@ -11,8 +11,8 @@ import (
 
 // TestSuiteDB holds a shared database for a test suite.
 type TestSuiteDB struct {
+	TestDB       database.Database
 	adminDB      database.Database
-	testDB       database.Database
 	testDBConfig config.DBConfig
 }
 
@@ -56,7 +56,7 @@ func NewTestSuiteDB(t *testing.T) *TestSuiteDB {
 
 	return &TestSuiteDB{
 		adminDB:      adminDB,
-		testDB:       testDB,
+		TestDB:       testDB,
 		testDBConfig: testDBConfig,
 	}
 }
@@ -65,7 +65,7 @@ func NewTestSuiteDB(t *testing.T) *TestSuiteDB {
 func (suiteDB *TestSuiteDB) Reset(t *testing.T) {
 	t.Helper()
 
-	result := suiteDB.testDB.Exec("TRUNCATE TABLE photos, hikes RESTART IDENTITY CASCADE")
+	result := suiteDB.TestDB.Exec("TRUNCATE TABLE photos, hikes RESTART IDENTITY CASCADE")
 	if result.Error != nil {
 		t.Fatalf("Failed to reset %s database: %v", suiteDB.testDBConfig.DBName, result.Error)
 	}
@@ -75,7 +75,7 @@ func (suiteDB *TestSuiteDB) Reset(t *testing.T) {
 func (suiteDB *TestSuiteDB) Teardown(t *testing.T) {
 	t.Helper()
 
-	closeDB(t, suiteDB.testDB)
+	closeDB(t, suiteDB.TestDB)
 
 	var exists int
 	suiteDB.adminDB.Raw("SELECT 1 FROM pg_database WHERE datname = ?", suiteDB.testDBConfig.DBName).Scan(&exists)

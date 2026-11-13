@@ -1,7 +1,6 @@
 package store
 
 import (
-	"github.com/TylerWon/hike-log/backend/config"
 	"github.com/TylerWon/hike-log/backend/database"
 	"github.com/TylerWon/hike-log/backend/models"
 	"gorm.io/gorm"
@@ -23,24 +22,14 @@ type storeImpl struct {
 	db database.Database
 }
 
-// Creates a Store connected to the database specified in the given dbConfig.
-func New(dbConfig config.DBConfig) (Store, error) {
-	db, err := database.Connect(dbConfig)
-	if err != nil {
-		return nil, err
-	}
-
-	err = db.AutoMigrate(&models.Hike{}, &models.Photo{})
+// Creates a Store backed by the given database.
+func New(db database.Database) (Store, error) {
+	err := db.AutoMigrate(&models.Hike{}, &models.Photo{})
 	if err != nil {
 		return nil, err
 	}
 
 	return &storeImpl{db}, nil
-}
-
-// Creates a new Store. Allows injection of internal dependencies to allow for mocking.
-func NewTestStore(db database.Database) Store {
-	return &storeImpl{db}
 }
 
 // Ends the connection to the database.

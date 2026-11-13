@@ -33,19 +33,18 @@ type photosHandlerTestSuite struct {
 
 func (suite *photosHandlerTestSuite) SetupSuite() {
 	suite.suiteDB = testutils.NewTestSuiteDB(suite.T())
-	suite.store = testutils.NewStore(suite.T(), suite.suiteDB)
+	suite.store = testutils.NewStore(suite.T(), suite.suiteDB.TestDB)
 	suite.s3Client = testutils.NewS3Client(suite.T(), "", config.AWSConfig{})
 	suite.photoStorage = testutils.NewPhotoStorage(suite.T(), suite.s3Client, "", config.AWSConfig{})
 	suite.auth = testutils.NewAuth(suite.T(), config.AuthConfig{})
 	suite.middleware = middleware.New(suite.auth)
-	suite.router = testutils.NewPhotosRouter(suite.T(), 
+	suite.router = testutils.NewPhotosRouter(suite.T(),
 		testutils.NewPhotosHandler(suite.T(), suite.store, suite.photoStorage),
 		suite.middleware,
 	)
 }
 
 func (suite *photosHandlerTestSuite) TearDownSuite() {
-	testutils.TeardownStore(suite.T(), suite.store)
 	suite.suiteDB.Teardown(suite.T())
 }
 
@@ -75,7 +74,7 @@ func (suite *photosHandlerTestSuite) TestDeletePhoto_Returns401ErrorWhenUnauthor
 }
 
 func (suite *photosHandlerTestSuite) TestDeletePhoto_Returns400ErrorWhenPhotoIDIsInvalid() {
-	res := testutils.SendRequest(suite.T(), 
+	res := testutils.SendRequest(suite.T(),
 		suite.router,
 		http.MethodDelete,
 		"/photos/abc",
@@ -86,7 +85,7 @@ func (suite *photosHandlerTestSuite) TestDeletePhoto_Returns400ErrorWhenPhotoIDI
 }
 
 func (suite *photosHandlerTestSuite) TestDeletePhoto_Returns404ErrorWhenPhotoDoesNotExist() {
-	res := testutils.SendRequest(suite.T(), 
+	res := testutils.SendRequest(suite.T(),
 		suite.router,
 		http.MethodDelete,
 		"/photos/1",
@@ -103,7 +102,7 @@ func (suite *photosHandlerTestSuite) TestDeletePhoto_Returns500ErrorWhenDBErrors
 
 	photo := testutils.ConstructHikes(suite.T(), 1, suite.store, suite.photoStorage, true, true)[0].Photos[0]
 
-	res := testutils.SendRequest(suite.T(), 
+	res := testutils.SendRequest(suite.T(),
 		router,
 		http.MethodDelete,
 		fmt.Sprintf("/photos/%d", photo.ID),
@@ -130,7 +129,7 @@ func (suite *photosHandlerTestSuite) TestDeletePhoto_DeletesPhotoButS3ObjectDele
 	)
 	suite.Require().NoError(err)
 
-	res := testutils.SendRequest(suite.T(), 
+	res := testutils.SendRequest(suite.T(),
 		router,
 		http.MethodDelete,
 		fmt.Sprintf("/photos/%d", photo.ID),
@@ -160,7 +159,7 @@ func (suite *photosHandlerTestSuite) TestDeletePhoto_DeletesPhotoAndS3Object() {
 	)
 	suite.Require().NoError(err)
 
-	res := testutils.SendRequest(suite.T(), 
+	res := testutils.SendRequest(suite.T(),
 		suite.router,
 		http.MethodDelete,
 		fmt.Sprintf("/photos/%d", photo.ID),
@@ -191,7 +190,7 @@ func (suite *photosHandlerTestSuite) TestUpdatePhoto_Returns401ErrorWhenUnauthor
 }
 
 func (suite *photosHandlerTestSuite) TestUpdatePhoto_Returns400ErrorWhenPhotoIDIsInvalid() {
-	res := testutils.SendRequest(suite.T(), 
+	res := testutils.SendRequest(suite.T(),
 		suite.router,
 		http.MethodPut,
 		"/photos/abc",
@@ -207,7 +206,7 @@ func (suite *photosHandlerTestSuite) TestUpdatePhoto_Returns404ErrorWhenPhotoDoe
 		"displayOrder": 2,
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(suite.T(), 
+	res := testutils.SendRequest(suite.T(),
 		suite.router,
 		http.MethodPut,
 		"/photos/1",
@@ -225,7 +224,7 @@ func (suite *photosHandlerTestSuite) TestUpdatePhoto_Returns400ErrorWhenRequestB
 		"displayOrder": 0, // must be > 0
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(suite.T(), 
+	res := testutils.SendRequest(suite.T(),
 		suite.router,
 		http.MethodPut,
 		fmt.Sprintf("/photos/%d", photo.ID),
@@ -243,7 +242,7 @@ func (suite *photosHandlerTestSuite) TestUpdatePhoto_Returns400ErrorWhenRequestB
 		"caption": "Updated caption",
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(suite.T(), 
+	res := testutils.SendRequest(suite.T(),
 		suite.router,
 		http.MethodPut,
 		fmt.Sprintf("/photos/%d", photo.ID),
@@ -269,7 +268,7 @@ func (suite *photosHandlerTestSuite) TestUpdatePhoto_Returns500ErrorWhenDBErrors
 		"displayOrder": 2,
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(suite.T(), 
+	res := testutils.SendRequest(suite.T(),
 		router,
 		http.MethodPut,
 		fmt.Sprintf("/photos/%d", photo.ID),
@@ -288,7 +287,7 @@ func (suite *photosHandlerTestSuite) TestUpdatePhoto_UpdatesPhoto() {
 		"displayOrder": 2,
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(suite.T(), 
+	res := testutils.SendRequest(suite.T(),
 		suite.router,
 		http.MethodPut,
 		fmt.Sprintf("/photos/%d", photo.ID),
@@ -318,7 +317,7 @@ func (suite *photosHandlerTestSuite) TestUpdatePhoto_UpdatesPhotoWhenOptionalFie
 		"displayOrder": 2,
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(suite.T(), 
+	res := testutils.SendRequest(suite.T(),
 		suite.router,
 		http.MethodPut,
 		fmt.Sprintf("/photos/%d", photo.ID),

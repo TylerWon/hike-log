@@ -5,6 +5,7 @@ import (
 
 	"github.com/TylerWon/hike-log/backend/auth"
 	"github.com/TylerWon/hike-log/backend/config"
+	"github.com/TylerWon/hike-log/backend/database"
 	"github.com/TylerWon/hike-log/backend/handler"
 	"github.com/TylerWon/hike-log/backend/middleware"
 	"github.com/TylerWon/hike-log/backend/photostorage"
@@ -19,7 +20,12 @@ func main() {
 		log.Fatal("Failed to load config: ", err)
 	}
 
-	store, err := store.New(config.Database)
+	db, err := database.Connect(config.Database)
+	if err != nil {
+		log.Fatal("Failed to connect to database: ", err)
+	}
+
+	store, err := store.New(db)
 	if err != nil {
 		log.Fatal("Failed to create store: ", err)
 	}
