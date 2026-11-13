@@ -2,7 +2,7 @@ package handler
 
 import (
 	"fmt"
-	"log"
+	"log/slog"
 	"net/http"
 	"strconv"
 	"strings"
@@ -56,7 +56,7 @@ func (h *HikesHandler) CreateHike(c *gin.Context) {
 	}
 	err := h.store.CreateRecord(&hike)
 	if err != nil {
-		log.Println("Failed to create Hike: ", err)
+		slog.Error("Failed to create hike", "err", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": http.StatusText(http.StatusInternalServerError)})
 		return
 	}
@@ -114,7 +114,7 @@ func (h *HikesHandler) CreatePhotos(c *gin.Context) {
 
 		exists, err := h.photoStorage.DoesPhotoExist(c, item.ObjectKey)
 		if err != nil {
-			log.Printf("Unable to verify if photo %d (ObjectKey=%s) exists in the S3 bucket: %v", idx, item.ObjectKey, err)
+			slog.Error("Unable to verify photo exists in S3", "index", idx, "object_key", item.ObjectKey, "err", err)
 			item := createPhotosResponseItem{
 				Index:   *item.Index,
 				Success: false,
@@ -140,7 +140,7 @@ func (h *HikesHandler) CreatePhotos(c *gin.Context) {
 		}
 		err = h.store.CreateRecord(&photo)
 		if err != nil {
-			log.Printf("Failed to create Photo %d: %v", idx, err)
+			slog.Error("Failed to create photo", "index", idx, "err", err)
 			item := createPhotosResponseItem{Index: *item.Index, Success: false, Error: "Failed to create photo"}
 			res = append(res, item)
 			continue
@@ -198,7 +198,7 @@ func (h *HikesHandler) CreatePresignedURLs(c *gin.Context) {
 			int64(item.ContentLength),
 		)
 		if err != nil {
-			log.Printf("Failed to create presigned URL for item %d: %v", idx, err)
+			slog.Error("Failed to create presigned URL", "index", idx, "err", err)
 			item := createPresignedURLsResponseItem{Index: *item.Index, Success: false, Error: "Failed to create presigned URL"}
 			res = append(res, item)
 			continue
@@ -249,14 +249,14 @@ func (h *HikesHandler) DeleteHike(c *gin.Context) {
 	// when S3 objects are deleted first but models fail to delete.
 	err = h.store.DeleteRecord(&models.Hike{ID: params.HikeID})
 	if err != nil {
-		log.Printf("Failed to delete Hike (id=%d): %v", params.HikeID, err)
+		slog.Error("Failed to delete hike", "id", params.HikeID, "err", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": http.StatusText(http.StatusInternalServerError)})
 		return
 	}
 
 	err = h.photoStorage.DeletePhotosForHike(c, params.HikeID)
 	if err != nil {
-		log.Printf("Failed to delete S3 Photo objects for Hike (id=%d): %v", params.HikeID, err)
+		slog.Error("Failed to delete S3 photo objects for hike", "id", params.HikeID, "err", err)
 		c.JSON(http.StatusOK, gin.H{"message": "ok"}) // return OK since Hike deleted, only orphan S3 objects
 		return
 	}
@@ -274,7 +274,7 @@ Returns:
 func (h *HikesHandler) ListHikes(c *gin.Context) {
 	hikes, err := h.store.ListHikes()
 	if err != nil {
-		log.Println("Failed to list hikes: ", err)
+		slog.Error("Failed to list hikes", "err", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": http.StatusText(http.StatusInternalServerError)})
 		return
 	}
@@ -327,7 +327,7 @@ func (h *HikesHandler) UpdateHike(c *gin.Context) {
 	}
 	err = h.store.UpdateRecord(&hike)
 	if err != nil {
-		log.Printf("Failed to update Hike (id=%d): %v", hike.ID, err)
+		slog.Error("Failed to update hike", "id", hike.ID, "err", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": http.StatusText(http.StatusInternalServerError)})
 		return
 	}

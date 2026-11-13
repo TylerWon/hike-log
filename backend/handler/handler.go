@@ -3,7 +3,7 @@ package handler
 import (
 	"errors"
 	"fmt"
-	"log"
+	"log/slog"
 	"net/http"
 
 	"github.com/TylerWon/hike-log/backend/auth"
@@ -50,6 +50,6 @@ func handleRecordDoesNotExistError(c *gin.Context, err error, id uint) {
 		c.JSON(http.StatusNotFound, gin.H{"error": http.StatusText(http.StatusNotFound)})
 		return
 	}
-	log.Printf("Failed to get record (id=%d): %v", id, err)
+	slog.Error("Failed to get record", "id", id, "err", err)
 	c.JSON(http.StatusInternalServerError, gin.H{"error": http.StatusText(http.StatusInternalServerError)})
 }

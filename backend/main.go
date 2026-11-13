@@ -1,7 +1,8 @@
 package main
 
 import (
-	"log"
+	"log/slog"
+	"os"
 
 	"github.com/TylerWon/hike-log/backend/auth"
 	"github.com/TylerWon/hike-log/backend/config"
@@ -15,52 +16,61 @@ import (
 )
 
 func main() {
-	config, err := config.New()
+	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stdout, nil)))
+
+	cfg, err := config.New()
 	if err != nil {
-		log.Fatal("Failed to load config: ", err)
+		fatal("Failed to load config", err)
 	}
 
-	db, err := database.Connect(config.Database)
+	db, err := database.Connect(cfg.Database)
 	if err != nil {
-		log.Fatal("Failed to connect to database: ", err)
+		fatal("Failed to connect to database", err)
 	}
 
 	store, err := store.New(db)
 	if err != nil {
-		log.Fatal("Failed to create store: ", err)
+		fatal("Failed to create store", err)
 	}
 
-	s3Client, err := s3client.New(config.Env, config.AWS)
+	s3Client, err := s3client.New(cfg.Env, cfg.AWS)
 	if err != nil {
-		log.Fatal("Failed to setup S3 client: ", err)
+		fatal("Failed to setup S3 client", err)
 	}
 
-	photoStorage, err := photostorage.New(s3Client, config.Env, config.AWS)
+	photoStorage, err := photostorage.New(s3Client, cfg.Env, cfg.AWS)
 	if err != nil {
-		log.Fatal("Failed to setup photo storage: ", err)
+		fatal("Failed to setup photo storage", err)
 	}
 
-	auth, err := auth.New(config.Auth)
+	auth, err := auth.New(cfg.Auth)
 	if err != nil {
-		log.Fatal("Failed to setup auth: ", err)
+		fatal("Failed to setup auth", err)
 	}
 
 	validatorManager, err := handler.NewValidatorManager()
 	if err != nil {
-		log.Fatal("Failed to setup validator manager: ", err)
+		fatal("Failed to setup validator manager", err)
 	}
 
 	handler, err := handler.NewHandler(store, photoStorage, auth, validatorManager)
 	if err != nil {
-		log.Fatal("Failed to setup handler: ", err)
+		fatal("Failed to setup handler", err)
 	}
 
 	middleware := middleware.New(auth)
 
-	router, err := router.New(handler, middleware, config.FrontendURL)
+	router, err := router.New(handler, middleware, cfg.FrontendURL)
 	if err != nil {
-		log.Fatal("Failed to setup router: ", err)
+		fatal("Failed to setup router", err)
 	}
 
-	router.Run()
+	if err := router.Run(); err != nil {
+		fatal("Failed to start server", err)
+	}
+}
+
+func fatal(msg string, err error) {
+	slog.Error(msg, "err", err)
+	os.Exit(1)
 }

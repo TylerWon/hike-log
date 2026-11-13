@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"log"
+	"log/slog"
 	"net/http"
 
 	"github.com/TylerWon/hike-log/backend/models"
@@ -48,14 +48,14 @@ func (h *PhotosHandler) DeletePhoto(c *gin.Context) {
 
 	err = h.store.DeleteRecord(&models.Photo{ID: params.PhotoID})
 	if err != nil {
-		log.Printf("Failed to delete Photo (id=%d): %v", params.PhotoID, err)
+		slog.Error("Failed to delete photo", "id", params.PhotoID, "err", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": http.StatusText(http.StatusInternalServerError)})
 		return
 	}
 
 	err = h.photoStorage.DeletePhoto(c, photo.SrcUrl)
 	if err != nil {
-		log.Printf("Failed to delete S3 photo object for Photo (id=%d): %v", params.PhotoID, err)
+		slog.Error("Failed to delete S3 photo object", "id", params.PhotoID, "err", err)
 		c.JSON(http.StatusOK, gin.H{"message": "ok"}) // return OK since Photo deleted, only orphan S3 object
 		return
 	}
@@ -101,7 +101,7 @@ func (h *PhotosHandler) UpdatePhoto(c *gin.Context) {
 
 	err = h.store.UpdateRecord(photo)
 	if err != nil {
-		log.Printf("Failed to update Photo (id=%d): %v", photo.ID, err)
+		slog.Error("Failed to update photo", "id", photo.ID, "err", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": http.StatusText(http.StatusInternalServerError)})
 		return
 	}
