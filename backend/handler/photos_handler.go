@@ -17,12 +17,8 @@ type PhotosHandler struct {
 }
 
 // Creates a new PhotosHandler.
-func NewPhotosHandler(store store.Store, photoStorage photostorage.PhotoStorage) (*PhotosHandler, error) {
-	_, err := registerCustomValidators()
-	if err != nil {
-		return nil, err
-	}
-	return &PhotosHandler{photoStorage: photoStorage, store: store}, nil
+func NewPhotosHandler(store store.Store, photoStorage photostorage.PhotoStorage) *PhotosHandler {
+	return &PhotosHandler{photoStorage: photoStorage, store: store}
 }
 
 /*

@@ -13,34 +13,34 @@ import (
 func NewAuthHandler(t *testing.T, auth auth.Auth) *handler.AuthHandler {
 	t.Helper()
 
-	authHandler, err := handler.NewAuthHandler(auth)
+	_, err := handler.RegisterCustomValidators()
 	if err != nil {
-		t.Fatal("Failed to setup auth handler: ", err)
+		t.Fatal("Failed to register custom validators: ", err)
 	}
 
-	return authHandler
+	return handler.NewAuthHandler(auth)
 }
 
 // Creates a HikesHandler to use during testing.
 func NewHikesHandler(t *testing.T, store store.Store, photoStorage photostorage.PhotoStorage) *handler.HikesHandler {
 	t.Helper()
 
-	hikesHandler, err := handler.NewHikesHandler(store, photoStorage)
+	_, err := handler.RegisterCustomValidators()
 	if err != nil {
-		t.Fatal("Failed to setup hikes handler: ", err)
+		t.Fatal("Failed to register custom validators: ", err)
 	}
 
-	return hikesHandler
+	return handler.NewHikesHandler(store, photoStorage)
 }
 
 // Creates a PhotosHandler to use during testing.
 func NewPhotosHandler(t *testing.T, store store.Store, photoStorage photostorage.PhotoStorage) *handler.PhotosHandler {
 	t.Helper()
 
-	photosHandler, err := handler.NewPhotosHandler(store, photoStorage)
+	_, err := handler.RegisterCustomValidators()
 	if err != nil {
-		t.Fatal("Failed to setup photos handler: ", err)
+		t.Fatal("Failed to register custom validators: ", err)
 	}
 
-	return photosHandler
+	return handler.NewPhotosHandler(store, photoStorage)
 }

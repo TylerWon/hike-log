@@ -13,12 +13,8 @@ type AuthHandler struct {
 }
 
 // Creates a new AuthHandler.
-func NewAuthHandler(auth auth.Auth) (*AuthHandler, error) {
-	_, err := registerCustomValidators()
-	if err != nil {
-		return nil, err
-	}
-	return &AuthHandler{auth: auth}, nil
+func NewAuthHandler(auth auth.Auth) *AuthHandler {
+	return &AuthHandler{auth: auth}
 }
 
 /*

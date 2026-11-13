@@ -22,7 +22,7 @@ var VALID_IMAGE_TYPES = map[string]struct{}{
 }
 
 // Registers custom struct field validators used by Gin for model validation
-func registerCustomValidators() (*validator.Validate, error) {
+func RegisterCustomValidators() (*validator.Validate, error) {
 	v, ok := binding.Validator.Engine().(*validator.Validate)
 	if !ok {
 		return nil, errors.New("Failed to obtain validator engine")

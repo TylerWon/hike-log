@@ -22,25 +22,15 @@ type Handler struct {
 
 // Creates a new Handler.
 func NewHandler(store store.Store, photoStorage photostorage.PhotoStorage, auth auth.Auth) (*Handler, error) {
-	authHandler, err := NewAuthHandler(auth)
+	_, err := RegisterCustomValidators()
 	if err != nil {
-		return nil, fmt.Errorf("Failed to create auth handler: %w", err)
-	}
-
-	hikesHandler, err := NewHikesHandler(store, photoStorage)
-	if err != nil {
-		return nil, fmt.Errorf("Failed to create hikes handler: %w", err)
-	}
-
-	photosHandler, err := NewPhotosHandler(store, photoStorage)
-	if err != nil {
-		return nil, fmt.Errorf("Failed to create photos handler: %w", err)
+		return nil, fmt.Errorf("Failed to register custom validators: %w", err)
 	}
 
 	return &Handler{
-		Auth:   authHandler,
-		Hikes:  hikesHandler,
-		Photos: photosHandler,
+		Auth:   NewAuthHandler(auth),
+		Hikes:  NewHikesHandler(store, photoStorage),
+		Photos: NewPhotosHandler(store, photoStorage),
 	}, nil
 }
 

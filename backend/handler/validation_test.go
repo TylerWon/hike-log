@@ -13,7 +13,7 @@ type validationTestSuite struct {
 }
 
 func (suite *validationTestSuite) SetupTest() {
-	v, err := registerCustomValidators()
+	v, err := RegisterCustomValidators()
 	if err != nil {
 		suite.T().Fatal("Error while registering custom validators: ", err)
 	}

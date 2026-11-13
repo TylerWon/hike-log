@@ -21,12 +21,8 @@ type HikesHandler struct {
 }
 
 // Creates a new HikesHandler.
-func NewHikesHandler(store store.Store, photoStorage photostorage.PhotoStorage) (*HikesHandler, error) {
-	_, err := registerCustomValidators()
-	if err != nil {
-		return nil, err
-	}
-	return &HikesHandler{photoStorage: photoStorage, store: store}, nil
+func NewHikesHandler(store store.Store, photoStorage photostorage.PhotoStorage) *HikesHandler {
+	return &HikesHandler{photoStorage: photoStorage, store: store}
 }
 
 /*

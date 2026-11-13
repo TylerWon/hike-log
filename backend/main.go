@@ -46,6 +46,7 @@ func main() {
 	}
 
 	middleware := middleware.New(auth)
+
 	handler, err := handler.NewHandler(store, photoStorage, auth)
 	if err != nil {
 		log.Fatal("Failed to setup handler: ", err)
