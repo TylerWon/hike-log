@@ -86,7 +86,7 @@ func main() {
 	}
 	go runServer(server)
 
-	gracefulShutdown(server, store)
+	gracefulShutdown(server, db)
 }
 
 // Starts the HTTP server.
@@ -99,7 +99,7 @@ func runServer(server *http.Server) {
 }
 
 // Handles shutdown of the HTTP server.
-func gracefulShutdown(server *http.Server, store store.Store) {
+func gracefulShutdown(server *http.Server, db database.Database) {
 	// Wait for termination signals (SIGTERM, SIGINT)
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
@@ -116,9 +116,9 @@ func gracefulShutdown(server *http.Server, store store.Store) {
 	}
 
 	// Close connection to database
-	err = store.CloseConnection()
+	err = db.Close()
 	if err != nil {
-		slog.Error("Database close error", "err", err)
+		slog.Error("Failed to close database connection", "err", err)
 	}
 }
 

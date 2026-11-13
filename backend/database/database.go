@@ -1,7 +1,6 @@
 package database
 
 import (
-	"database/sql"
 	"fmt"
 
 	"github.com/TylerWon/hike-log/backend/config"
@@ -14,8 +13,8 @@ import (
 // GORM result can be exposed.
 type Database interface {
 	AutoMigrate(dst ...interface{}) error
+	Close() error
 	Create(value interface{}) (tx *gorm.DB)
-	DB() (*sql.DB, error)
 	Delete(value interface{}) (tx *gorm.DB)
 	Exec(sql string, values ...interface{}) (tx *gorm.DB)
 	Find(dest interface{}, conds ...interface{}) (tx *gorm.DB)
@@ -55,14 +54,19 @@ func (database *databaseImpl) AutoMigrate(dst ...interface{}) error {
 	return database.db.AutoMigrate(dst...)
 }
 
+// Closes the database connection.
+func (database *databaseImpl) Close() error {
+	sqlDB, err := database.db.DB()
+	if err != nil {
+		return err
+	}
+
+	return sqlDB.Close()
+}
+
 // Inserts value, returning the inserted data's primary key in value's id. value can be a single model or multiple.
 func (database *databaseImpl) Create(value interface{}) (tx *gorm.DB) {
 	return database.db.Create(value)
-}
-
-// Returns `*sql.DB`.
-func (database *databaseImpl) DB() (*sql.DB, error) {
-	return database.db.DB()
 }
 
 // Deletes value. value can be a single model or multiple and the model(s) should have their ID set.

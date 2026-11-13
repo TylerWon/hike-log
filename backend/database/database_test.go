@@ -34,7 +34,5 @@ func (suite *databaseTestSuite) TestConnect_CreatesDatabase() {
 	suite.Require().NoError(err)
 	suite.Require().NotNil(db)
 
-	sqlDB, err := db.DB()
-	suite.Require().NoError(err)
-	suite.Require().NoError(sqlDB.Close())
+	suite.Require().NoError(db.Close())
 }

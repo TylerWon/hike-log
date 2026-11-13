@@ -1,16 +1,13 @@
 package database
 
 import (
-	"database/sql"
-
 	"gorm.io/gorm"
 )
 
 type MockDatabase struct {
 	AutoMigrateError error
+	CloseError       error
 	CreateResult     *gorm.DB
-	DBResult         *sql.DB
-	DBError          error
 	DeleteResult     *gorm.DB
 	ExecResult       *gorm.DB
 	FindResult       *gorm.DB
@@ -23,12 +20,12 @@ func (m *MockDatabase) AutoMigrate(dst ...interface{}) error {
 	return m.AutoMigrateError
 }
 
-func (m *MockDatabase) Create(value interface{}) (tx *gorm.DB) {
-	return m.CreateResult
+func (m *MockDatabase) Close() error {
+	return m.CloseError
 }
 
-func (m *MockDatabase) DB() (*sql.DB, error) {
-	return m.DBResult, m.DBError
+func (m *MockDatabase) Create(value interface{}) (tx *gorm.DB) {
+	return m.CreateResult
 }
 
 func (m *MockDatabase) Delete(value interface{}) (tx *gorm.DB) {

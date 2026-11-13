@@ -75,7 +75,10 @@ func (suiteDB *TestSuiteDB) Reset(t *testing.T) {
 func (suiteDB *TestSuiteDB) Teardown(t *testing.T) {
 	t.Helper()
 
-	closeDB(t, suiteDB.TestDB)
+	err := suiteDB.TestDB.Close()
+	if err != nil {
+		t.Fatal("Failed to close test database connection: ", err)
+	}
 
 	var exists int
 	suiteDB.adminDB.Raw("SELECT 1 FROM pg_database WHERE datname = ?", suiteDB.testDBConfig.DBName).Scan(&exists)
@@ -86,18 +89,8 @@ func (suiteDB *TestSuiteDB) Teardown(t *testing.T) {
 		}
 	}
 
-	closeDB(t, suiteDB.adminDB)
-}
-
-func closeDB(t *testing.T, db database.Database) {
-	t.Helper()
-
-	sqlDB, err := db.DB()
+	err = suiteDB.adminDB.Close()
 	if err != nil {
-		t.Fatal("Failed to get database connection: ", err)
-	}
-
-	if err := sqlDB.Close(); err != nil {
-		t.Fatal("Failed to close database connection: ", err)
+		t.Fatal("Failed to close admin database connection: ", err)
 	}
 }

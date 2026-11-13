@@ -8,7 +8,6 @@ import (
 
 // Store handles all interactions with the database for the app.
 type Store interface {
-	CloseConnection() error
 	CreateRecord(record interface{}) error
 	DeleteRecord(record interface{}) error
 	GetHikeByID(id uint) (*models.Hike, error)
@@ -30,21 +29,6 @@ func New(db database.Database) (Store, error) {
 	}
 
 	return &storeImpl{db}, nil
-}
-
-// Ends the connection to the database.
-func (store *storeImpl) CloseConnection() error {
-	sqlDb, err := store.db.DB()
-	if err != nil {
-		return err
-	}
-
-	err = sqlDb.Close()
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 // Creates the provided record/records.
