@@ -32,6 +32,6 @@ var testConfig = config.Config{
 }
 
 // Returns a copy of the default Config to use for testing.
-func TestConfig() config.Config {
+func NewTestConfig() config.Config {
 	return testConfig
 }

@@ -1,6 +1,8 @@
 package testutils
 
 import (
+	"testing"
+
 	"github.com/TylerWon/hike-log/backend/handler"
 	"github.com/TylerWon/hike-log/backend/middleware"
 	"github.com/TylerWon/hike-log/backend/router"
@@ -8,7 +10,9 @@ import (
 )
 
 // Creates a test router with only auth routes.
-func NewAuthRouter(h *handler.AuthHandler) *gin.Engine {
+func NewAuthRouter(t *testing.T, h *handler.AuthHandler) *gin.Engine {
+	t.Helper()
+
 	gin.SetMode(gin.TestMode)
 	r := gin.New()
 	router.RegisterAuthRoutes(r.Group(""), h)
@@ -16,7 +20,9 @@ func NewAuthRouter(h *handler.AuthHandler) *gin.Engine {
 }
 
 // Creates a test router with only hike routes.
-func NewHikesRouter(h *handler.HikesHandler, m *middleware.Middleware) *gin.Engine {
+func NewHikesRouter(t *testing.T, h *handler.HikesHandler, m *middleware.Middleware) *gin.Engine {
+	t.Helper()
+
 	gin.SetMode(gin.TestMode)
 	r := gin.New()
 	router.RegisterHikesRoutes(r.Group(""), h, m)
@@ -24,7 +30,9 @@ func NewHikesRouter(h *handler.HikesHandler, m *middleware.Middleware) *gin.Engi
 }
 
 // Creates a test router with only photo routes.
-func NewPhotosRouter(h *handler.PhotosHandler, m *middleware.Middleware) *gin.Engine {
+func NewPhotosRouter(t *testing.T, h *handler.PhotosHandler, m *middleware.Middleware) *gin.Engine {
+	t.Helper()
+
 	gin.SetMode(gin.TestMode)
 	r := gin.New()
 	router.RegisterPhotosRoutes(r.Group(""), h, m)

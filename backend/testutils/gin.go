@@ -3,6 +3,7 @@ package testutils
 import (
 	"net/http"
 	"net/http/httptest"
+	"testing"
 
 	"github.com/gin-gonic/gin"
 )
@@ -10,7 +11,9 @@ import (
 /*
 Creates a new Gin context. Optionally sets a cookie on the request if provided.
 */
-func NewGinContext(cookie *http.Cookie) *gin.Context {
+func NewGinContext(t *testing.T, cookie *http.Cookie) *gin.Context {
+	t.Helper()
+
 	gin.SetMode(gin.TestMode)
 
 	w := httptest.NewRecorder()

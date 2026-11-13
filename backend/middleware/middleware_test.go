@@ -27,7 +27,7 @@ func TestAuthTestSuite(t *testing.T) {
 }
 
 func (suite *middlewareTestSuite) TestRequireAuth_Returns401ErrorAndAbortsWhenUnauthenticated() {
-	c := testutils.NewGinContext(nil) // Missing session cookie
+	c := testutils.NewGinContext(suite.T(), nil) // Missing session cookie
 
 	suite.middleware.RequireAuth(c)
 
@@ -37,7 +37,7 @@ func (suite *middlewareTestSuite) TestRequireAuth_Returns401ErrorAndAbortsWhenUn
 }
 
 func (suite *middlewareTestSuite) TestRequireAuth_PassesWhenAuthenticated() {
-	c := testutils.NewGinContext(testutils.CreateSessionCookie(suite.auth))
+	c := testutils.NewGinContext(suite.T(), testutils.CreateSessionCookie(suite.T(), suite.auth))
 
 	suite.middleware.RequireAuth(c)
 

@@ -21,7 +21,7 @@ type authHandlerTestSuite struct {
 
 func (suite *authHandlerTestSuite) SetupSuite() {
 	suite.auth = testutils.NewAuth(suite.T(), config.AuthConfig{})
-	suite.router = testutils.NewAuthRouter(testutils.NewAuthHandler(suite.T(), suite.auth))
+	suite.router = testutils.NewAuthRouter(suite.T(), testutils.NewAuthHandler(suite.T(), suite.auth))
 }
 
 func TestAuthTestSuite(t *testing.T) {
@@ -29,7 +29,7 @@ func TestAuthTestSuite(t *testing.T) {
 }
 
 func (suite *authHandlerTestSuite) TestCheckAuth_ReturnsUnauthenticated() {
-	res := testutils.SendRequest(suite.router, http.MethodGet, "/auth", nil) // Session cookie missing
+	res := testutils.SendRequest(suite.T(), suite.router, http.MethodGet, "/auth", nil) // Session cookie missing
 
 	suite.Require().Equal(http.StatusOK, res.Code)
 
@@ -41,12 +41,12 @@ func (suite *authHandlerTestSuite) TestCheckAuth_ReturnsUnauthenticated() {
 }
 
 func (suite *authHandlerTestSuite) TestCheckAuth_ReturnsAuthenticated() {
-	res := testutils.SendRequest(
+	res := testutils.SendRequest(suite.T(), 
 		suite.router,
 		http.MethodGet,
 		"/auth",
 		nil,
-		testutils.CreateSessionCookie(suite.auth),
+		testutils.CreateSessionCookie(suite.T(), suite.auth),
 	)
 
 	suite.Require().Equal(http.StatusOK, res.Code)
@@ -63,13 +63,13 @@ func (suite *authHandlerTestSuite) TestLogin_Returns400ErrorWhenRequestBodyHasIn
 		"password": 123, // number instead of string
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(suite.router, http.MethodPost, "/auth", reqBody)
+	res := testutils.SendRequest(suite.T(), suite.router, http.MethodPost, "/auth", reqBody)
 
 	suite.Require().Equal(http.StatusBadRequest, res.Code)
 }
 
 func (suite *authHandlerTestSuite) TestLogin_Returns400ErrorWhenRequestBodyIsMissingField() {
-	res := testutils.SendRequest(suite.router, http.MethodPost, "/auth", nil)
+	res := testutils.SendRequest(suite.T(), suite.router, http.MethodPost, "/auth", nil)
 	suite.Require().Equal(http.StatusBadRequest, res.Code)
 }
 
@@ -78,7 +78,7 @@ func (suite *authHandlerTestSuite) TestLogin_Returns401ErrorWhenPasswordIsIncorr
 		"password": "incorrect password",
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(suite.router, http.MethodPost, "/auth", reqBody)
+	res := testutils.SendRequest(suite.T(), suite.router, http.MethodPost, "/auth", reqBody)
 
 	suite.Require().Equal(http.StatusUnauthorized, res.Code)
 }
@@ -88,7 +88,7 @@ func (suite *authHandlerTestSuite) TestLogin_SetsSessionCookie() {
 		"password": "admin",
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(suite.router, http.MethodPost, "/auth", reqBody)
+	res := testutils.SendRequest(suite.T(), suite.router, http.MethodPost, "/auth", reqBody)
 
 	suite.Require().Equal(http.StatusOK, res.Code)
 

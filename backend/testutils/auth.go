@@ -9,7 +9,9 @@ import (
 )
 
 // Creates a session cookie that can be attached to requests.
-func CreateSessionCookie(authService auth.Auth) *http.Cookie {
+func CreateSessionCookie(t *testing.T, authService auth.Auth) *http.Cookie {
+	t.Helper()
+
 	return &http.Cookie{
 		Name:  auth.SESSION_COOKIE_NAME,
 		Value: authService.CreateSessionCookieValue(),
@@ -20,7 +22,7 @@ func CreateSessionCookie(authService auth.Auth) *http.Cookie {
 func NewAuth(t *testing.T, authConfig config.AuthConfig) auth.Auth {
 	t.Helper()
 
-	testConfig := TestConfig()
+	testConfig := NewTestConfig()
 
 	if authConfig.AdminPasswordHash != "" {
 		testConfig.Auth.AdminPasswordHash = authConfig.AdminPasswordHash

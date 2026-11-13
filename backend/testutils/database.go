@@ -20,7 +20,7 @@ type TestSuiteDB struct {
 func NewTestSuiteDB(t *testing.T) *TestSuiteDB {
 	t.Helper()
 
-	testConfig := TestConfig()
+	testConfig := NewTestConfig()
 
 	adminDBConfig := testConfig.Database
 	adminDBConfig.DBName = "postgres"

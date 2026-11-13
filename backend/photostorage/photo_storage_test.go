@@ -26,27 +26,27 @@ func TestPhotoStorageTestSuite(t *testing.T) {
 }
 
 func (suite *photoStorageTestSuite) TestNew_ReturnsErrorWhenEnvIsEmpty() {
-	testConfig := testutils.TestConfig()
+	testConfig := testutils.NewTestConfig()
 	_, err := photostorage.New(nil, "", testConfig.AWS)
 	suite.Require().Error(err)
 }
 
 func (suite *photoStorageTestSuite) TestNew_ReturnsErrorWhenBucketNameIsEmpty() {
-	testConfig := testutils.TestConfig()
+	testConfig := testutils.NewTestConfig()
 	testConfig.AWS.S3.BucketName = ""
 	_, err := photostorage.New(nil, testConfig.Env, testConfig.AWS)
 	suite.Require().Error(err)
 }
 
 func (suite *photoStorageTestSuite) TestNew_ReturnsErrorWhenRegionIsEmpty() {
-	testConfig := testutils.TestConfig()
+	testConfig := testutils.NewTestConfig()
 	testConfig.AWS.Region = ""
 	_, err := photostorage.New(nil, testConfig.Env, testConfig.AWS)
 	suite.Require().Error(err)
 }
 
 func (suite *photoStorageTestSuite) TestNew_ReturnsErrorWhenExternalEndpointURLIsEmptyInLocalEnvironment() {
-	testConfig := testutils.TestConfig()
+	testConfig := testutils.NewTestConfig()
 	testConfig.Env = "local"
 	testConfig.AWS.ExternalEndpointURL = ""
 	_, err := photostorage.New(nil, testConfig.Env, testConfig.AWS)
@@ -54,7 +54,7 @@ func (suite *photoStorageTestSuite) TestNew_ReturnsErrorWhenExternalEndpointURLI
 }
 
 func (suite *photoStorageTestSuite) TestNew_AllowsEmptyExternalEndpointURLInNonLocalEnvironment() {
-	testConfig := testutils.TestConfig()
+	testConfig := testutils.NewTestConfig()
 	testConfig.Env = "production"
 	testConfig.AWS.ExternalEndpointURL = ""
 	storage, err := photostorage.New(nil, testConfig.Env, testConfig.AWS)
@@ -180,7 +180,7 @@ func (suite *photoStorageTestSuite) TestDoesPhotoExist_ReturnsS3Result() {
 }
 
 func (suite *photoStorageTestSuite) TestGetPhotoObjectKey_ReturnsObjectKeyFromPathStyleURLWhenInLocalEnvironment() {
-	testConfig := testutils.TestConfig()
+	testConfig := testutils.NewTestConfig()
 	testConfig.Env = "local"
 	testConfig.AWS.S3.BucketName = "bucket"
 	testConfig.AWS.ExternalEndpointURL = "http://localhost:4566"
@@ -195,7 +195,7 @@ func (suite *photoStorageTestSuite) TestGetPhotoObjectKey_ReturnsObjectKeyFromPa
 }
 
 func (suite *photoStorageTestSuite) TestGetPhotoObjectKey_ReturnsObjectKeyFromVirtualHostStyleURLWhenInNonLocalEnvironment() {
-	testConfig := testutils.TestConfig()
+	testConfig := testutils.NewTestConfig()
 	testConfig.Env = "production"
 	testConfig.AWS.S3.BucketName = "bucket"
 	testConfig.AWS.Region = "us-east-1"
@@ -215,7 +215,7 @@ func (suite *photoStorageTestSuite) TestGetPhotoObjectKey_ReturnsObjectKeyFromVi
 }
 
 func (suite *photoStorageTestSuite) TestGetPhotoObjectURL_ReturnsPathStyleURLInLocalEnvironment() {
-	testConfig := testutils.TestConfig()
+	testConfig := testutils.NewTestConfig()
 	testConfig.Env = "local"
 	testConfig.AWS.S3.BucketName = "bucket"
 	testConfig.AWS.ExternalEndpointURL = "http://localhost:4566"
@@ -230,7 +230,7 @@ func (suite *photoStorageTestSuite) TestGetPhotoObjectURL_ReturnsPathStyleURLInL
 }
 
 func (suite *photoStorageTestSuite) TestGetPhotoObjectURL_ReturnsVirtualHostStyleURLInNonLocalEnvironment() {
-	testConfig := testutils.TestConfig()
+	testConfig := testutils.NewTestConfig()
 	testConfig.Env = "production"
 	testConfig.AWS.S3.BucketName = "bucket"
 	testConfig.AWS.Region = "us-east-1"

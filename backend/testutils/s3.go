@@ -11,7 +11,7 @@ import (
 func NewS3Client(t *testing.T, env string, awsConfig config.AWSConfig) s3.S3Client {
 	t.Helper()
 
-	testConfig := TestConfig()
+	testConfig := NewTestConfig()
 
 	if env != "" {
 		testConfig.Env = env

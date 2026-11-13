@@ -53,7 +53,7 @@ func (suite *authTestSuite) TestGenerateHmacSha256Signature_ReturnsDifferentSign
 }
 
 func (suite *authTestSuite) TestGenerateHmacSha256Signature_ReturnsDifferentSignaturesForDifferentSecrets() {
-	testConfig := testutils.TestConfig()
+	testConfig := testutils.NewTestConfig()
 
 	testConfig.Auth.SessionSecret = "a"
 	auth1 := testutils.NewAuth(suite.T(), testConfig.Auth)
@@ -69,7 +69,7 @@ func (suite *authTestSuite) TestGenerateHmacSha256Signature_ReturnsDifferentSign
 }
 
 func (suite *authTestSuite) TestIsAuthenticated_ReturnsFalseWhenCookieIsMissing() {
-	c := testutils.NewGinContext(nil)
+	c := testutils.NewGinContext(suite.T(), nil)
 
 	res, err := suite.auth.IsAuthenticated(c)
 
@@ -78,7 +78,7 @@ func (suite *authTestSuite) TestIsAuthenticated_ReturnsFalseWhenCookieIsMissing(
 }
 
 func (suite *authTestSuite) TestIsAuthenticated_ReturnsFalseWhenCookieValueIsInvalid() {
-	c := testutils.NewGinContext(&http.Cookie{
+	c := testutils.NewGinContext(suite.T(), &http.Cookie{
 		Name:  auth.SESSION_COOKIE_NAME,
 		Value: "invalid value",
 	})
@@ -92,7 +92,7 @@ func (suite *authTestSuite) TestIsAuthenticated_ReturnsFalseWhenCookieValueIsInv
 func (suite *authTestSuite) TestIsAuthenticated_ReturnsFalseWhenExpiryTimeIsNotAnInteger() {
 	expiry := "abc"
 	signature := suite.auth.GenerateHmacSha256Signature(expiry)
-	c := testutils.NewGinContext(&http.Cookie{
+	c := testutils.NewGinContext(suite.T(), &http.Cookie{
 		Name:  auth.SESSION_COOKIE_NAME,
 		Value: expiry + "." + signature,
 	})
@@ -106,7 +106,7 @@ func (suite *authTestSuite) TestIsAuthenticated_ReturnsFalseWhenExpiryTimeIsNotA
 func (suite *authTestSuite) TestIsAuthenticated_ReturnsFalseWhenCookieIsExpired() {
 	expiry := "1" // Expiry time is not within 24hrs
 	signature := suite.auth.GenerateHmacSha256Signature(expiry)
-	c := testutils.NewGinContext(&http.Cookie{
+	c := testutils.NewGinContext(suite.T(), &http.Cookie{
 		Name:  auth.SESSION_COOKIE_NAME,
 		Value: expiry + "." + signature,
 	})
@@ -120,7 +120,7 @@ func (suite *authTestSuite) TestIsAuthenticated_ReturnsFalseWhenCookieIsExpired(
 func (suite *authTestSuite) TestIsAuthenticated_ReturnsFalseWhenSignatureIsInvalid() {
 	expiry := strconv.FormatInt(time.Now().Add(time.Hour).Unix(), 10)
 	signature := suite.auth.GenerateHmacSha256Signature(expiry)
-	c := testutils.NewGinContext(&http.Cookie{
+	c := testutils.NewGinContext(suite.T(), &http.Cookie{
 		Name:  auth.SESSION_COOKIE_NAME,
 		Value: expiry + "." + signature + "123", // Add extra characters to signature to invalidate it
 	})
@@ -132,7 +132,7 @@ func (suite *authTestSuite) TestIsAuthenticated_ReturnsFalseWhenSignatureIsInval
 }
 
 func (suite *authTestSuite) TestIsAuthenticated_ReturnsTrueWhenCookieIsValid() {
-	c := testutils.NewGinContext(testutils.CreateSessionCookie(suite.auth))
+	c := testutils.NewGinContext(suite.T(), testutils.CreateSessionCookie(suite.T(), suite.auth))
 
 	res, err := suite.auth.IsAuthenticated(c)
 
@@ -141,7 +141,7 @@ func (suite *authTestSuite) TestIsAuthenticated_ReturnsTrueWhenCookieIsValid() {
 }
 
 func (suite *authTestSuite) TestSetSessionCookie_SetsCookie() {
-	c := testutils.NewGinContext(nil)
+	c := testutils.NewGinContext(suite.T(), nil)
 
 	suite.auth.SetSessionCookie(c)
 

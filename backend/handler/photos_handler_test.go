@@ -38,7 +38,7 @@ func (suite *photosHandlerTestSuite) SetupSuite() {
 	suite.photoStorage = testutils.NewPhotoStorage(suite.T(), suite.s3Client, "", config.AWSConfig{})
 	suite.auth = testutils.NewAuth(suite.T(), config.AuthConfig{})
 	suite.middleware = middleware.New(suite.auth)
-	suite.router = testutils.NewPhotosRouter(
+	suite.router = testutils.NewPhotosRouter(suite.T(), 
 		testutils.NewPhotosHandler(suite.T(), suite.store, suite.photoStorage),
 		suite.middleware,
 	)
@@ -68,30 +68,30 @@ func (suite *photosHandlerTestSuite) TestDeletePhoto_Returns401ErrorWhenUnauthor
 	)
 	suite.Require().NoError(err)
 
-	res := testutils.SendRequest(suite.router, http.MethodDelete, fmt.Sprintf("/photos/%d", photo.ID), nil) // Missing session cookie
+	res := testutils.SendRequest(suite.T(), suite.router, http.MethodDelete, fmt.Sprintf("/photos/%d", photo.ID), nil) // Missing session cookie
 	suite.Require().Equal(http.StatusUnauthorized, res.Code)
 
 	suite.s3Client.DeleteObject(context.TODO(), objectKey)
 }
 
 func (suite *photosHandlerTestSuite) TestDeletePhoto_Returns400ErrorWhenPhotoIDIsInvalid() {
-	res := testutils.SendRequest(
+	res := testutils.SendRequest(suite.T(), 
 		suite.router,
 		http.MethodDelete,
 		"/photos/abc",
 		nil,
-		testutils.CreateSessionCookie(suite.auth),
+		testutils.CreateSessionCookie(suite.T(), suite.auth),
 	)
 	suite.Require().Equal(http.StatusBadRequest, res.Code)
 }
 
 func (suite *photosHandlerTestSuite) TestDeletePhoto_Returns404ErrorWhenPhotoDoesNotExist() {
-	res := testutils.SendRequest(
+	res := testutils.SendRequest(suite.T(), 
 		suite.router,
 		http.MethodDelete,
 		"/photos/1",
 		nil,
-		testutils.CreateSessionCookie(suite.auth),
+		testutils.CreateSessionCookie(suite.T(), suite.auth),
 	)
 	suite.Require().Equal(http.StatusNotFound, res.Code)
 }
@@ -99,16 +99,16 @@ func (suite *photosHandlerTestSuite) TestDeletePhoto_Returns404ErrorWhenPhotoDoe
 func (suite *photosHandlerTestSuite) TestDeletePhoto_Returns500ErrorWhenDBErrors() {
 	mockStore := store.MockStore{GetPhotoByIDError: errors.New("Something went wrong")}
 	photosHandler := testutils.NewPhotosHandler(suite.T(), &mockStore, suite.photoStorage)
-	router := testutils.NewPhotosRouter(photosHandler, suite.middleware)
+	router := testutils.NewPhotosRouter(suite.T(), photosHandler, suite.middleware)
 
 	photo := testutils.ConstructHikes(suite.T(), 1, suite.store, suite.photoStorage, true, true)[0].Photos[0]
 
-	res := testutils.SendRequest(
+	res := testutils.SendRequest(suite.T(), 
 		router,
 		http.MethodDelete,
 		fmt.Sprintf("/photos/%d", photo.ID),
 		nil,
-		testutils.CreateSessionCookie(suite.auth),
+		testutils.CreateSessionCookie(suite.T(), suite.auth),
 	)
 	suite.Require().Equal(http.StatusInternalServerError, res.Code)
 }
@@ -118,7 +118,7 @@ func (suite *photosHandlerTestSuite) TestDeletePhoto_DeletesPhotoButS3ObjectDele
 		DeletePhotoError: errors.New("Something went wrong"),
 	}
 	photosHandler := testutils.NewPhotosHandler(suite.T(), suite.store, &mockPhotoStorage)
-	router := testutils.NewPhotosRouter(photosHandler, suite.middleware)
+	router := testutils.NewPhotosRouter(suite.T(), photosHandler, suite.middleware)
 
 	photo := testutils.ConstructHikes(suite.T(), 1, suite.store, suite.photoStorage, true, true)[0].Photos[0]
 	objectKey := suite.photoStorage.GetPhotoObjectKey(photo.SrcUrl)
@@ -130,12 +130,12 @@ func (suite *photosHandlerTestSuite) TestDeletePhoto_DeletesPhotoButS3ObjectDele
 	)
 	suite.Require().NoError(err)
 
-	res := testutils.SendRequest(
+	res := testutils.SendRequest(suite.T(), 
 		router,
 		http.MethodDelete,
 		fmt.Sprintf("/photos/%d", photo.ID),
 		nil,
-		testutils.CreateSessionCookie(suite.auth),
+		testutils.CreateSessionCookie(suite.T(), suite.auth),
 	)
 	suite.Require().Equal(http.StatusOK, res.Code)
 
@@ -160,12 +160,12 @@ func (suite *photosHandlerTestSuite) TestDeletePhoto_DeletesPhotoAndS3Object() {
 	)
 	suite.Require().NoError(err)
 
-	res := testutils.SendRequest(
+	res := testutils.SendRequest(suite.T(), 
 		suite.router,
 		http.MethodDelete,
 		fmt.Sprintf("/photos/%d", photo.ID),
 		nil,
-		testutils.CreateSessionCookie(suite.auth),
+		testutils.CreateSessionCookie(suite.T(), suite.auth),
 	)
 	suite.Require().Equal(http.StatusOK, res.Code)
 
@@ -185,18 +185,18 @@ func (suite *photosHandlerTestSuite) TestUpdatePhoto_Returns401ErrorWhenUnauthor
 		"displayOrder": 2,
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(suite.router, http.MethodPut, fmt.Sprintf("/photos/%d", photo.ID), reqBody) // Missing session cookie
+	res := testutils.SendRequest(suite.T(), suite.router, http.MethodPut, fmt.Sprintf("/photos/%d", photo.ID), reqBody) // Missing session cookie
 
 	suite.Require().Equal(http.StatusUnauthorized, res.Code)
 }
 
 func (suite *photosHandlerTestSuite) TestUpdatePhoto_Returns400ErrorWhenPhotoIDIsInvalid() {
-	res := testutils.SendRequest(
+	res := testutils.SendRequest(suite.T(), 
 		suite.router,
 		http.MethodPut,
 		"/photos/abc",
 		nil,
-		testutils.CreateSessionCookie(suite.auth),
+		testutils.CreateSessionCookie(suite.T(), suite.auth),
 	)
 	suite.Require().Equal(http.StatusBadRequest, res.Code)
 }
@@ -207,12 +207,12 @@ func (suite *photosHandlerTestSuite) TestUpdatePhoto_Returns404ErrorWhenPhotoDoe
 		"displayOrder": 2,
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(
+	res := testutils.SendRequest(suite.T(), 
 		suite.router,
 		http.MethodPut,
 		"/photos/1",
 		reqBody,
-		testutils.CreateSessionCookie(suite.auth),
+		testutils.CreateSessionCookie(suite.T(), suite.auth),
 	)
 	suite.Require().Equal(http.StatusNotFound, res.Code)
 }
@@ -225,12 +225,12 @@ func (suite *photosHandlerTestSuite) TestUpdatePhoto_Returns400ErrorWhenRequestB
 		"displayOrder": 0, // must be > 0
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(
+	res := testutils.SendRequest(suite.T(), 
 		suite.router,
 		http.MethodPut,
 		fmt.Sprintf("/photos/%d", photo.ID),
 		reqBody,
-		testutils.CreateSessionCookie(suite.auth),
+		testutils.CreateSessionCookie(suite.T(), suite.auth),
 	)
 
 	suite.Require().Equal(http.StatusBadRequest, res.Code)
@@ -243,12 +243,12 @@ func (suite *photosHandlerTestSuite) TestUpdatePhoto_Returns400ErrorWhenRequestB
 		"caption": "Updated caption",
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(
+	res := testutils.SendRequest(suite.T(), 
 		suite.router,
 		http.MethodPut,
 		fmt.Sprintf("/photos/%d", photo.ID),
 		reqBody,
-		testutils.CreateSessionCookie(suite.auth),
+		testutils.CreateSessionCookie(suite.T(), suite.auth),
 	)
 
 	suite.Require().Equal(http.StatusBadRequest, res.Code)
@@ -262,19 +262,19 @@ func (suite *photosHandlerTestSuite) TestUpdatePhoto_Returns500ErrorWhenDBErrors
 		UpdateRecordError:  errors.New("Something went wrong"),
 	}
 	photosHandler := testutils.NewPhotosHandler(suite.T(), &mockStore, suite.photoStorage)
-	router := testutils.NewPhotosRouter(photosHandler, suite.middleware)
+	router := testutils.NewPhotosRouter(suite.T(), photosHandler, suite.middleware)
 
 	body := map[string]any{
 		"caption":      "Updated caption",
 		"displayOrder": 2,
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(
+	res := testutils.SendRequest(suite.T(), 
 		router,
 		http.MethodPut,
 		fmt.Sprintf("/photos/%d", photo.ID),
 		reqBody,
-		testutils.CreateSessionCookie(suite.auth),
+		testutils.CreateSessionCookie(suite.T(), suite.auth),
 	)
 
 	suite.Require().Equal(http.StatusInternalServerError, res.Code)
@@ -288,12 +288,12 @@ func (suite *photosHandlerTestSuite) TestUpdatePhoto_UpdatesPhoto() {
 		"displayOrder": 2,
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(
+	res := testutils.SendRequest(suite.T(), 
 		suite.router,
 		http.MethodPut,
 		fmt.Sprintf("/photos/%d", photo.ID),
 		reqBody,
-		testutils.CreateSessionCookie(suite.auth),
+		testutils.CreateSessionCookie(suite.T(), suite.auth),
 	)
 
 	suite.Require().Equal(http.StatusOK, res.Code)
@@ -318,12 +318,12 @@ func (suite *photosHandlerTestSuite) TestUpdatePhoto_UpdatesPhotoWhenOptionalFie
 		"displayOrder": 2,
 	}
 	reqBody := testutils.SerializeJSONRequestBody(suite.T(), body)
-	res := testutils.SendRequest(
+	res := testutils.SendRequest(suite.T(), 
 		suite.router,
 		http.MethodPut,
 		fmt.Sprintf("/photos/%d", photo.ID),
 		reqBody,
-		testutils.CreateSessionCookie(suite.auth),
+		testutils.CreateSessionCookie(suite.T(), suite.auth),
 	)
 
 	suite.Require().Equal(http.StatusOK, res.Code)

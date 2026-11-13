@@ -17,7 +17,7 @@ func NewPhotoStorage(
 ) photostorage.PhotoStorage {
 	t.Helper()
 
-	testConfig := TestConfig()
+	testConfig := NewTestConfig()
 
 	if env != "" {
 		testConfig.Env = env
