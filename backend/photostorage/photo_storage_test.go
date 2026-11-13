@@ -8,7 +8,7 @@ import (
 
 	"github.com/TylerWon/hike-log/backend/config"
 	"github.com/TylerWon/hike-log/backend/photostorage"
-	"github.com/TylerWon/hike-log/backend/s3"
+	"github.com/TylerWon/hike-log/backend/s3client"
 	"github.com/TylerWon/hike-log/backend/testutils"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	v4 "github.com/aws/aws-sdk-go-v2/aws/signer/v4"
@@ -77,7 +77,7 @@ func (suite *photoStorageTestSuite) TestCreatePhotoObjectKey_ReturnsUniqueKeys()
 }
 
 func (suite *photoStorageTestSuite) TestCreatePresignedUploadURL_ReturnsErrorWhenS3Errors() {
-	mockS3Client := &s3.MockS3Client{
+	mockS3Client := &s3client.MockS3Client{
 		CreatePresignedPutObjectRequestError: errors.New("Something went wrong"),
 	}
 	storage := testutils.NewPhotoStorage(suite.T(), mockS3Client, "", config.AWSConfig{})
@@ -88,7 +88,7 @@ func (suite *photoStorageTestSuite) TestCreatePresignedUploadURL_ReturnsErrorWhe
 }
 
 func (suite *photoStorageTestSuite) TestCreatePresignedUploadURL_ReturnsURLAndObjectKey() {
-	mockS3Client := &s3.MockS3Client{
+	mockS3Client := &s3client.MockS3Client{
 		CreatePresignedPutObjectRequestResult: &v4.PresignedHTTPRequest{URL: "https://presigned.example/upload"},
 	}
 	storage := testutils.NewPhotoStorage(suite.T(), mockS3Client, "", config.AWSConfig{})
@@ -101,7 +101,7 @@ func (suite *photoStorageTestSuite) TestCreatePresignedUploadURL_ReturnsURLAndOb
 }
 
 func (suite *photoStorageTestSuite) TestDeletePhoto_ReturnsErrorWhenS3Errors() {
-	mockS3Client := &s3.MockS3Client{DeleteObjectError: errors.New("Something went wrong")}
+	mockS3Client := &s3client.MockS3Client{DeleteObjectError: errors.New("Something went wrong")}
 	storage := testutils.NewPhotoStorage(suite.T(), mockS3Client, "", config.AWSConfig{})
 
 	err := storage.DeletePhoto(context.TODO(), storage.GetPhotoObjectURL("abc"))
@@ -110,7 +110,7 @@ func (suite *photoStorageTestSuite) TestDeletePhoto_ReturnsErrorWhenS3Errors() {
 }
 
 func (suite *photoStorageTestSuite) TestDeletePhoto_DeletesPhoto() {
-	mockS3Client := &s3.MockS3Client{DeleteObjectResult: &s3Sdk.DeleteObjectOutput{}}
+	mockS3Client := &s3client.MockS3Client{DeleteObjectResult: &s3Sdk.DeleteObjectOutput{}}
 	storage := testutils.NewPhotoStorage(suite.T(), mockS3Client, "", config.AWSConfig{})
 
 	err := storage.DeletePhoto(context.TODO(), storage.GetPhotoObjectURL("abc"))
@@ -119,7 +119,7 @@ func (suite *photoStorageTestSuite) TestDeletePhoto_DeletesPhoto() {
 }
 
 func (suite *photoStorageTestSuite) TestDeletePhotosForHike_ReturnsErrorWhenS3ListErrors() {
-	mockS3Client := &s3.MockS3Client{ListObjectsError: errors.New("Something went wrong")}
+	mockS3Client := &s3client.MockS3Client{ListObjectsError: errors.New("Something went wrong")}
 	storage := testutils.NewPhotoStorage(suite.T(), mockS3Client, "", config.AWSConfig{})
 
 	err := storage.DeletePhotosForHike(context.TODO(), 1)
@@ -128,7 +128,7 @@ func (suite *photoStorageTestSuite) TestDeletePhotosForHike_ReturnsErrorWhenS3Li
 }
 
 func (suite *photoStorageTestSuite) TestDeletePhotosForHike_NoOpWhenNoPhotos() {
-	mockS3Client := &s3.MockS3Client{
+	mockS3Client := &s3client.MockS3Client{
 		ListObjectsResult: &s3Sdk.ListObjectsV2Output{Contents: []s3types.Object{}},
 	}
 	storage := testutils.NewPhotoStorage(suite.T(), mockS3Client, "", config.AWSConfig{})
@@ -139,7 +139,7 @@ func (suite *photoStorageTestSuite) TestDeletePhotosForHike_NoOpWhenNoPhotos() {
 }
 
 func (suite *photoStorageTestSuite) TestDeletePhotosForHike_ReturnsErrorWhenS3DeleteErrors() {
-	mockS3Client := &s3.MockS3Client{
+	mockS3Client := &s3client.MockS3Client{
 		ListObjectsResult: &s3Sdk.ListObjectsV2Output{
 			Contents: []s3types.Object{{Key: aws.String("hikes/1/photos/abc")}},
 		},
@@ -153,7 +153,7 @@ func (suite *photoStorageTestSuite) TestDeletePhotosForHike_ReturnsErrorWhenS3De
 }
 
 func (suite *photoStorageTestSuite) TestDeletePhotosForHike_DeletesPhotos() {
-	mockS3Client := &s3.MockS3Client{
+	mockS3Client := &s3client.MockS3Client{
 		ListObjectsResult: &s3Sdk.ListObjectsV2Output{
 			Contents: []s3types.Object{
 				{Key: aws.String("hikes/1/photos/abc")},
@@ -170,7 +170,7 @@ func (suite *photoStorageTestSuite) TestDeletePhotosForHike_DeletesPhotos() {
 }
 
 func (suite *photoStorageTestSuite) TestDoesPhotoExist_ReturnsS3Result() {
-	mockS3Client := &s3.MockS3Client{DoesObjectExistResult: true}
+	mockS3Client := &s3client.MockS3Client{DoesObjectExistResult: true}
 	storage := testutils.NewPhotoStorage(suite.T(), mockS3Client, "", config.AWSConfig{})
 
 	exists, err := storage.DoesPhotoExist(context.TODO(), storage.CreatePhotoObjectKey(1))

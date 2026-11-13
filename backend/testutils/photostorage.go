@@ -5,13 +5,13 @@ import (
 
 	"github.com/TylerWon/hike-log/backend/config"
 	"github.com/TylerWon/hike-log/backend/photostorage"
-	"github.com/TylerWon/hike-log/backend/s3"
+	"github.com/TylerWon/hike-log/backend/s3client"
 )
 
 // Creates a PhotoStorage to use during testing. Arguments are optional and can be provided to override default values.
 func NewPhotoStorage(
 	t *testing.T,
-	s3Client s3.S3Client,
+	s3Client s3client.S3Client,
 	env string,
 	awsConfig config.AWSConfig,
 ) photostorage.PhotoStorage {

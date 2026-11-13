@@ -10,7 +10,7 @@ import (
 	"github.com/TylerWon/hike-log/backend/middleware"
 	"github.com/TylerWon/hike-log/backend/photostorage"
 	"github.com/TylerWon/hike-log/backend/router"
-	"github.com/TylerWon/hike-log/backend/s3"
+	"github.com/TylerWon/hike-log/backend/s3client"
 	"github.com/TylerWon/hike-log/backend/store"
 )
 
@@ -30,7 +30,7 @@ func main() {
 		log.Fatal("Failed to create store: ", err)
 	}
 
-	s3Client, err := s3.NewS3Client(config.Env, config.AWS)
+	s3Client, err := s3client.New(config.Env, config.AWS)
 	if err != nil {
 		log.Fatal("Failed to setup S3 client: ", err)
 	}

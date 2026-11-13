@@ -17,7 +17,7 @@ import (
 	"github.com/TylerWon/hike-log/backend/models"
 	"github.com/TylerWon/hike-log/backend/models/types"
 	"github.com/TylerWon/hike-log/backend/photostorage"
-	"github.com/TylerWon/hike-log/backend/s3"
+	"github.com/TylerWon/hike-log/backend/s3client"
 	"github.com/TylerWon/hike-log/backend/store"
 	"github.com/TylerWon/hike-log/backend/testutils"
 	"github.com/gin-gonic/gin"
@@ -29,7 +29,7 @@ type hikesHandlerTestSuite struct {
 	auth         auth.Auth
 	middleware   *middleware.Middleware
 	photoStorage photostorage.PhotoStorage
-	s3Client     s3.S3Client
+	s3Client     s3client.S3Client
 	store        store.Store
 	suiteDB      *testutils.TestSuiteDB
 	router       *gin.Engine

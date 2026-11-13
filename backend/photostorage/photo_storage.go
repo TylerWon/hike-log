@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/TylerWon/hike-log/backend/config"
-	"github.com/TylerWon/hike-log/backend/s3"
+	"github.com/TylerWon/hike-log/backend/s3client"
 	"github.com/google/uuid"
 )
 
@@ -31,11 +31,11 @@ type PhotoStorage interface {
 type photoStorageImpl struct {
 	awsConfig config.AWSConfig
 	env       string
-	s3Client  s3.S3Client
+	s3Client  s3client.S3Client
 }
 
 // Creates a new PhotoStorage.
-func New(s3Client s3.S3Client, env string, awsConfig config.AWSConfig) (PhotoStorage, error) {
+func New(s3Client s3client.S3Client, env string, awsConfig config.AWSConfig) (PhotoStorage, error) {
 	if env == "" {
 		return nil, errors.New("env is empty")
 	} else if awsConfig.S3.BucketName == "" {

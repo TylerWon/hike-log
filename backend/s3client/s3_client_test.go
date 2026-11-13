@@ -1,4 +1,4 @@
-package s3_test
+package s3client_test
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/TylerWon/hike-log/backend/config"
-	"github.com/TylerWon/hike-log/backend/s3"
+	"github.com/TylerWon/hike-log/backend/s3client"
 	"github.com/TylerWon/hike-log/backend/testutils"
 	"github.com/stretchr/testify/suite"
 )
@@ -24,12 +24,12 @@ func TestS3ClientTestSuite(t *testing.T) {
 }
 
 func (suite *s3ClientTestSuite) TestCreatePresignedPutObjectRequest_ReturnsErrorWhenS3Errors() {
-	mockPresignClient := s3.MockPresignClient{
+	mockPresignClient := s3client.MockPresignClient{
 		PresignPutObjectResult: nil,
 		PresignPutObjectError:  errors.New("Something went wrong"),
 	}
 
-	s3Client := s3.NewTestS3Client(&s3.MockClient{}, &mockPresignClient, "hike-log")
+	s3Client := s3client.NewTestS3Client(&s3client.MockClient{}, &mockPresignClient, "hike-log")
 
 	_, err := s3Client.CreatePresignedPutObjectRequest(context.TODO(), "abc", "application/json", 5000)
 	suite.Require().Error(err)
@@ -101,12 +101,12 @@ func (suite *s3ClientTestSuite) TestCreatePresignedPutObjectRequest_ReturnsPresi
 }
 
 func (suite *s3ClientTestSuite) TestDeleteObject_ReturnsErrorWhenS3Errors() {
-	mockClient := s3.MockClient{
+	mockClient := s3client.MockClient{
 		DeleteObjectResult: nil,
 		DeleteObjectError:  errors.New("Something went wrong"),
 	}
 
-	s3Client := s3.NewTestS3Client(&mockClient, &s3.MockPresignClient{}, "hike-log")
+	s3Client := s3client.NewTestS3Client(&mockClient, &s3client.MockPresignClient{}, "hike-log")
 
 	_, err := s3Client.DeleteObject(context.TODO(), "abc")
 	suite.Require().Error(err)
@@ -135,12 +135,12 @@ func (suite *s3ClientTestSuite) TestDeleteObject_NoErrorWhenObjectDoesNotExist()
 }
 
 func (suite *s3ClientTestSuite) TestDeleteObjects_ReturnsErrorWhenS3Errors() {
-	mockClient := s3.MockClient{
+	mockClient := s3client.MockClient{
 		DeleteObjectsResult: nil,
 		DeleteObjectsError:  errors.New("Something went wrong"),
 	}
 
-	s3Client := s3.NewTestS3Client(&mockClient, &s3.MockPresignClient{}, "hike-log")
+	s3Client := s3client.NewTestS3Client(&mockClient, &s3client.MockPresignClient{}, "hike-log")
 
 	_, err := s3Client.DeleteObjects(context.TODO(), []string{"abc", "def"})
 	suite.Require().Error(err)
@@ -185,12 +185,12 @@ func (suite *s3ClientTestSuite) TestDeleteObjects_NoErrorWhenObjectDoesNotExist(
 }
 
 func (suite *s3ClientTestSuite) TestDoesObjectExist_ReturnsErrorWhenS3Errors() {
-	mockClient := s3.MockClient{
+	mockClient := s3client.MockClient{
 		HeadObjectResult: nil,
 		HeadObjectError:  errors.New("Something went wrong"),
 	}
 
-	s3Client := s3.NewTestS3Client(&mockClient, &s3.MockPresignClient{}, "hike-log")
+	s3Client := s3client.NewTestS3Client(&mockClient, &s3client.MockPresignClient{}, "hike-log")
 
 	_, err := s3Client.DoesObjectExist(context.TODO(), "abc")
 	suite.Require().Error(err)
@@ -220,12 +220,12 @@ func (suite *s3ClientTestSuite) TestDoesObjectExist_ReturnsTrueWhenObjectExists(
 }
 
 func (suite *s3ClientTestSuite) TestPutObject_ReturnsErrorWhenS3Errors() {
-	mockClient := s3.MockClient{
+	mockClient := s3client.MockClient{
 		PutObjectResult: nil,
 		PutObjectError:  errors.New("Something went wrong"),
 	}
 
-	s3Client := s3.NewTestS3Client(&mockClient, &s3.MockPresignClient{}, "hike-log")
+	s3Client := s3client.NewTestS3Client(&mockClient, &s3client.MockPresignClient{}, "hike-log")
 
 	_, err := s3Client.PutObject(context.TODO(), "abc", strings.NewReader("content"), "text/plain")
 	suite.Require().Error(err)

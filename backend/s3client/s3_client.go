@@ -1,4 +1,4 @@
-package s3
+package s3client
 
 import (
 	"context"
@@ -74,7 +74,7 @@ type client interface {
 }
 
 // Creates a new S3Client.
-func NewS3Client(env string, awsConfig config.AWSConfig) (S3Client, error) {
+func New(env string, awsConfig config.AWSConfig) (S3Client, error) {
 	if env == "" {
 		return nil, errors.New("env is empty")
 	} else if awsConfig.AccessKeyID == "" {
