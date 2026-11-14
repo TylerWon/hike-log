@@ -68,7 +68,7 @@ func main() {
 		fatal("Failed to setup validator manager", err)
 	}
 
-	handler, err := handler.NewHandler(store, photoStorage, auth, validatorManager)
+	handler, err := handler.NewHandler(db, store, photoStorage, auth, validatorManager)
 	if err != nil {
 		fatal("Failed to setup handler", err)
 	}

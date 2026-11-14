@@ -1,6 +1,8 @@
 package database
 
 import (
+	"context"
+
 	"gorm.io/gorm"
 )
 
@@ -12,6 +14,7 @@ type MockDatabase struct {
 	ExecResult       *gorm.DB
 	FindResult       *gorm.DB
 	FirstResult      *gorm.DB
+	PingError        error
 	RawResult        *gorm.DB
 	UpdatesResult    *gorm.DB
 }
@@ -46,6 +49,10 @@ func (m *MockDatabase) First(dest interface{}, conds ...interface{}) (tx *gorm.D
 
 func (m *MockDatabase) Order(value interface{}) Database {
 	return m
+}
+
+func (m *MockDatabase) Ping(ctx context.Context) error {
+	return m.PingError
 }
 
 func (m *MockDatabase) Preload(query string, args ...interface{}) Database {

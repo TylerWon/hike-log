@@ -26,7 +26,7 @@ func New(h *handler.Handler, m *middleware.Middleware, frontendURL string) (*gin
 	RegisterHikesRoutes(apiRouteGroup, h.Hikes, m)
 	RegisterPhotosRoutes(apiRouteGroup, h.Photos, m)
 
-	router.GET("/health", handler.HealthCheck)
+	RegisterHealthRoutes(router, h.Health)
 
 	return router, nil
 }
@@ -43,18 +43,18 @@ func configureCORSMiddleware(router *gin.Engine, frontendURL string) {
 	router.Use(cors.New(cfg))
 }
 
-// Registers authentication API routes under the given apiRouteGroup.
-func RegisterAuthRoutes(apiRouteGroup *gin.RouterGroup, h *handler.AuthHandler) {
-	auth := apiRouteGroup.Group("/auth")
+// Registers authentication API routes under the given routeGroup.
+func RegisterAuthRoutes(routeGroup *gin.RouterGroup, h *handler.AuthHandler) {
+	auth := routeGroup.Group("/auth")
 	{
 		auth.POST("", h.Login)
 		auth.GET("", h.CheckAuth)
 	}
 }
 
-// Registers hike API routes under the given apiRouteGroup.
-func RegisterHikesRoutes(apiRouteGroup *gin.RouterGroup, h *handler.HikesHandler, m *middleware.Middleware) {
-	hikes := apiRouteGroup.Group("/hikes")
+// Registers hike API routes under the given routeGroup.
+func RegisterHikesRoutes(routeGroup *gin.RouterGroup, h *handler.HikesHandler, m *middleware.Middleware) {
+	hikes := routeGroup.Group("/hikes")
 	{
 		hikes.GET("", h.ListHikes)
 		hikes.POST("", m.RequireAuth, h.CreateHike)
@@ -73,9 +73,9 @@ func RegisterHikesRoutes(apiRouteGroup *gin.RouterGroup, h *handler.HikesHandler
 	}
 }
 
-// Registers photo API routes under the given apiRouteGroup.
-func RegisterPhotosRoutes(apiRouteGroup *gin.RouterGroup, h *handler.PhotosHandler, m *middleware.Middleware) {
-	photos := apiRouteGroup.Group("/photos")
+// Registers photo API routes under the given routeGroup.
+func RegisterPhotosRoutes(routeGroup *gin.RouterGroup, h *handler.PhotosHandler, m *middleware.Middleware) {
+	photos := routeGroup.Group("/photos")
 	{
 		photo := photos.Group("/:photoId")
 		{
@@ -83,4 +83,10 @@ func RegisterPhotosRoutes(apiRouteGroup *gin.RouterGroup, h *handler.PhotosHandl
 			photo.PUT("", m.RequireAuth, h.UpdatePhoto)
 		}
 	}
+}
+
+// Registers health and readiness probe routes on the given router.
+func RegisterHealthRoutes(router *gin.Engine, h *handler.HealthHandler) {
+	router.GET("/health", h.HealthCheck)
+	router.GET("/ready", h.ReadyCheck)
 }

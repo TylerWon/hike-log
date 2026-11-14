@@ -38,3 +38,13 @@ func NewPhotosRouter(t *testing.T, h *handler.PhotosHandler, m *middleware.Middl
 	router.RegisterPhotosRoutes(r.Group(""), h, m)
 	return r
 }
+
+// Creates a test router with health and ready routes.
+func NewHealthRouter(t *testing.T, h *handler.HealthHandler) *gin.Engine {
+	t.Helper()
+
+	gin.SetMode(gin.TestMode)
+	r := gin.New()
+	router.RegisterHealthRoutes(r, h)
+	return r
+}

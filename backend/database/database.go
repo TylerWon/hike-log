@@ -1,6 +1,7 @@
 package database
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/TylerWon/hike-log/backend/config"
@@ -20,6 +21,7 @@ type Database interface {
 	Find(dest interface{}, conds ...interface{}) (tx *gorm.DB)
 	First(dest interface{}, conds ...interface{}) (tx *gorm.DB)
 	Order(value interface{}) Database
+	Ping(ctx context.Context) error
 	Preload(query string, args ...interface{}) Database
 	Raw(sql string, values ...interface{}) (tx *gorm.DB)
 	Update(value interface{}) (tx *gorm.DB)
@@ -92,6 +94,16 @@ func (database *databaseImpl) First(dest interface{}, conds ...interface{}) (tx 
 // Specifies the order when retrieving records from database.
 func (database *databaseImpl) Order(value interface{}) Database {
 	return &databaseImpl{database.db.Order(value)}
+}
+
+// Verifies the database connection is alive.
+func (database *databaseImpl) Ping(ctx context.Context) error {
+	sqlDB, err := database.db.DB()
+	if err != nil {
+		return err
+	}
+
+	return sqlDB.PingContext(ctx)
 }
 
 // Preload associations with given conditions.

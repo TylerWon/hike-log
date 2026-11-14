@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/TylerWon/hike-log/backend/auth"
+	"github.com/TylerWon/hike-log/backend/database"
 	"github.com/TylerWon/hike-log/backend/photostorage"
 	"github.com/TylerWon/hike-log/backend/store"
 	"github.com/gin-gonic/gin"
@@ -16,12 +17,14 @@ import (
 // Handler handles the request-response lifecycle for API routes.
 type Handler struct {
 	Auth   *AuthHandler
+	Health *HealthHandler
 	Hikes  *HikesHandler
 	Photos *PhotosHandler
 }
 
 // Creates a new Handler.
 func NewHandler(
+	db database.Database,
 	store store.Store,
 	photoStorage photostorage.PhotoStorage,
 	auth auth.Auth,
@@ -34,14 +37,10 @@ func NewHandler(
 
 	return &Handler{
 		Auth:   NewAuthHandler(auth),
+		Health: NewHealthHandler(db),
 		Hikes:  NewHikesHandler(store, photoStorage),
 		Photos: NewPhotosHandler(store, photoStorage),
 	}, nil
-}
-
-// Returns a 200 OK for application health checks.
-func HealthCheck(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"health": "ok"})
 }
 
 // Handles error that occurs when a record unexpectedly does not exist.

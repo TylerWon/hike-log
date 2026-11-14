@@ -60,4 +60,5 @@ func (suite *routerTestSuite) TestNew_CreatesRouter() {
 
 	// health
 	suite.Require().Contains(paths, "GET /health")
+	suite.Require().Contains(paths, "GET /ready")
 }

@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/TylerWon/hike-log/backend/auth"
+	"github.com/TylerWon/hike-log/backend/database"
 	"github.com/TylerWon/hike-log/backend/handler"
 	"github.com/TylerWon/hike-log/backend/photostorage"
 	"github.com/TylerWon/hike-log/backend/store"
@@ -42,4 +43,10 @@ func NewPhotosHandler(t *testing.T, store store.Store, photoStorage photostorage
 	t.Helper()
 	registerValidators(t)
 	return handler.NewPhotosHandler(store, photoStorage)
+}
+
+// Creates a HealthHandler to use during testing.
+func NewHealthHandler(t *testing.T, db database.Database) *handler.HealthHandler {
+	t.Helper()
+	return handler.NewHealthHandler(db)
 }
