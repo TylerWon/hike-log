@@ -16,8 +16,8 @@ import (
 )
 
 const (
-	ONE_DAY_IN_SECONDS  = 24 * 60 * 60
-	SESSION_COOKIE_NAME = "hike-log-session"
+	OneDayInSeconds   = 24 * 60 * 60
+	SessionCookieName = "hike-log-session"
 )
 
 // Auth handles authentication for the app.
@@ -79,7 +79,7 @@ A request is authenticated if it has a session cookie and the cookie's value sat
 2. A HMAC-SHA256 signature of the expiry time matches the signature in the value.
 */
 func (a *authImpl) IsAuthenticated(c *gin.Context) (bool, error) {
-	value, err := c.Cookie(SESSION_COOKIE_NAME)
+	value, err := c.Cookie(SessionCookieName)
 	if err != nil {
 		return false, errors.New("Session cookie is missing from request.")
 	}
@@ -111,7 +111,7 @@ func (a *authImpl) IsAuthenticated(c *gin.Context) (bool, error) {
 Sets a session cookie on the response.
 
 The session cookie is used to authenticate requests to restricted API routes and is only valid for 24hrs after being
-issued. The cookie is named [SESSION_COOKIE_NAME].
+issued. The cookie is named [SessionCookieName].
 */
 func (a *authImpl) SetSessionCookie(c *gin.Context) {
 	cookieValue := a.CreateSessionCookieValue()
@@ -119,9 +119,9 @@ func (a *authImpl) SetSessionCookie(c *gin.Context) {
 	// Only allow cookie to be sent between same sites (same site = scheme + host are the same)
 	c.SetSameSite(http.SameSiteLaxMode)
 	c.SetCookie(
-		SESSION_COOKIE_NAME,
+		SessionCookieName,
 		cookieValue,
-		ONE_DAY_IN_SECONDS,
+		OneDayInSeconds,
 		// Cookie can be sent to any path
 		"/",
 		// Cookie can only be sent to same host that issued it

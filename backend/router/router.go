@@ -9,7 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-const API_BASE_PATH = "/api/v1"
+const apiBasePath = "/api/v1"
 
 // Creates a Gin router and registers middleware and API routes.
 func New(h *handler.Handler, m *middleware.Middleware, frontendURL string) (*gin.Engine, error) {
@@ -21,7 +21,7 @@ func New(h *handler.Handler, m *middleware.Middleware, frontendURL string) (*gin
 
 	configureCORSMiddleware(router, frontendURL)
 
-	apiRouteGroup := router.Group(API_BASE_PATH)
+	apiRouteGroup := router.Group(apiBasePath)
 	RegisterAuthRoutes(apiRouteGroup, h.Auth)
 	RegisterHikesRoutes(apiRouteGroup, h.Hikes, m)
 	RegisterPhotosRoutes(apiRouteGroup, h.Photos, m)

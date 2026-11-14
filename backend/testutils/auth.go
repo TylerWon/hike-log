@@ -13,7 +13,7 @@ func CreateSessionCookie(t *testing.T, authService auth.Auth) *http.Cookie {
 	t.Helper()
 
 	return &http.Cookie{
-		Name:  auth.SESSION_COOKIE_NAME,
+		Name:  auth.SessionCookieName,
 		Value: authService.CreateSessionCookieValue(),
 	}
 }

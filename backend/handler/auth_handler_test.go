@@ -99,5 +99,5 @@ func (suite *authHandlerTestSuite) TestLogin_SetsSessionCookie() {
 
 	cookies := res.Result().Cookies()
 	suite.Require().Len(cookies, 1)
-	suite.Require().Equal(auth.SESSION_COOKIE_NAME, cookies[0].Name)
+	suite.Require().Equal(auth.SessionCookieName, cookies[0].Name)
 }

@@ -100,7 +100,7 @@ func (suite *authTestSuite) TestIsAuthenticated_ReturnsFalseWhenCookieIsMissing(
 
 func (suite *authTestSuite) TestIsAuthenticated_ReturnsFalseWhenCookieValueIsInvalid() {
 	c := testutils.NewGinContext(suite.T(), &http.Cookie{
-		Name:  auth.SESSION_COOKIE_NAME,
+		Name:  auth.SessionCookieName,
 		Value: "invalid value",
 	})
 
@@ -114,7 +114,7 @@ func (suite *authTestSuite) TestIsAuthenticated_ReturnsFalseWhenExpiryTimeIsNotA
 	expiry := "abc"
 	signature := suite.auth.GenerateHmacSha256Signature(expiry)
 	c := testutils.NewGinContext(suite.T(), &http.Cookie{
-		Name:  auth.SESSION_COOKIE_NAME,
+		Name:  auth.SessionCookieName,
 		Value: expiry + "." + signature,
 	})
 
@@ -128,7 +128,7 @@ func (suite *authTestSuite) TestIsAuthenticated_ReturnsFalseWhenCookieIsExpired(
 	expiry := "1" // Expiry time is not within 24hrs
 	signature := suite.auth.GenerateHmacSha256Signature(expiry)
 	c := testutils.NewGinContext(suite.T(), &http.Cookie{
-		Name:  auth.SESSION_COOKIE_NAME,
+		Name:  auth.SessionCookieName,
 		Value: expiry + "." + signature,
 	})
 
@@ -142,7 +142,7 @@ func (suite *authTestSuite) TestIsAuthenticated_ReturnsFalseWhenSignatureIsInval
 	expiry := strconv.FormatInt(time.Now().Add(time.Hour).Unix(), 10)
 	signature := suite.auth.GenerateHmacSha256Signature(expiry)
 	c := testutils.NewGinContext(suite.T(), &http.Cookie{
-		Name:  auth.SESSION_COOKIE_NAME,
+		Name:  auth.SessionCookieName,
 		Value: expiry + "." + signature + "123", // Add extra characters to signature to invalidate it
 	})
 
@@ -171,9 +171,9 @@ func (suite *authTestSuite) TestSetSessionCookie_SetsCookie() {
 	suite.Require().NoError(err)
 
 	suite.Require().Equal(http.SameSiteLaxMode, sessionCookie.SameSite)
-	suite.Require().Equal(auth.SESSION_COOKIE_NAME, sessionCookie.Name)
+	suite.Require().Equal(auth.SessionCookieName, sessionCookie.Name)
 	suite.Require().NotEmpty(sessionCookie.Value)
-	suite.Require().Equal(auth.ONE_DAY_IN_SECONDS, sessionCookie.MaxAge)
+	suite.Require().Equal(auth.OneDayInSeconds, sessionCookie.MaxAge)
 	suite.Require().Equal("/", sessionCookie.Path)
 	suite.Require().Empty(sessionCookie.Domain)
 	suite.Require().True(sessionCookie.Secure)

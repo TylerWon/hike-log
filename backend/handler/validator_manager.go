@@ -13,7 +13,7 @@ import (
 	"github.com/google/uuid"
 )
 
-var VALID_IMAGE_TYPES = map[string]struct{}{
+var validImageTypes = map[string]struct{}{
 	"image/jpeg": {},
 	"image/png":  {},
 	"image/webp": {},
@@ -78,7 +78,7 @@ func validImageTypeValidator(fl validator.FieldLevel) bool {
 	if fl.Field().Kind() != reflect.String {
 		return false
 	}
-	_, ok := VALID_IMAGE_TYPES[fl.Field().String()]
+	_, ok := validImageTypes[fl.Field().String()]
 	return ok
 }
 

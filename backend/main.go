@@ -22,8 +22,8 @@ import (
 )
 
 const (
-	SERVER_PORT           = ":8080"
-	SHUTDOWN_TIMEOUT_SECS = 15
+	serverPort      = ":8080"
+	shutdownTimeout = 15 * time.Second
 )
 
 func main() {
@@ -81,7 +81,7 @@ func main() {
 	}
 
 	server := &http.Server{
-		Addr:    SERVER_PORT,
+		Addr:    serverPort,
 		Handler: router,
 	}
 	go runServer(server)
@@ -106,7 +106,7 @@ func gracefulShutdown(server *http.Server, db database.Database) {
 	<-quit
 
 	slog.Info("Shutting down")
-	ctx, cancel := context.WithTimeout(context.Background(), SHUTDOWN_TIMEOUT_SECS*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
 	defer cancel()
 
 	// Shutdown server with timeout
