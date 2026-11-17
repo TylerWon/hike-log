@@ -28,10 +28,12 @@ func NewHandler(
 	store store.Store,
 	photoStorage photostorage.PhotoStorage,
 	auth auth.Auth,
-	validatorManager ValidatorManager,
 ) (*Handler, error) {
-	err := validatorManager.RegisterValidators()
+	validatorManager, err := NewValidatorManager()
 	if err != nil {
+		return nil, fmt.Errorf("Failed to setup validator manager: %w", err)
+	}
+	if err := validatorManager.RegisterValidators(); err != nil {
 		return nil, fmt.Errorf("Failed to register custom validators: %w", err)
 	}
 

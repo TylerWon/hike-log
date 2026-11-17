@@ -1,7 +1,6 @@
 package handler_test
 
 import (
-	"errors"
 	"testing"
 
 	"github.com/TylerWon/hike-log/backend/auth"
@@ -20,30 +19,12 @@ func TestHandlerTestSuite(t *testing.T) {
 	suite.Run(t, new(handlerTestSuite))
 }
 
-func (suite *handlerTestSuite) TestNewHandler_ReturnsErrorWhenRegisterValidatorsFails() {
-	mockValidatorManager := &handler.MockValidatorManager{
-		RegisterValidatorsError: errors.New("Something went wrong"),
-	}
-
-	h, err := handler.NewHandler(
-		&database.MockDatabase{},
-		&store.MockStore{},
-		&photostorage.MockPhotoStorage{},
-		&auth.MockAuth{},
-		mockValidatorManager,
-	)
-
-	suite.Require().Error(err)
-	suite.Require().Nil(h)
-}
-
 func (suite *handlerTestSuite) TestNewHandler_CreatesHandler() {
 	h, err := handler.NewHandler(
 		&database.MockDatabase{},
 		&store.MockStore{},
 		&photostorage.MockPhotoStorage{},
 		&auth.MockAuth{},
-		&handler.MockValidatorManager{},
 	)
 
 	suite.Require().NoError(err)
