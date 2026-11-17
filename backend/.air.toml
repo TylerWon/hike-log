@@ -6,10 +6,11 @@ tmp_dir = "tmp"
 
 [build]
   args_bin = []
-  bin = "./tmp/main"
-  cmd = "go build -o ./tmp/main ."
+  # Build outside the bind mount — Docker Desktop on macOS corrupts ELF binaries written to ./tmp
+  bin = "/tmp/hike-log-main"
+  cmd = "go build -o /tmp/hike-log-main ."
   delay = 1000
-  entrypoint = ["./tmp/main"]
+  entrypoint = ["/tmp/hike-log-main"]
   exclude_dir = ["assets", "tmp", "vendor", "testdata"]
   exclude_file = []
   exclude_regex = ["_test.go"]
