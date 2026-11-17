@@ -8,6 +8,7 @@ import (
 	"github.com/TylerWon/hike-log/backend/auth"
 	"github.com/TylerWon/hike-log/backend/config"
 	"github.com/TylerWon/hike-log/backend/handler"
+	"github.com/TylerWon/hike-log/backend/middleware"
 	"github.com/TylerWon/hike-log/backend/testutils"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/suite"
@@ -21,7 +22,11 @@ type authHandlerTestSuite struct {
 
 func (suite *authHandlerTestSuite) SetupSuite() {
 	suite.auth = testutils.NewAuth(suite.T(), config.AuthConfig{})
-	suite.router = testutils.NewAuthRouter(suite.T(), testutils.NewAuthHandler(suite.T(), suite.auth))
+	suite.router = testutils.NewAuthRouter(
+		suite.T(),
+		testutils.NewAuthHandler(suite.T(), suite.auth),
+		middleware.New(suite.auth),
+	)
 }
 
 func TestAuthTestSuite(t *testing.T) {

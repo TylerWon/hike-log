@@ -22,7 +22,7 @@ func New(h *handler.Handler, m *middleware.Middleware, frontendURL string) (*gin
 	configureCORSMiddleware(router, frontendURL)
 
 	apiRouteGroup := router.Group(apiBasePath)
-	RegisterAuthRoutes(apiRouteGroup, h.Auth)
+	RegisterAuthRoutes(apiRouteGroup, h.Auth, m)
 	RegisterHikesRoutes(apiRouteGroup, h.Hikes, m)
 	RegisterPhotosRoutes(apiRouteGroup, h.Photos, m)
 
@@ -44,10 +44,10 @@ func configureCORSMiddleware(router *gin.Engine, frontendURL string) {
 }
 
 // Registers authentication API routes under the given routeGroup.
-func RegisterAuthRoutes(routeGroup *gin.RouterGroup, h *handler.AuthHandler) {
+func RegisterAuthRoutes(routeGroup *gin.RouterGroup, h *handler.AuthHandler, m *middleware.Middleware) {
 	auth := routeGroup.Group("/auth")
 	{
-		auth.POST("", h.Login)
+		auth.POST("", m.RateLimit, h.Login)
 		auth.GET("", h.CheckAuth)
 	}
 }

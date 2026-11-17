@@ -31,7 +31,7 @@ func (suite *middlewareTestSuite) TestNew_CreatesMiddleware() {
 	suite.Require().NotNil(m)
 }
 
-func (suite *middlewareTestSuite) TestRequireAuth_Returns401ErrorAndAbortsWhenUnauthenticated() {
+func (suite *middlewareTestSuite) TestRequireAuth_Returns401AndAbortsWhenUnauthenticated() {
 	c := testutils.NewGinContext(suite.T(), nil) // Missing session cookie
 
 	suite.middleware.RequireAuth(c)
@@ -47,4 +47,21 @@ func (suite *middlewareTestSuite) TestRequireAuth_PassesWhenAuthenticated() {
 	suite.middleware.RequireAuth(c)
 
 	suite.Require().False(c.IsAborted())
+}
+
+func (suite *middlewareTestSuite) TestRateLimit_AllowsWhenUnderLimitDisallowsWhenOverLimit() {
+	for i := range middleware.RateLimit + 5 {
+		c := testutils.NewGinContext(suite.T(), nil)
+		c.Request.RemoteAddr = "1.2.3.4:12345"
+
+		suite.middleware.RateLimit(c)
+
+		res := c.Writer
+		if i < middleware.RateLimit {
+			suite.Require().False(c.IsAborted())
+		} else {
+			suite.Require().Equal(http.StatusTooManyRequests, res.Status())
+			suite.Require().True(c.IsAborted())
+		}
+	}
 }

@@ -10,12 +10,12 @@ import (
 )
 
 // Creates a test router with only auth routes.
-func NewAuthRouter(t *testing.T, h *handler.AuthHandler) *gin.Engine {
+func NewAuthRouter(t *testing.T, h *handler.AuthHandler, m *middleware.Middleware) *gin.Engine {
 	t.Helper()
 
 	gin.SetMode(gin.TestMode)
 	r := gin.New()
-	router.RegisterAuthRoutes(r.Group(""), h)
+	router.RegisterAuthRoutes(r.Group(""), h, m)
 	return r
 }
 
