@@ -9,7 +9,7 @@ import GenericError from "../../components/GenericError";
 import PendingButton from "../../components/PendingButton";
 import Toast from "../../components/Toast";
 import { login } from "../../network/api/auth";
-import { AuthError } from "../../network/api/errors";
+import { AuthError, RateLimitError } from "../../network/api/errors";
 import { type LoginFormData, LoginFormDataSchema } from "../../schemas/forms/login";
 
 const reasonToMessage: Map<string, string> = new Map([["expired", "Session expired. Please login again."]]);
@@ -41,6 +41,10 @@ export default function Login({ navigateProp, searchParamsProp }: LoginProps) {
       if (e instanceof AuthError) {
         // Display error on the password field when auth fails
         setPasswordError("Incorrect password");
+        return;
+      } else if (e instanceof RateLimitError) {
+        // Display error on the password field when rate limited
+        setPasswordError("Too many incorrect attempts. Please try again later.");
         return;
       }
 

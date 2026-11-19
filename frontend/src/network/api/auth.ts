@@ -1,7 +1,7 @@
 import type { LoginRequest } from "../../schemas/requests/auth";
 
 import { type CheckAuthResponse, CheckAuthResponseSchema } from "../../schemas/responses/auth";
-import { AuthError } from "./errors";
+import { AuthError, RateLimitError } from "./errors";
 import { apiFetch } from "./fetch";
 
 /**
@@ -31,8 +31,8 @@ export async function checkAuth(): Promise<CheckAuthResponse> {
  * If login is successful, a session cookie will be attached to the response which should be used to authenticate
  * requests to restricted API endpoints.
  *
- * Throws an error if the response is not 200. An AuthError is thrown for a 401 response, otherwise a normal Error is
- * thrown.
+ * Throws an error if the response is not 200. An AuthError is thrown for a 401 response, a RateLimitError is
+ * thrown for a 429 response, otherwise a normal Error is thrown.
  */
 export async function login(reqBody: LoginRequest) {
   const response = await apiFetch("/auth", {
@@ -45,6 +45,8 @@ export async function login(reqBody: LoginRequest) {
 
   if (response.status === 401) {
     throw new AuthError("Incorrect credentials");
+  } else if (response.status == 429) {
+    throw new RateLimitError("Too many incorrect attempts");
   } else if (response.status !== 200) {
     throw new Error(`Failed to login: ${response.status} - ${response.statusText}`);
   }

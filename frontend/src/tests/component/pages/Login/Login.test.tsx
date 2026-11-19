@@ -2,7 +2,7 @@ import { describe, expect, test, vi } from "vitest";
 import { render } from "vitest-browser-react";
 
 import { login } from "../../../../network/api/auth";
-import { AuthError } from "../../../../network/api/errors";
+import { AuthError, RateLimitError } from "../../../../network/api/errors";
 import { clickButton } from "../../../utils/button";
 import { checkFieldError, checkNoFieldError, fillField } from "../../../utils/Field/test-helpers";
 import { LoginWrapper } from "../../../utils/Login/test-components";
@@ -62,6 +62,17 @@ describe("Login", () => {
     await clickButton(screen, "Login");
 
     await checkFieldError(screen, "Password", "Incorrect password");
+  });
+
+  test("displays field error when too many incorrect attempts were made", async () => {
+    vi.mocked(login).mockRejectedValue(new RateLimitError("Too many incorrect attempts"));
+
+    const screen = await render(<LoginWrapper />);
+
+    await fillField(screen, "Password", "abc");
+    await clickButton(screen, "Login");
+
+    await checkFieldError(screen, "Password", "Too many incorrect attempts. Please try again later.");
   });
 
   test("displays error message when login fails unexpectedly", async () => {
