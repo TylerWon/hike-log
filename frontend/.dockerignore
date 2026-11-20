@@ -1,1 +1,16 @@
+# Docker
+Dockerfile*
+.dockerignore
+
+# Dev-only 
 node_modules
+src/tests
+.env.*
+.prettierignore
+.prettierrc.json
+eslint.config.*
+
+# Misc
+.DS_Store
+README.md
+.gitignore

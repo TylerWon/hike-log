@@ -1,0 +1,14 @@
+# Docker
+Dockerfile*
+.dockerignore
+
+# Dev-only
+.env*
+*.test
+.air.toml
+/tmp
+
+# Misc
+.DS_Store
+README*
+.gitignore
