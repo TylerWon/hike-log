@@ -1,5 +1,9 @@
 # Backend
 
+## Go
+
+Install [Go 1.26](https://go.dev/dl/)
+
 ## Installing/Uninstalling Packages
 
 1. Start the services: `docker compose up`

@@ -1,5 +1,10 @@
 # Frontend
 
+## Node
+
+Install [Node 26.13](https://nodejs.org/en/download). Run `cd frontend && npm ci` to install the dependencies on your 
+machine. Even though the application runs in a container in development, this will prevent static errors from appearing.
+
 ## Installing/Uninstalling Packages
 
 1. Start the services: `docker compose up`
