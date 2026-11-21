@@ -1,0 +1,110 @@
+package handler
+
+import (
+	"log/slog"
+	"net/http"
+
+	"github.com/TylerWon/hike-log/backend/src/models"
+	"github.com/TylerWon/hike-log/backend/src/photostorage"
+	"github.com/TylerWon/hike-log/backend/src/store"
+	"github.com/gin-gonic/gin"
+)
+
+// PhotosHandler handles photo API routes.
+type PhotosHandler struct {
+	photoStorage photostorage.PhotoStorage
+	store        store.Store
+}
+
+// Creates a new PhotosHandler.
+func NewPhotosHandler(store store.Store, photoStorage photostorage.PhotoStorage) *PhotosHandler {
+	return &PhotosHandler{photoStorage: photoStorage, store: store}
+}
+
+/*
+Deletes a Photo.
+
+Also deletes the object stored in the S3 bucket. S3 clean-up is best-effort and does not result in an error on failure.
+
+Path parameters: [photoIDPathParam]
+
+Returns:
+ 1. 200 OK when successful
+ 2. 404 Not Found and an error message when the Photo does not exist
+ 3. 500 Internal Server Error and an error message when there is an unexpected error
+*/
+func (h *PhotosHandler) DeletePhoto(c *gin.Context) {
+	var params photoIDPathParam
+	if err := c.ShouldBindUri(&params); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	photo, err := h.store.GetPhotoByID(params.PhotoID)
+	if err != nil {
+		handleRecordDoesNotExistError(c, err, params.PhotoID)
+		return
+	}
+
+	err = h.store.DeleteRecord(&models.Photo{ID: params.PhotoID})
+	if err != nil {
+		slog.Error("Failed to delete photo", "id", params.PhotoID, "err", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": http.StatusText(http.StatusInternalServerError)})
+		return
+	}
+
+	err = h.photoStorage.DeletePhoto(c, photo.SrcUrl)
+	if err != nil {
+		slog.Error("Failed to delete S3 photo object", "id", params.PhotoID, "err", err)
+		c.JSON(http.StatusOK, gin.H{"message": "ok"}) // return OK since Photo deleted, only orphan S3 object
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "ok"})
+}
+
+/*
+Updates a Photo.
+
+Path parameters: [photoIDPathParam]
+
+Request body: [updatePhotoRequest]
+
+Returns:
+ 1. 200 OK when successful
+ 2. 404 Not Found and an error message when the Photo does not exist
+ 3. 500 Internal Server Error and an error message when there is an unexpected error
+*/
+func (h *PhotosHandler) UpdatePhoto(c *gin.Context) {
+	var params photoIDPathParam
+	if err := c.ShouldBindUri(&params); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	photo, err := h.store.GetPhotoByID(params.PhotoID)
+	if err != nil {
+		handleRecordDoesNotExistError(c, err, params.PhotoID)
+		return
+	}
+
+	var req updatePhotoRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	photo.DisplayOrder = req.DisplayOrder
+	if req.Caption != "" {
+		photo.Caption = req.Caption
+	}
+
+	err = h.store.UpdateRecord(photo)
+	if err != nil {
+		slog.Error("Failed to update photo", "id", photo.ID, "err", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": http.StatusText(http.StatusInternalServerError)})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "ok"})
+}

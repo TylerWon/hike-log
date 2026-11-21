@@ -1,0 +1,122 @@
+package database
+
+import (
+	"context"
+	"fmt"
+
+	"github.com/TylerWon/hike-log/backend/src/config"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+)
+
+// Database is a thin wrapper around the gorm.DB type.
+// Chainable methods (Preload, Order) return a Database. Terminal methods (Find, First, etc.) return *gorm.DB so the
+// GORM result can be exposed.
+type Database interface {
+	AutoMigrate(dst ...interface{}) error
+	Close() error
+	Create(value interface{}) (tx *gorm.DB)
+	Delete(value interface{}) (tx *gorm.DB)
+	Exec(sql string, values ...interface{}) (tx *gorm.DB)
+	Find(dest interface{}, conds ...interface{}) (tx *gorm.DB)
+	First(dest interface{}, conds ...interface{}) (tx *gorm.DB)
+	Order(value interface{}) Database
+	Ping(ctx context.Context) error
+	Preload(query string, args ...interface{}) Database
+	Raw(sql string, values ...interface{}) (tx *gorm.DB)
+	Update(value interface{}) (tx *gorm.DB)
+}
+
+// databaseImpl is an implementation of the Database interface.
+type databaseImpl struct {
+	db *gorm.DB
+}
+
+// Connects to the database specified in the given dbConfig.
+func Connect(dbConfig config.DBConfig) (Database, error) {
+	dsn := fmt.Sprintf(
+		"host=%s port=%s dbname=%s user=%s password=%s",
+		dbConfig.DBHost,
+		dbConfig.DBPort,
+		dbConfig.DBName,
+		dbConfig.DBUser,
+		dbConfig.DBPassword,
+	)
+
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	if err != nil {
+		return nil, err
+	}
+
+	return &databaseImpl{db}, nil
+}
+
+// Runs migration for given the models.
+func (database *databaseImpl) AutoMigrate(dst ...interface{}) error {
+	return database.db.AutoMigrate(dst...)
+}
+
+// Closes the database connection.
+func (database *databaseImpl) Close() error {
+	sqlDB, err := database.db.DB()
+	if err != nil {
+		return err
+	}
+
+	return sqlDB.Close()
+}
+
+// Inserts value, returning the inserted data's primary key in value's id. value can be a single model or multiple.
+func (database *databaseImpl) Create(value interface{}) (tx *gorm.DB) {
+	return database.db.Create(value)
+}
+
+// Deletes value. value can be a single model or multiple and the model(s) should have their ID set.
+func (database *databaseImpl) Delete(value interface{}) (tx *gorm.DB) {
+	return database.db.Delete(value)
+}
+
+// Executes raw SQL DDL (INSERT, UPDATE, DELETE, etc.).
+func (database *databaseImpl) Exec(sql string, values ...interface{}) (tx *gorm.DB) {
+	return database.db.Exec(sql, values...)
+}
+
+// Finds all records matching given conditions conds.
+func (database *databaseImpl) Find(dest interface{}, conds ...interface{}) (tx *gorm.DB) {
+	return database.db.Find(dest, conds...)
+}
+
+// Finds the first record ordered by primary key, matching given conditions conds.
+func (database *databaseImpl) First(dest interface{}, conds ...interface{}) (tx *gorm.DB) {
+	return database.db.First(dest, conds...)
+}
+
+// Specifies the order when retrieving records from database.
+func (database *databaseImpl) Order(value interface{}) Database {
+	return &databaseImpl{database.db.Order(value)}
+}
+
+// Verifies the database connection is alive.
+func (database *databaseImpl) Ping(ctx context.Context) error {
+	sqlDB, err := database.db.DB()
+	if err != nil {
+		return err
+	}
+
+	return sqlDB.PingContext(ctx)
+}
+
+// Preload associations with given conditions.
+func (database *databaseImpl) Preload(query string, args ...interface{}) Database {
+	return &databaseImpl{database.db.Preload(query, args...)}
+}
+
+// Executes a raw SQL query (SELECT).
+func (database *databaseImpl) Raw(sql string, values ...interface{}) (tx *gorm.DB) {
+	return database.db.Raw(sql, values...)
+}
+
+// Updates all fields of value. value is a model.
+func (database *databaseImpl) Update(value interface{}) (tx *gorm.DB) {
+	return database.db.Select("*").Updates(value)
+}
