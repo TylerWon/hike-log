@@ -57,7 +57,7 @@ services:
     restart: unless-stopped
 
   localstack:
-    image: localstack/localstack
+    image: localstack/localstack:2026.10
     ports:
       # LocalStack Gateway
       - "127.0.0.1:4566:4566"
@@ -81,7 +81,7 @@ services:
       # Mounts public read policy file used in init script
       - ./localstack/public-read-policy.json:/etc/localstack/init/ready.d/public-read-policy.json
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/health"]
+      test: ["CMD-SHELL", "awslocal s3api head-bucket --bucket hike-log"]
       interval: 10s
       timeout: 5s
       retries: 5
