@@ -1,5 +1,5 @@
 # Use Debian-based image for Playwright
-FROM node:26-bookworm-slim
+FROM node:26.13-bookworm-slim
 
 WORKDIR /app
 
