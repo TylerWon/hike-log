@@ -1,5 +1,5 @@
-# Docker
-Dockerfile*
+# Docker / local-only
+docker/local/
 .dockerignore
 
 # Dev-only 

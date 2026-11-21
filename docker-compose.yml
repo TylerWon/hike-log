@@ -2,13 +2,13 @@ services:
   backend:
     build:
       context: ./backend
-      dockerfile: Dockerfile.development
+      dockerfile: docker/local/Dockerfile
     ports:
       - "8080:8080"
     volumes:
       # Mount backend source code so changes are reflected without restarting the container
       - ./backend:/app
-    env_file: ./backend/.env.local
+    env_file: ./backend/docker/local/.env
     healthcheck:
       test: ["CMD-SHELL", "wget -O - http://localhost:8080/health"]
       interval: 10s
@@ -24,7 +24,7 @@ services:
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile.development
+      dockerfile: docker/local/Dockerfile
     ports:
       - "5173:5173"
     volumes:
@@ -32,7 +32,7 @@ services:
       - ./frontend:/app
       # Anonymous volume that shields the container's node_modules from being overwritten by the above bind mount
       - /app/node_modules
-    env_file: ./frontend/.env.local
+    env_file: ./frontend/docker/local/.env
     depends_on:
       backend:
         condition: service_healthy
